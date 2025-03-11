@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <!-- Create an Account Text -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create an\naccount"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:gravity="center"/>
+
+    <!-- Username/Email Field -->
+    <EditText
+        android:id="@+id/etSignUpUsername"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Username or Email"
+        android:inputType="textEmailAddress"
+        android:padding="12dp"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/edittext_border"/>
+
+    <!-- Password Field -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <EditText
+            android:id="@+id/etSignUpPassword"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:padding="12dp"
+            android:background="@drawable/edittext_border"/>
+
+        <ImageView
+            android:id="@+id/ivShowSignUpPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_view"
+            android:padding="8dp"
+            android:contentDescription="Show Password"/>
+    </LinearLayout>
+
+    <!-- Confirm Password Field -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <EditText
+            android:id="@+id/etConfirmPassword"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Confirm Password"
+            android:inputType="textPassword"
+            android:padding="12dp"
+            android:background="@drawable/edittext_border"/>
+
+        <ImageView
+            android:id="@+id/ivShowConfirmPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_view"
+            android:padding="8dp"
+            android:contentDescription="Show Confirm Password"/>
+    </LinearLayout>
+
+    <!-- Terms Text -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="By clicking the Register button, you agree\nto the public offer"
+        android:textColor="#666666"
+        android:layout_marginTop="16dp"
+        android:gravity="center"/>
+
+    <!-- Create Account Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnCreateAccount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create Account"
+        android:textAllCaps="false"
+        android:background="#F63757"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:padding="12dp"
+        android:layout_marginTop="32dp"/>
+
+    <!-- OR Continue With -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="- OR Continue with -"
+        android:textColor="#000000"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Social Login Buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/google_icon"
+            android:contentDescription="Google"/>
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/apple_icon"
+            android:contentDescription="Apple"/>
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/facebook_icon"
+            android:contentDescription="Facebook"/>
+    </LinearLayout>
+
+    <!-- Login Link -->
+    <TextView
+        android:id="@+id/tvLoginLink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="I Already Have an Account Login"
+        android:textColor="#FF0000"
+        android:layout_marginTop="16dp"/>
+
+</LinearLayout>

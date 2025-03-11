@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvPrev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Prev"
+            android:textColor="#666666"
+            android:visibility="gone"
+            android:padding="8dp"/>
+
+        <LinearLayout
+            android:id="@+id/llDots"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginHorizontal="16dp"/>
+
+        <TextView
+            android:id="@+id/tvNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            android:textColor="#FF0000"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/tvGetStarted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get Started"
+            android:textColor="#FF0000"
+            android:visibility="gone"
+            android:padding="8dp"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvSkip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Skip"
+        android:textColor="#666666"
+        android:gravity="end"
+        android:padding="16dp"/>
+
+</LinearLayout>

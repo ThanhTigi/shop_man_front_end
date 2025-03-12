@@ -80,7 +80,7 @@ public class SignUpActivity extends AppCompatActivity {
                     // Add your sign-up logic here (e.g., save to a database or send to a server)
                     Toast.makeText(getApplicationContext(), "Account Created Successfully!", Toast.LENGTH_SHORT).show();
                     // Optionally, navigate to the login screen
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                     startActivity(intent);
                     finish();
                 }
@@ -91,7 +91,7 @@ public class SignUpActivity extends AppCompatActivity {
         tvLoginLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(intent);
                 finish();
             }

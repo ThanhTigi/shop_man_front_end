@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ShopMan</string>
+    <string name="sign_up_text"><u>Sign Up</u></string>
+    <string name="login_text"><u>Login</u></string>
 </resources>

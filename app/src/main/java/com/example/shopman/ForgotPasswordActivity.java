@@ -37,12 +37,22 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     // Simulate sending a reset email (in a real app, integrate with a backend)
                     Toast.makeText(ForgotPasswordActivity.this, "Password reset link sent to " + email, Toast.LENGTH_SHORT).show();
                     // Navigate back to the login screen
-                    Intent intent = new Intent(ForgotPasswordActivity.this, MainActivity.class);
+                    Intent intent = new Intent(ForgotPasswordActivity.this, LoginActivity.class);
                     startActivity(intent);
                     finish();
                 }
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(ForgotPasswordActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
+
+        // Nếu không gọi super.onBackPressed(), Activity sẽ không đóng
+        super.onBackPressed();
     }
 
     // Simple email validation

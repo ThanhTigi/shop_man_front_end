@@ -24,6 +24,8 @@
         android:layout_height="wrap_content"
         android:hint="Username or Email"
         android:inputType="textEmailAddress"
+        android:drawableLeft="@drawable/user"
+        android:drawablePadding="8dp"
         android:padding="12dp"
         android:layout_marginTop="32dp"
         android:background="@drawable/edittext_border"/>
@@ -41,6 +43,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="Password"
+            android:drawableLeft="@drawable/password"
+            android:drawablePadding="8dp"
             android:inputType="textPassword"
             android:padding="12dp"
             android:background="@drawable/edittext_border"/>
@@ -67,6 +71,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="Confirm Password"
+            android:drawableLeft="@drawable/password"
+            android:drawablePadding="8dp"
             android:inputType="textPassword"
             android:padding="12dp"
             android:background="@drawable/edittext_border"/>
@@ -137,12 +143,25 @@
     </LinearLayout>
 
     <!-- Login Link -->
-    <TextView
-        android:id="@+id/tvLoginLink"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="I Already Have an Account Login"
-        android:textColor="#FF0000"
-        android:layout_marginTop="16dp"/>
+        android:gravity="center"
+        android:paddingTop="20dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I Already Have an Account"
+            android:textColor="#616161"/>
+
+        <TextView
+            android:id="@+id/tvLoginLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="@string/login_text"
+            android:textColor="#FF0000"/>
+    </LinearLayout>
 
 </LinearLayout>

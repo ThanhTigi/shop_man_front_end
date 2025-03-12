@@ -1,10 +1,12 @@
 package com.example.shopman;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +26,9 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         ivShowPassword = findViewById(R.id.ivShowPassword);
         Button btnLogin = findViewById(R.id.btnLogin);
+        TextView btnForgotPassWord = findViewById(R.id.btnForgotPassword);
+        TextView btnCreateAccount = findViewById(R.id.btnCreateAccount);
+
 
         // Toggle Password Visibility
         ivShowPassword.setOnClickListener(new View.OnClickListener() {
@@ -54,6 +59,24 @@ public class LoginActivity extends AppCompatActivity {
                     // Add your login logic here (e.g., validate with a server)
                     Toast.makeText(getApplicationContext(), "Login Successful!", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        btnForgotPassWord.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        btnCreateAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
     }

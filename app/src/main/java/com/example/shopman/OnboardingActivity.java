@@ -12,7 +12,8 @@ import androidx.viewpager.widget.ViewPager;
 public class OnboardingActivity extends AppCompatActivity {
 
     private ViewPager viewPager;
-    private TextView tvPrev, tvNext, tvGetStarted, tvSkip;
+    private TextView numberOfPageTxt;
+    private TextView tvHidePrev, tvPrev, tvNext, tvGetStarted, tvSkip;
     private LinearLayout llDots;
     private TextView[] dots;
 
@@ -22,6 +23,8 @@ public class OnboardingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_onboarding);
 
         viewPager = findViewById(R.id.viewPager);
+        numberOfPageTxt = findViewById(R.id.numberOfPageTxt);
+        tvHidePrev = findViewById(R.id.tvHidePrev);
         tvPrev = findViewById(R.id.tvPrev);
         tvNext = findViewById(R.id.tvNext);
         tvGetStarted = findViewById(R.id.tvGetStarted);
@@ -43,14 +46,17 @@ public class OnboardingActivity extends AppCompatActivity {
                 addDots(position);
                 if (position == 0) {
                     tvPrev.setVisibility(View.GONE);
+                    tvHidePrev.setVisibility(View.VISIBLE);
                     tvNext.setVisibility(View.VISIBLE);
                     tvGetStarted.setVisibility(View.GONE);
                 } else if (position == adapter.getCount() - 1) {
                     tvPrev.setVisibility(View.VISIBLE);
+                    tvHidePrev.setVisibility(View.GONE);
                     tvNext.setVisibility(View.GONE);
                     tvGetStarted.setVisibility(View.VISIBLE);
                 } else {
                     tvPrev.setVisibility(View.VISIBLE);
+                    tvHidePrev.setVisibility(View.GONE);
                     tvNext.setVisibility(View.VISIBLE);
                     tvGetStarted.setVisibility(View.GONE);
                 }
@@ -64,18 +70,19 @@ public class OnboardingActivity extends AppCompatActivity {
         tvPrev.setOnClickListener(v -> viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true));
         tvNext.setOnClickListener(v -> viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true));
         tvGetStarted.setOnClickListener(v -> {
-            Intent intent = new Intent(OnboardingActivity.this, MainActivity.class);
+            Intent intent = new Intent(OnboardingActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
         });
         tvSkip.setOnClickListener(v -> {
-            Intent intent = new Intent(OnboardingActivity.this, MainActivity.class);
+            Intent intent = new Intent(OnboardingActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
         });
     }
 
     private void addDots(int currentPage) {
+        numberOfPageTxt.setText((currentPage + 1) + "/3");
         llDots.removeAllViews();
         dots = new TextView[3];  // Số lượng màn hình onboarding
         for (int i = 0; i < dots.length; i++) {

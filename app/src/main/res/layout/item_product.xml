@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/ivProduct"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/ic_menu_user"
+        android:contentDescription="Product"/>
+
+    <TextView
+        android:id="@+id/tvProductName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Product Name"
+        android:textSize="16sp"
+        android:textColor="#000000"
+        android:layout_marginTop="4dp"/>
+
+    <TextView
+        android:id="@+id/tvProductDesc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Description"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:layout_marginTop="2dp"/>
+
+    <TextView
+        android:id="@+id/tvProductPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="₹1500"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:layout_marginTop="4dp"/>
+
+    <TextView
+        android:id="@+id/tvProductDiscount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="40% OFF"
+        android:textSize="14sp"
+        android:textColor="#FF0000"
+        android:layout_marginTop="2dp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp">
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@android:drawable/ic_menu_add"
+            android:contentDescription="Rating"/>
+
+        <TextView
+            android:id="@+id/tvProductRating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4.5 (1234)"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginStart="4dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

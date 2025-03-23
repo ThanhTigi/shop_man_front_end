@@ -1,42 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#FFEBEE">
+    android:layout_height="match_parent"
+    android:background="@drawable/banner_background">
 
-    <TextView
-        android:id="@+id/tvBannerTitle"
+    <!-- Left Side: Text and Button -->
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="UP TO 40% OFF"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#000000"/>
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Now in (product) All colours"
-        android:textSize="16sp"
-        android:textColor="#666666"
-        android:layout_marginTop="4dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50-40% OFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF" />
 
-    <Button
-        android:id="@+id/btnShopNow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Shop Now"
-        android:background="#FF0000"
-        android:textColor="#FFFFFF"
-        android:layout_marginTop="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New in (product)"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ALL colours"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/shopNowButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shop Now →"
+            android:background="@android:color/transparent"
+            android:textColor="#FFFFFF"
+            android:padding="8dp"
+            android:layout_marginTop="16dp"
+            android:drawableEnd="@android:drawable/ic_media_play" />
+
+    </LinearLayout>
+
+    <!-- Right Side: Image -->
     <ImageView
-        android:id="@+id/ivBanner"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:contentDescription="Banner"
-        android:layout_marginTop="8dp"/>
+        android:id="@+id/bannerImage"
+        android:layout_width="150dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/banner_image" />
 
-</LinearLayout>
+</RelativeLayout>

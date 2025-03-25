@@ -1,5 +1,6 @@
 package com.example.shopman;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +33,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.productDescription.setText(product.getDescription());
         holder.productPrice.setText(product.getPrice());
         holder.productImage.setImageResource(product.getImageResId());
-        holder.productRating.setRating(product.getRating()); // Set the rating
+        holder.productRating.setRating(product.getRating());
+
+        // Handle item click to navigate to ProductDetailsActivity
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(holder.itemView.getContext(), ProductDetailsActivity.class);
+            intent.putExtra("product", product); // Pass the Product object
+            holder.itemView.getContext().startActivity(intent);
+        });
     }
 
     @Override
@@ -43,7 +51,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView productImage;
         TextView productName, productDescription, productPrice;
-        RatingBar productRating; // Add RatingBar
+        RatingBar productRating;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -51,7 +59,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             productName = itemView.findViewById(R.id.productName);
             productDescription = itemView.findViewById(R.id.productDescription);
             productPrice = itemView.findViewById(R.id.productPrice);
-            productRating = itemView.findViewById(R.id.productRating); // Initialize RatingBar
+            productRating = itemView.findViewById(R.id.productRating);
         }
     }
 }

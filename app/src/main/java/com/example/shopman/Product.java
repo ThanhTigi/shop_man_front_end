@@ -1,18 +1,25 @@
 package com.example.shopman;
 
-public class Product {
+import java.io.Serializable;
+import java.util.List;
+
+public class Product implements Serializable {
     private String name;
     private String description;
     private String price;
     private int imageResId;
-    private float rating; // New field for rating
+    private float rating;
+    private List<String> sizes;
+    private String detailedDescription;
 
-    public Product(String name, String description, String price, int imageResId, float rating) {
+    public Product(String name, String description, String price, int imageResId, float rating, List<String> sizes, String detailedDescription) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.imageResId = imageResId;
         this.rating = rating;
+        this.sizes = sizes;
+        this.detailedDescription = detailedDescription;
     }
 
     public String getName() {
@@ -33,5 +40,13 @@ public class Product {
 
     public float getRating() {
         return rating;
+    }
+
+    public List<String> getSizes() {
+        return sizes;
+    }
+
+    public String getDetailedDescription() {
+        return detailedDescription;
     }
 }

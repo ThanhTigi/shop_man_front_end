@@ -37,6 +37,18 @@
         <activity android:name=".WishlistActivity"
             android:exported="false">
         </activity>
+        <activity android:name=".CartActivity"
+            android:exported="false">
+        </activity>
+        <activity android:name=".CheckoutActivity"
+            android:exported="false">
+        </activity>
+        <activity android:name=".PaymentActivity"
+            android:exported="false">
+        </activity>
+        <activity android:name=".ProfileActivity"
+            android:exported="false">
+        </activity>
         <activity android:name=".LoginActivity"
             android:exported="false">
         </activity>

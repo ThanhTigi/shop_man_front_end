@@ -25,6 +25,8 @@ public class WishlistActivity extends AppCompatActivity {
     private ProductAdapter wishlistAdapter;
     private List<Product> wishlistItems;
     private BottomNavigationView bottomNavigation;
+    private ImageView ivMenu, ivProfile;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,7 +40,15 @@ public class WishlistActivity extends AppCompatActivity {
         filterButton = findViewById(R.id.filterButton);
         wishlistRecyclerView = findViewById(R.id.wishlistRecyclerView);
         bottomNavigation = findViewById(R.id.bottomNavigation);
+        ivMenu = findViewById(R.id.ivMenu);
+        ivProfile = findViewById(R.id.ivProfile);
 
+        // Set up toolbar click listeners
+        ivMenu.setOnClickListener(v -> Toast.makeText(WishlistActivity.this, "Menu clicked", Toast.LENGTH_SHORT).show());
+        ivProfile.setOnClickListener(v -> {
+            Intent profileIntent = new Intent(WishlistActivity.this, ProfileActivity.class);
+            startActivity(profileIntent);
+        });
 
         // Set up search bar
         ivVoiceSearch.setOnClickListener(new View.OnClickListener() {
@@ -79,11 +89,11 @@ public class WishlistActivity extends AppCompatActivity {
         wishlistItems.add(new Product("Denim Dress", "Casual Denim Dress", "₹1500", R.drawable.deal_image_2, 4.0f, sizes, "A casual denim dress for everyday wear."));
 
         wishlistAdapter = new ProductAdapter(wishlistItems);
-        wishlistRecyclerView.setLayoutManager(new GridLayoutManager(this, 2)); // 2 columns
+        wishlistRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         wishlistRecyclerView.setAdapter(wishlistAdapter);
 
         // Update item count
-        itemCount.setText(wishlistItems.size() + " Items"); // Simplified item count for clarity
+        itemCount.setText(wishlistItems.size() + " Items");
 
         // Set up Bottom Navigation
         bottomNavigation.setOnNavigationItemSelectedListener(item -> {
@@ -110,7 +120,6 @@ public class WishlistActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Ensure the "Wishlist" item is highlighted when the activity is resumed
         bottomNavigation.setSelectedItemId(R.id.nav_wishlist);
     }
 }

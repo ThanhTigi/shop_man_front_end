@@ -36,6 +36,7 @@ public class HomeActivity extends AppCompatActivity {
     private TextView dealViewAll, trendingViewAll, newArrivalsViewAll;
     private Button visitNowButton;
     private BottomNavigationView bottomNavigation;
+    private ImageView ivMenu, ivProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +58,15 @@ public class HomeActivity extends AppCompatActivity {
         newArrivalsViewAll = findViewById(R.id.newArrivalsViewAll);
         visitNowButton = findViewById(R.id.visitNowButton);
         bottomNavigation = findViewById(R.id.bottomNavigation);
+        ivMenu = findViewById(R.id.ivMenu);
+        ivProfile = findViewById(R.id.ivProfile);
+
+        // Set up toolbar click listeners
+        ivMenu.setOnClickListener(v -> Toast.makeText(HomeActivity.this, "Menu clicked", Toast.LENGTH_SHORT).show());
+        ivProfile.setOnClickListener(v -> {
+            Intent profileIntent = new Intent(HomeActivity.this, ProfileActivity.class);
+            startActivity(profileIntent);
+        });
 
         // Set up search bar
         ivVoiceSearch.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +150,7 @@ public class HomeActivity extends AppCompatActivity {
 
         newArrivalsViewAll.setOnClickListener(v -> Toast.makeText(HomeActivity.this, "New Arrivals View All clicked", Toast.LENGTH_SHORT).show());
 
-        // Set up Bottom Navigation
+        // Inside onCreate, in the bottomNavigation.setOnNavigationItemSelectedListener
         bottomNavigation.setOnNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
                 Toast.makeText(HomeActivity.this, "Home clicked", Toast.LENGTH_SHORT).show();
@@ -150,7 +160,8 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(wishlistIntent);
                 return true;
             } else if (item.getItemId() == R.id.nav_cart) {
-                Toast.makeText(HomeActivity.this, "Cart clicked", Toast.LENGTH_SHORT).show();
+                Intent cartIntent = new Intent(HomeActivity.this, CartActivity.class);
+                startActivity(cartIntent);
                 return true;
             } else if (item.getItemId() == R.id.nav_search) {
                 Toast.makeText(HomeActivity.this, "Search clicked", Toast.LENGTH_SHORT).show();
@@ -166,7 +177,6 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Ensure the "Home" item is highlighted when the activity is resumed
         bottomNavigation.setSelectedItemId(R.id.nav_home);
     }
 }

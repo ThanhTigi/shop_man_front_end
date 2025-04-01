@@ -1,19 +1,16 @@
 package com.example.shopman;
 
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RatingBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
-
-    private List<Product> productList;
+public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
+    private final List<Product> productList;
 
     public ProductAdapter(List<Product> productList) {
         this.productList = productList;
@@ -21,45 +18,33 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     @NonNull
     @Override
-    public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_product, parent, false);
-        return new ProductViewHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Product product = productList.get(position);
-        holder.productName.setText(product.getName());
-        holder.productDescription.setText(product.getDescription());
-        holder.productPrice.setText(product.getPrice());
         holder.productImage.setImageResource(product.getImageResId());
-        holder.productRating.setRating(product.getRating());
-
-        // Handle item click to navigate to ProductDetailsActivity
-        holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(holder.itemView.getContext(), ProductDetailsActivity.class);
-            intent.putExtra("product", product); // Pass the Product object
-            holder.itemView.getContext().startActivity(intent);
-        });
+        holder.productName.setText(product.getName());
+        holder.productPrice.setText(product.getPrice());
     }
 
     @Override
     public int getItemCount() {
-        return productList.size();
+        return productList != null ? productList.size() : 0;
     }
 
-    public static class ProductViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView productImage;
-        TextView productName, productDescription, productPrice;
-        RatingBar productRating;
+        TextView productName, productPrice;
 
-        public ProductViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
             productImage = itemView.findViewById(R.id.productImage);
             productName = itemView.findViewById(R.id.productName);
-            productDescription = itemView.findViewById(R.id.productDescription);
             productPrice = itemView.findViewById(R.id.productPrice);
-            productRating = itemView.findViewById(R.id.productRating);
         }
     }
 }

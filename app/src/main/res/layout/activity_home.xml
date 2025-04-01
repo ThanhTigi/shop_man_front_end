@@ -5,44 +5,9 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF">
 
-    <!-- Toolbar -->
-    <LinearLayout
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
-
-        <ImageView
-            android:id="@+id/ivMenu"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:src="@drawable/ic_menu_sort_by_size"
-            android:contentDescription="Menu"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Stylish"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:gravity="center"/>
-
-        <ImageView
-            android:id="@+id/ivProfile"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:src="@drawable/ic_menu_user"
-            android:contentDescription="Profile"/>
-    </LinearLayout>
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"
         android:layout_above="@+id/bottomNavigation">
 
         <LinearLayout
@@ -455,19 +420,5 @@
 
         </LinearLayout>
     </ScrollView>
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="#FFFFFF"
-        app:itemIconSize="24dp"
-        app:itemTextAppearanceActive="@style/BottomNavigationViewTextActive"
-        app:itemTextAppearanceInactive="@style/BottomNavigationViewTextInactive"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottom_nav_menu"
-        app:itemIconTint="@drawable/bottom_nav_icon_tint"
-        app:itemTextColor="@drawable/bottom_nav_text_tint"/>
 
 </RelativeLayout>

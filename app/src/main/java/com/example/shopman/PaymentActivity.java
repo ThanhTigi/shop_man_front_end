@@ -111,7 +111,7 @@ public class PaymentActivity extends AppCompatActivity {
         // Automatically dismiss the dialog after 2 seconds and navigate to HomeActivity
         new android.os.Handler().postDelayed(() -> {
             dialog.dismiss();
-            Intent homeIntent = new Intent(PaymentActivity.this, HomeActivity.class);
+            Intent homeIntent = new Intent(PaymentActivity.this, MainActivity.class);
             homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(homeIntent);
             finish();

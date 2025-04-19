@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -12,6 +13,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopMan"
         tools:targetApi="31">
+
+
+        <activity android:name=".auth.LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ProductDetailsActivity"
             android:exported="true">
@@ -26,7 +37,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".OnboardingActivity"
+            android:name=".onboarding.OnboardingActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,10 +45,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".WishlistActivity"
+        <activity android:name=".auth.CheckOTPActivity"
             android:exported="false">
         </activity>
-        <activity android:name=".CartActivity"
+        <activity android:name=".auth.ChangePasswordActivity"
             android:exported="false">
         </activity>
         <activity android:name=".CheckoutActivity"
@@ -49,13 +60,10 @@
         <activity android:name=".ProfileActivity"
             android:exported="false">
         </activity>
-        <activity android:name=".LoginActivity"
+        <activity android:name=".auth.ForgotPasswordActivity"
             android:exported="false">
         </activity>
-        <activity android:name=".ForgotPasswordActivity"
-            android:exported="false">
-        </activity>
-        <activity android:name=".SignUpActivity"
+        <activity android:name=".auth.SignUpActivity"
             android:exported="false">
         </activity>
     </application>

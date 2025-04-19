@@ -1,4 +1,4 @@
-package com.example.shopman;
+package com.example.shopman.onboarding;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +8,9 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
+
+import com.example.shopman.R;
+import com.example.shopman.auth.LoginActivity;
 
 public class OnboardingActivity extends AppCompatActivity {
 

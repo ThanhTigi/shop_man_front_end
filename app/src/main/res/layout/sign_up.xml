@@ -30,6 +30,18 @@
         android:layout_marginTop="32dp"
         android:background="@drawable/edittext_border"/>
 
+    <EditText
+        android:id="@+id/etSignUpName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Name"
+        android:inputType="textEmailAddress"
+        android:drawableLeft="@drawable/user"
+        android:drawablePadding="8dp"
+        android:padding="12dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/edittext_border"/>
+
     <!-- Password Field -->
     <LinearLayout
         android:layout_width="match_parent"

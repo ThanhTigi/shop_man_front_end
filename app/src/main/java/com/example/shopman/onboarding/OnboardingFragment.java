@@ -1,4 +1,4 @@
-package com.example.shopman;
+package com.example.shopman.onboarding;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

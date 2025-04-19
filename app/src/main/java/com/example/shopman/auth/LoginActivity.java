@@ -1,4 +1,4 @@
-package com.example.shopman;
+package com.example.shopman.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,11 +11,19 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.shopman.MainActivity;
+import com.example.shopman.R;
+import com.example.shopman.SharedPreferencesManager;
+import com.example.shopman.models.LoginResponse;
+import com.example.shopman.remote.ApiManager;
+import com.example.shopman.remote.ApiResponseListener;
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etUsername, etPassword;
     private ImageView ivShowPassword;
     private boolean isPasswordVisible = false;
+    private ApiManager apiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +37,7 @@ public class LoginActivity extends AppCompatActivity {
         TextView btnForgotPassWord = findViewById(R.id.btnForgotPassword);
         TextView btnCreateAccount = findViewById(R.id.btnCreateAccount);
 
+        apiManager = new ApiManager();
 
         // Toggle Password Visibility
         ivShowPassword.setOnClickListener(new View.OnClickListener() {
@@ -57,7 +66,24 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
                 } else {
                     // Add your login logic here (e.g., validate with a server)
-                    Toast.makeText(getApplicationContext(), "Login Successful!", Toast.LENGTH_SHORT).show();
+                    apiManager.login(username, password, new ApiResponseListener<LoginResponse>() {
+                        @Override
+                        public void onSuccess(LoginResponse response) {
+                            // Lưu thông tin người dùng vào SharedPreferences
+                            SharedPreferencesManager.saveUserInfo(LoginActivity.this, response.getMetadata().getUser());
+                            // Chuyển đến màn hình chính
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            // Hiển thị lỗi
+                            Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
                 }
             }
         });

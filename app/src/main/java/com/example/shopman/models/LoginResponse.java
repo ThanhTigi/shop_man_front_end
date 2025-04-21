@@ -2,13 +2,11 @@ package com.example.shopman.models;
 
 public class LoginResponse {
     private String message;
-    private UserMetadata userMetadata;
+    private int status;
+    private LoginMetadata metadata;
 
-    public String getMessage() {
-        return message;
-    }
-
-    public UserMetadata getMetadata() {
-        return userMetadata;
+    public LoginMetadata getMetadata()
+    {
+        return metadata;
     }
 }

@@ -6,6 +6,8 @@ import com.example.shopman.models.LoginRequest;
 import com.example.shopman.models.LoginResponse;
 import com.example.shopman.models.SignUpRequest;
 import com.example.shopman.models.SignUpResponse;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,6 +34,7 @@ public class ApiManager {
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful()) {
                     listener.onSuccess(response.body());
+
                 } else {
                     listener.onError("Login failed: " + response.message());
                 }

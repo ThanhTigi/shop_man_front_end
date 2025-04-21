@@ -15,8 +15,11 @@ import com.example.shopman.MainActivity;
 import com.example.shopman.R;
 import com.example.shopman.SharedPreferencesManager;
 import com.example.shopman.models.LoginResponse;
+import com.example.shopman.models.User;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -70,7 +73,16 @@ public class LoginActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(LoginResponse response) {
                             // Lưu thông tin người dùng vào SharedPreferences
-                            SharedPreferencesManager.saveUserInfo(LoginActivity.this, response.getMetadata().getUser());
+                            if (response != null && response.getMetadata() != null) {
+                                User user = response.getMetadata().getMetadata().getUser();
+                                if (user != null) {
+                                    SharedPreferencesManager.saveUserInfo(LoginActivity.this, user);
+                                } else {
+                                    Toast.makeText(LoginActivity.this, "User data is null!", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Invalid response from server", Toast.LENGTH_SHORT).show();
+                            }
                             // Chuyển đến màn hình chính
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);

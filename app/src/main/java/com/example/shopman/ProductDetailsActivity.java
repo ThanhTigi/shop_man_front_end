@@ -22,10 +22,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private TextView selectedSizeText;
     private LinearLayout sizeContainer;
     private Button goToCartButton, buyNowButton;
-    private TextView viewSimilar, addToCompare;
-    private RecyclerView similarProductsRecyclerView;
-    private ProductAdapter similarProductsAdapter;
-    private List<Product> similarProducts;
     private Button selectedSizeButton;
 
     @Override
@@ -44,9 +40,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
         sizeContainer = findViewById(R.id.sizeContainer);
         goToCartButton = findViewById(R.id.goToCartButton);
         buyNowButton = findViewById(R.id.buyNowButton);
-        viewSimilar = findViewById(R.id.viewSimilar);
-        addToCompare = findViewById(R.id.addToCompare);
-        similarProductsRecyclerView = findViewById(R.id.similarProductsRecyclerView);
 
         // Get product data from Intent
         Product product = (Product) getIntent().getSerializableExtra("product");
@@ -106,23 +99,5 @@ public class ProductDetailsActivity extends AppCompatActivity {
         goToCartButton.setOnClickListener(v -> Toast.makeText(this, "Go to Cart clicked", Toast.LENGTH_SHORT).show());
         buyNowButton.setOnClickListener(v -> Toast.makeText(this, "Buy Now clicked", Toast.LENGTH_SHORT).show());
 
-        // Set up View Similar and Add to Compare
-        viewSimilar.setOnClickListener(v -> Toast.makeText(this, "View Similar clicked", Toast.LENGTH_SHORT).show());
-        addToCompare.setOnClickListener(v -> Toast.makeText(this, "Add to Compare clicked", Toast.LENGTH_SHORT).show());
-
-        // Set up RecyclerView for similar products
-        similarProducts = new ArrayList<>();
-        List<String> sizes = new ArrayList<>();
-        sizes.add("6 UK");
-        sizes.add("7 UK");
-        sizes.add("8 UK");
-        sizes.add("9 UK");
-        sizes.add("10 UK");
-        similarProducts.add(new Product("Nike Sneakers", "Jordan Retro 1 Low", "₹ 12,000", R.drawable.trending_image_1, 4.5f, sizes, "A classic sneaker with a low-cut design."));
-        similarProducts.add(new Product("Nike Sneakers", "Hot Punch Mocha Shoes For Men White Black Pink S...", "₹ 11,000", R.drawable.trending_image_2, 4.0f, sizes, "A vibrant sneaker with a unique colorway."));
-
-        similarProductsAdapter = new ProductAdapter(similarProducts);
-        similarProductsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        similarProductsRecyclerView.setAdapter(similarProductsAdapter);
     }
 }

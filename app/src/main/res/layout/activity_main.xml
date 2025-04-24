@@ -15,18 +15,12 @@
         app:layout_constraintTop_toTopOf="parent"
         android:gravity="center_vertical">
 
-        <ImageView
-            android:id="@+id/ivMenu"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:src="@drawable/ic_menu_sort_by_size"
-            android:contentDescription="Menu"/>
 
         <TextView
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Stylish"
+            android:text="Shop man"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#000000"

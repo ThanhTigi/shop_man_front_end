@@ -79,7 +79,7 @@ public class CheckOTPActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(ForgotPasswordResponse response) {
                         Intent otpIntent = new Intent(CheckOTPActivity.this, ChangePasswordActivity.class);
-                        otpIntent.putExtra("resetToken", response.getMessage()); // Pass the email as an extra
+                        otpIntent.putExtra("resetToken", response.getMetaData().getMessage()); // Pass the email as an extra
                         startActivity(otpIntent);
                     }
 

@@ -2,9 +2,14 @@ package com.example.shopman.models;
 
 public class ForgotPasswordResponse {
     private String message;
-    private ForgotPasswordMetadata metadata;
+    private int status;
+    private ForgotPasswordMetadata metaData;
 
-    public String getMessage() {
-        return message;
+    public ForgotPasswordMetadata getMetaData() {
+        return metaData;
+    }
+
+    public void setMetaData(ForgotPasswordMetadata metaData) {
+        this.metaData = metaData;
     }
 }

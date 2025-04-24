@@ -112,40 +112,6 @@
             android:textColor="#666666"
             android:layout_marginTop="8dp" />
 
-        <!-- Links -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Nearest Store"
-                android:textSize="14sp"
-                android:textColor="#0000FF"
-                android:gravity="center" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="VIP"
-                android:textSize="14sp"
-                android:textColor="#0000FF"
-                android:gravity="center" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Return Policy"
-                android:textSize="14sp"
-                android:textColor="#0000FF"
-                android:gravity="center" />
-        </LinearLayout>
 
         <!-- Buttons -->
         <LinearLayout
@@ -175,66 +141,6 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
-        <!-- Delivery Info -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Delivery in 1 within Hour"
-            android:textSize="14sp"
-            android:textColor="#FF0000"
-            android:layout_marginTop="8dp"
-            android:gravity="center" />
-
-        <!-- View Similar and Add to Compare -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
-
-            <TextView
-                android:id="@+id/viewSimilar"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="View Similar"
-                android:textSize="14sp"
-                android:textColor="#0000FF"
-                android:gravity="center" />
-
-            <TextView
-                android:id="@+id/addToCompare"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Add to Compare"
-                android:textSize="14sp"
-                android:textColor="#0000FF"
-                android:gravity="center" />
-        </LinearLayout>
-
-        <!-- Similar Products -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Similar To"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="282+ items"
-            android:textSize="14sp"
-            android:textColor="#666666"
-            android:layout_marginTop="4dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/similarProductsRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" />
 
     </LinearLayout>
 </ScrollView>

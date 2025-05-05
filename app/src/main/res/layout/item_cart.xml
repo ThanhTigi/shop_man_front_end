@@ -107,37 +107,43 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
-        <!-- Quantity Controls -->
+        <!-- Quantity Controls (Updated) -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:gravity="center">
 
-            <Button
+            <TextView
                 android:id="@+id/btnDecrease"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:text="-"
-                android:textSize="16sp"
-                android:background="@android:drawable/btn_default" />
+                android:textSize="30sp"
+                android:gravity="center"
+                android:background="@drawable/btn_quantity_selector"
+                android:textColor="#000000" />
 
             <TextView
                 android:id="@+id/tvQuantity"
                 android:layout_width="40dp"
-                android:layout_height="32dp"
+                android:layout_height="40dp"
                 android:text="1"
                 android:textSize="16sp"
                 android:gravity="center"
-                android:background="@android:drawable/edit_text" />
+                android:background="@drawable/quantity_border"
+                android:layout_marginHorizontal="4dp" />
 
-            <Button
+            <TextView
                 android:id="@+id/btnIncrease"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:text="+"
-                android:textSize="16sp"
-                android:background="@android:drawable/btn_default" />
+                android:textSize="30sp"
+                android:gravity="center"
+                android:background="@drawable/btn_quantity_selector"
+                android:textColor="#000000" />
         </LinearLayout>
 
         <!-- Total Order for this Item -->

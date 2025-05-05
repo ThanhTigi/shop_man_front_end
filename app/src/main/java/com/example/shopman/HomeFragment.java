@@ -26,7 +26,6 @@ public class HomeFragment extends Fragment {
 
     private EditText etSearch;
     private ImageView ivVoiceSearch;
-    private Button sortButton, filterButton;
     private RecyclerView categoryRecyclerView;
     private CategoryAdapter categoryAdapter;
     private List<Category> categoryList;
@@ -58,8 +57,6 @@ public class HomeFragment extends Fragment {
         // Initialize views
         etSearch = view.findViewById(R.id.etSearch);
         ivVoiceSearch = view.findViewById(R.id.ivVoiceSearch);
-        sortButton = view.findViewById(R.id.sortButton);
-        filterButton = view.findViewById(R.id.filterButton);
         categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
         bannerViewPager = view.findViewById(R.id.bannerViewPager);
         bannerDots = view.findViewById(R.id.bannerDots);
@@ -73,9 +70,6 @@ public class HomeFragment extends Fragment {
         // Set up search bar
         ivVoiceSearch.setOnClickListener(v -> Toast.makeText(getActivity(), "Voice Search clicked", Toast.LENGTH_SHORT).show());
 
-        // Set up Sort and Filter buttons
-        sortButton.setOnClickListener(v -> Toast.makeText(getActivity(), "Sort button clicked", Toast.LENGTH_SHORT).show());
-        filterButton.setOnClickListener(v -> Toast.makeText(getActivity(), "Filter button clicked", Toast.LENGTH_SHORT).show());
 
         // Set up RecyclerView for categories
         categoryList = new ArrayList<>();

@@ -68,7 +68,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (username.isEmpty() || password.isEmpty()) {
                     Toast.makeText(getApplicationContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Add your login logic here (e.g., validate with a server)
+                    // Add your login logic here (e.g., validate with a server)+0
                     apiManager.login(username, password, new ApiResponseListener<LoginResponse>() {
                         @Override
                         public void onSuccess(LoginResponse response) {

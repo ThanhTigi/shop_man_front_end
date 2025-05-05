@@ -96,7 +96,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         ImageView productImage;
         TextView productName, productVariations, ratingText, productPrice, productOriginalPrice, productDiscount, tvQuantity, tvTotalOrder;
         RatingBar productRating;
-        Button btnDecrease, btnIncrease;
+        TextView btnDecrease, btnIncrease;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);

@@ -31,7 +31,14 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         etEmail = findViewById(R.id.etEmail);
         btnSubmit = findViewById(R.id.btnSubmit);
-        ivBack.setOnClickListener(v -> finish());
+        ivBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ForgotPasswordActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
         apiManager = new ApiManager();
 
         // Submit Button Click

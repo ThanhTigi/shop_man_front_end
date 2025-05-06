@@ -12,14 +12,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.shopman.MainActivity;
+import com.example.shopman.MyPreferences;
 import com.example.shopman.R;
-import com.example.shopman.SharedPreferencesManager;
 import com.example.shopman.models.LoginResponse;
 import com.example.shopman.models.User;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -31,6 +29,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.log_in);
 
         etUsername = findViewById(R.id.etUsername);
@@ -76,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
                             if (response != null && response.getMetadata() != null) {
                                 User user = response.getMetadata().getMetadata().getUser();
                                 if (user != null) {
-                                    SharedPreferencesManager.saveUserInfo(LoginActivity.this, user);
+                                    MyPreferences.setString(LoginActivity.this,"current_user",user.toJson());
                                 } else {
                                     Toast.makeText(LoginActivity.this, "User data is null!", Toast.LENGTH_SHORT).show();
                                 }

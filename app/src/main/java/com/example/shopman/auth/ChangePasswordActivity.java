@@ -4,16 +4,13 @@ package com.example.shopman.auth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
-import com.example.shopman.MainActivity;
 import com.example.shopman.R;
-import com.example.shopman.SharedPreferencesManager;
 import com.example.shopman.models.LoginResponse;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;

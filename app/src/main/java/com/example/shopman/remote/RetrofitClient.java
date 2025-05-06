@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
     private static Retrofit retrofit;
-    private static final String BASE_URL = "https://shopman.onrender.com"; // sửa lại URL của bạn
+    private static final String BASE_URL = "https://shopman.onrender.com";
 
     public static Retrofit getClient() {
         if (retrofit == null) {

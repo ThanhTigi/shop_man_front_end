@@ -1,13 +1,13 @@
 package com.example.shopman.remote;
 
 import com.example.shopman.models.ChangePasswordRequest;
+import com.example.shopman.models.ForgotPasswordRequest;
 import com.example.shopman.models.ForgotPasswordResponse;
 import com.example.shopman.models.LoginRequest;
 import com.example.shopman.models.LoginResponse;
+import com.example.shopman.models.OTPRequest;
 import com.example.shopman.models.SignUpRequest;
 import com.example.shopman.models.SignUpResponse;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -71,8 +71,9 @@ public class ApiManager {
     }
 
     public void forgotPassword(String email, final ApiResponseListener<ForgotPasswordResponse> listener) {
+        ForgotPasswordRequest request = new ForgotPasswordRequest(email);
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<ForgotPasswordResponse> call = apiService.forgotPassword(email);
+        Call<ForgotPasswordResponse> call = apiService.forgotPassword(request);
 
         call.enqueue(new Callback<ForgotPasswordResponse>() {
             @Override
@@ -92,8 +93,9 @@ public class ApiManager {
     }
 
     public void checkOTP(String otp, final ApiResponseListener<ForgotPasswordResponse> listener) {
+        OTPRequest request = new OTPRequest(otp);
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<ForgotPasswordResponse> call = apiService.forgotPassword(otp);
+        Call<ForgotPasswordResponse> call = apiService.checkOTP(request);
 
         call.enqueue(new Callback<ForgotPasswordResponse>() {
             @Override

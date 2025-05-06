@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
+import com.example.shopman.MyPreferences;
 import com.example.shopman.R;
 import com.example.shopman.auth.LoginActivity;
 
@@ -23,6 +24,14 @@ public class OnboardingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (MyPreferences.getBoolean(this,"new_user", false))
+        {
+            Intent intent = new Intent(OnboardingActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
         setContentView(R.layout.activity_onboarding);
 
         viewPager = findViewById(R.id.viewPager);
@@ -73,11 +82,13 @@ public class OnboardingActivity extends AppCompatActivity {
         tvPrev.setOnClickListener(v -> viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true));
         tvNext.setOnClickListener(v -> viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true));
         tvGetStarted.setOnClickListener(v -> {
+            MyPreferences.setBoolean(this,"new_user",true);
             Intent intent = new Intent(OnboardingActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
         });
         tvSkip.setOnClickListener(v -> {
+            MyPreferences.setBoolean(this,"new_user",true);
             Intent intent = new Intent(OnboardingActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();

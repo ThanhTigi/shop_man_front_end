@@ -52,6 +52,8 @@
             </LinearLayout>
 
             <!-- Category Section -->
+
+            <!-- Banner Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -61,9 +63,9 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
+                    android:orientation="horizontal">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -74,11 +76,11 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
                             android:text="All Featured"
-                            android:textSize="18sp"
                             android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:layout_marginEnd="16dp" />
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
 
                     </LinearLayout>
@@ -95,7 +97,6 @@
 
             </LinearLayout>
 
-            <!-- Banner Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -332,26 +333,6 @@
                         android:layout_height="match_parent"
                         android:src="@drawable/new_arrivals_image"
                         android:scaleType="centerCrop" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Hot SUMMER Sale"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="#000000"
-                        android:layout_centerInParent="true" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Summer'25 Collections"
-                        android:textSize="16sp"
-                        android:textColor="#000000"
-                        android:layout_centerHorizontal="true"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginBottom="16dp" />
-
                 </RelativeLayout>
             </LinearLayout>
 

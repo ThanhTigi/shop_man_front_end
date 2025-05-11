@@ -22,6 +22,7 @@ public class MyPreferences {
         SharedPreferences.Editor editor = getPrefs(context).edit();
         editor.putString(key, value);
         editor.apply();
+        System.out.println(value);
     }
 
     public static void setBoolean(Context context, String key, boolean value) {

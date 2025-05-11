@@ -27,8 +27,7 @@ public class SettingFragment extends Fragment {
 
         // Thiết lập sự kiện click
         logOutButton.setOnClickListener(v -> {
-            // Xử lý đăng xuất (ví dụ: xóa dữ liệu người dùng)
-            clearUserData();
+            MyPreferences.setString(getActivity(), "current_user_meta_data", "");
 
             // Chuyển về giao diện login
             Intent intent = new Intent(getActivity(), LoginActivity.class);
@@ -40,9 +39,7 @@ public class SettingFragment extends Fragment {
         return view;
     }
 
-    // Hàm xử lý xóa dữ liệu người dùng (tùy thuộc vào cách bạn quản lý đăng nhập)
     private void clearUserData() {
-        // Ví dụ: Xóa SharedPreferences hoặc token đăng nhập
         SharedPreferences preferences = getActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.clear();

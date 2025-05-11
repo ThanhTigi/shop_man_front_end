@@ -1,12 +1,16 @@
 package com.example.shopman;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
@@ -29,11 +33,19 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         Category category = categoryList.get(position);
         holder.categoryName.setText(category.getName());
         holder.categoryImage.setImageResource(category.getImageResId());
+
+        // Set click listener to navigate to CategoryProductsActivity
+        holder.itemView.setOnClickListener(v -> {
+            Context context = holder.itemView.getContext();
+            Intent intent = new Intent(context, CategoryProductActivity.class);
+            intent.putExtra("categoryName", category.getName());
+            context.startActivity(intent);
+        });
     }
 
     @Override
     public int getItemCount() {
-        return categoryList.size();
+        return categoryList != null ? categoryList.size() : 0;
     }
 
     public static class CategoryViewHolder extends RecyclerView.ViewHolder {

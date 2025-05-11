@@ -16,6 +16,7 @@ import com.example.shopman.MyPreferences;
 import com.example.shopman.R;
 import com.example.shopman.models.LoginResponse;
 import com.example.shopman.models.User;
+import com.example.shopman.models.UserMetadata;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
 
@@ -31,6 +32,18 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.log_in);
+        apiManager = new ApiManager();
+
+        apiManager.checkUserLogin(LoginActivity.this, isLoggedIn ->
+        {
+            if (isLoggedIn) {
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+        });
+
 
         etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
@@ -39,9 +52,7 @@ public class LoginActivity extends AppCompatActivity {
         TextView btnForgotPassWord = findViewById(R.id.btnForgotPassword);
         TextView btnCreateAccount = findViewById(R.id.btnCreateAccount);
 
-        apiManager = new ApiManager();
 
-        // Toggle Password Visibility
         ivShowPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,7 +68,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Login Button Click
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,22 +77,20 @@ public class LoginActivity extends AppCompatActivity {
                 if (username.isEmpty() || password.isEmpty()) {
                     Toast.makeText(getApplicationContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Add your login logic here (e.g., validate with a server)+0
                     apiManager.login(username, password, new ApiResponseListener<LoginResponse>() {
                         @Override
                         public void onSuccess(LoginResponse response) {
                             // Lưu thông tin người dùng vào SharedPreferences
                             if (response != null && response.getMetadata() != null) {
-                                User user = response.getMetadata().getMetadata().getUser();
-                                if (user != null) {
-                                    MyPreferences.setString(LoginActivity.this,"current_user",user.toJson());
+                                UserMetadata userMetadata = response.getMetadata().getMetadata();
+                                if (userMetadata != null) {
+                                    MyPreferences.setString(LoginActivity.this, "current_user_meta_data", userMetadata.toJson());
                                 } else {
                                     Toast.makeText(LoginActivity.this, "User data is null!", Toast.LENGTH_SHORT).show();
                                 }
                             } else {
                                 Toast.makeText(LoginActivity.this, "Invalid response from server", Toast.LENGTH_SHORT).show();
                             }
-                            // Chuyển đến màn hình chính
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish();
@@ -90,7 +98,6 @@ public class LoginActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(String errorMessage) {
-                            // Hiển thị lỗi
                             Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                         }
                     });

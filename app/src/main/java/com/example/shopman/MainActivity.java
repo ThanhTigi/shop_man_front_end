@@ -1,7 +1,10 @@
 package com.example.shopman;
 
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -12,6 +15,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
 
+    private ImageView profileImageView;
     private ViewPager2 viewPager;
     private BottomNavigationView bottomNavigationView;
 
@@ -22,6 +26,15 @@ public class MainActivity extends AppCompatActivity {
 
         viewPager = findViewById(R.id.viewPager);
         bottomNavigationView = findViewById(R.id.bottomNavigation);
+        profileImageView = findViewById(R.id.ivProfile);
+
+        profileImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
 
         // Set up the ViewPager2 with a FragmentStateAdapter
         FragmentStateAdapter pagerAdapter = new FragmentStateAdapter(this) {

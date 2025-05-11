@@ -1,5 +1,8 @@
 package com.example.shopman;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -8,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.shopman.auth.LoginActivity;
 import com.example.shopman.models.UserMetadata;
 import com.example.shopman.models.profile.getuserprofile.Address;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
@@ -50,8 +54,6 @@ public class ProfileActivity extends AppCompatActivity {
         apiManager.getUserProfile(accessToken, new ApiResponseListener<GetUserProfileResponse>() {
             @Override
             public void onSuccess(GetUserProfileResponse response) {
-
-                System.out.println("======" + new Gson().toJson(response.getUserProfileMetaData().getUserProfileMetaData()));
                 UserProfileMetadata user = response.getUserProfileMetaData().getUserProfileMetaData();
                 etEmail.setText(user.getEmail());
                 etName.setText(user.getName());
@@ -59,7 +61,7 @@ public class ProfileActivity extends AppCompatActivity {
                 avatar = user.getAvatar();
                 if (!user.getAddress().isEmpty()) {
                     Address address = user.getAddress().get(0);
-                    etPincode.setText(address.getPincode());
+                    etPincode.setText(String.valueOf(address.getPincode()));
                     etAddress.setText(address.getAddress());
                     etCity.setText(address.getCity() );
                     etCountry.setText(address.getCountry());
@@ -74,6 +76,10 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onError(String errorMessage) {
                 Toast.makeText(ProfileActivity.this, "User Profile fail!", Toast.LENGTH_SHORT).show();
+                MyPreferences.setString(ProfileActivity.this, "current_user_meta_data", "");
+                Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
 

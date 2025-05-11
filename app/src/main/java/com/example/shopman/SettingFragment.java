@@ -39,9 +39,7 @@ public class SettingFragment extends Fragment {
         return view;
     }
 
-    // Hàm xử lý xóa dữ liệu người dùng (tùy thuộc vào cách bạn quản lý đăng nhập)
     private void clearUserData() {
-        // Ví dụ: Xóa SharedPreferences hoặc token đăng nhập
         SharedPreferences preferences = getActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.clear();

@@ -33,7 +33,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_password);
 
-        // Initialize views
         ivBack = findViewById(R.id.ivBack);
         etSignUpPassword = findViewById(R.id.etPassword);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
@@ -41,16 +40,13 @@ public class ChangePasswordActivity extends AppCompatActivity {
         ivShowConfirmPassword = findViewById(R.id.ivShowConfirmPassword);
         btnCreateAccount = findViewById(R.id.btnChangePassword);
         apiManager = new ApiManager();
-        // Retrieve the email from the Intent
         email = getIntent().getStringExtra("email");
         if (email == null) {
             email = "unknown@example.com"; // Default value if email is not passed
         }
 
-        // Set up back button
         ivBack.setOnClickListener(v -> finish());
 
-        // Toggle visibility of Sign Up Password
         ivShowSignUpPassword.setOnClickListener(v -> {
             isSignUpPasswordVisible = !isSignUpPasswordVisible;
             if (isSignUpPasswordVisible) {
@@ -60,11 +56,9 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 etSignUpPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                 ivShowSignUpPassword.setImageResource(android.R.drawable.ic_menu_view); // Eye-on icon
             }
-            // Move cursor to the end of the text
             etSignUpPassword.setSelection(etSignUpPassword.getText().length());
         });
 
-        // Toggle visibility of Confirm Password
         ivShowConfirmPassword.setOnClickListener(v -> {
             isConfirmPasswordVisible = !isConfirmPasswordVisible;
             if (isConfirmPasswordVisible) {
@@ -74,16 +68,13 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 etConfirmPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                 ivShowConfirmPassword.setImageResource(android.R.drawable.ic_menu_view); // Eye-on icon
             }
-            // Move cursor to the end of the text
             etConfirmPassword.setSelection(etConfirmPassword.getText().length());
         });
 
-        // Set up Change Password button
         btnCreateAccount.setOnClickListener(v -> {
             String password = etSignUpPassword.getText().toString().trim();
             String confirmPassword = etConfirmPassword.getText().toString().trim();
 
-            // Validate inputs
             if (password.isEmpty()) {
                 Toast.makeText(this, "Please enter a password", Toast.LENGTH_SHORT).show();
             } else if (password.length() < 6) {

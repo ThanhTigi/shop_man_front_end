@@ -1,5 +1,7 @@
 package com.example.shopman.models;
 
+import com.google.gson.Gson;
+
 public class UserMetadata {
     private User user;
     private Tokens tokens;
@@ -10,5 +12,16 @@ public class UserMetadata {
 
     public Tokens getTokens() {
         return tokens;
+    }
+
+    public String toJson() {
+        return new Gson().toJson(this);
+    }
+
+    public static UserMetadata fromJson(String json)
+    {
+        Gson gson = new Gson();
+        UserMetadata user = gson.fromJson(json, UserMetadata.class);
+        return user;
     }
 }

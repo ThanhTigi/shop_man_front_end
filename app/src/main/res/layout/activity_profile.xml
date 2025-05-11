@@ -35,12 +35,6 @@
                 android:textStyle="bold"
                 android:gravity="center" />
 
-            <ImageView
-                android:id="@+id/ivCheckout"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_close_clear_cancel"
-                android:contentDescription="Checkout" />
         </LinearLayout>
 
         <!-- Profile Image -->
@@ -57,7 +51,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PERSONAL DETAILS"
+            android:text="Mail"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginTop="24dp"
@@ -69,49 +63,77 @@
             android:layout_height="wrap_content"
             android:hint="Email"
             android:text="aashit@htg.com"
-            android:padding="12dp"
-            android:background="@android:drawable/edit_text"
-            android:layout_marginBottom="8dp" />
-
-        <EditText
-            android:id="@+id/etPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Password"
-            android:text="********"
-            android:inputType="textPassword"
+            android:inputType="none"
+            android:focusable="false"
+            android:clickable="false"
             android:padding="12dp"
             android:background="@android:drawable/edit_text"
             android:layout_marginBottom="8dp" />
 
         <TextView
-            android:id="@+id/tvChangePassword"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="CHANGE PASSWORD"
-            android:textSize="14sp"
-            android:textColor="#F63757"
-            android:layout_gravity="end"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Business Address Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="BUSINESS ADDRESS"
+            android:text="Name"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp" />
 
         <EditText
-            android:id="@+id/etFlatNo"
+            android:id="@+id/etName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Flat No."
-            android:text="450/16"
+            android:hint="Your name"
+            android:text="Nguyen Dac Thanh"
             android:padding="12dp"
             android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phone number"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etPhoneNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Phone number"
+            android:text="0326729576"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pincode"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etPincode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Pincode"
+            android:text="700000"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Address"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp" />
 
         <EditText
@@ -119,9 +141,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Address"
-            android:text="216 St Pauls Rd"
+            android:text="123 Nguyễn Trãi"
             android:padding="12dp"
             android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="City"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp" />
 
         <EditText
@@ -129,19 +160,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="City"
-            android:text="London"
+            android:text="Ha Noi"
             android:padding="12dp"
             android:background="@android:drawable/edit_text"
             android:layout_marginBottom="8dp" />
 
-        <EditText
-            android:id="@+id/etZipCode"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Zip Code"
-            android:text="N1 2LL"
-            android:padding="12dp"
-            android:background="@android:drawable/edit_text"
+            android:text="Country"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp" />
 
         <EditText
@@ -149,50 +179,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Country"
-            android:text="United Kingdom"
-            android:padding="12dp"
-            android:background="@android:drawable/edit_text"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Bank Account Details Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="BANK ACCOUNT DETAILS"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp" />
-
-        <EditText
-            android:id="@+id/etAccountNumber"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Account Number"
-            android:text="20345000XXXX"
+            android:text="Viet Nam"
             android:padding="12dp"
             android:background="@android:drawable/edit_text"
             android:layout_marginBottom="8dp" />
 
-        <EditText
-            android:id="@+id/etAccountHolderName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Account Holder's Name"
-            android:text="Abhraj Sisodiya"
-            android:padding="12dp"
-            android:background="@android:drawable/edit_text"
-            android:layout_marginBottom="8dp" />
-
-        <EditText
-            android:id="@+id/etIfscCode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="IFSC Code"
-            android:text="IFSC0428"
-            android:padding="12dp"
-            android:background="@android:drawable/edit_text"
-            android:layout_marginBottom="16dp" />
 
         <!-- Save Button -->
         <Button

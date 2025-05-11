@@ -1,5 +1,8 @@
 package com.example.shopman.remote;
 
+import android.content.Context;
+
+import com.example.shopman.MyPreferences;
 import com.example.shopman.models.ChangePasswordRequest;
 import com.example.shopman.models.ForgotPasswordRequest;
 import com.example.shopman.models.ForgotPasswordResponse;
@@ -8,6 +11,11 @@ import com.example.shopman.models.LoginResponse;
 import com.example.shopman.models.OTPRequest;
 import com.example.shopman.models.SignUpRequest;
 import com.example.shopman.models.SignUpResponse;
+import com.example.shopman.models.UserMetadata;
+import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
+import com.example.shopman.models.profile.updateuserprofile.UpdateProfileRequest;
+import com.example.shopman.models.profile.updateuserprofile.UpdateProfileResponse;
+import com.example.shopman.models.searchproducts.SearchProductsResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -138,4 +146,121 @@ public class ApiManager {
         });
     }
 
+    public void checkUserLogin(Context context, BooleanCallback callback)
+    {
+        if (MyPreferences.getString(context,"current_user_meta_data",null) == null)
+        {
+            callback.onResult(false);
+        }
+        String userJson = MyPreferences.getString(context,"current_user_meta_data","");
+        UserMetadata userMetadata = UserMetadata.fromJson(MyPreferences.getString(context,"current_user_meta_data",""));
+        if (userMetadata == null || userMetadata.getTokens() == null) {
+            callback.onResult(false);
+            return;
+        }
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<GetUserProfileResponse> call = apiService.getUserProfile("Bearer " + userMetadata.getTokens().getAccessToken());
+
+        call.enqueue(new Callback<GetUserProfileResponse>() {
+            @Override
+            public void onResponse(Call<GetUserProfileResponse> call, Response<GetUserProfileResponse> response) {
+                if (response.isSuccessful()) {
+                    callback.onResult(true);
+                } else {
+                    callback.onResult(false);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetUserProfileResponse> call, Throwable t) {
+                callback.onResult(false);
+            }
+        });
+    }
+
+    public void getUserProfile(String accessToken, final ApiResponseListener<GetUserProfileResponse> listener)
+    {
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<GetUserProfileResponse> call = apiService.getUserProfile("Bearer " + accessToken);
+
+        call.enqueue(new Callback<GetUserProfileResponse>() {
+            @Override
+            public void onResponse(Call<GetUserProfileResponse> call, Response<GetUserProfileResponse> response) {
+                if (response.isSuccessful())
+                {
+                    listener.onSuccess(response.body());
+                }
+                else
+                {
+                    listener.onError(response.message());
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<GetUserProfileResponse> call, Throwable t) {
+                listener.onError("Network Error: " + t.getMessage());
+            }
+        });
+    }
+
+
+    public void updateUserProfile(String token, UpdateProfileRequest request, BooleanCallback callback)
+    {
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<UpdateProfileResponse> call = apiService.updateUserProfile("Bearer " + token, request);
+
+        call.enqueue(new Callback<UpdateProfileResponse>() {
+            @Override
+            public void onResponse(Call<UpdateProfileResponse> call, Response<UpdateProfileResponse> response) {
+                System.out.println("==" + response.body());
+                if (response.isSuccessful()) {
+                    callback.onResult(true);
+                } else {
+                    callback.onResult(false);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UpdateProfileResponse> call, Throwable t) {
+                System.out.println("=========failed" + t.getMessage());
+                callback.onResult(false);
+            }
+        });
+
+    }
+
+    public void searchProducts(String keyword, final ApiResponseListener<SearchProductsResponse> listener)
+    {
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<SearchProductsResponse> call = apiService.searchProducts(keyword);
+
+        call.enqueue(new Callback<SearchProductsResponse>() {
+            @Override
+            public void onResponse(Call<SearchProductsResponse> call, Response<SearchProductsResponse> response) {
+                if (response.isSuccessful())
+                {
+                    listener.onSuccess(response.body());
+                }
+                else
+                {
+                    listener.onError(response.message());
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<SearchProductsResponse> call, Throwable t) {
+                listener.onError("Network Error: " + t.getMessage());
+            }
+        });
+    }
+
+
+    public interface BooleanCallback {
+        void onResult(boolean result);
+    }
+
 }
+

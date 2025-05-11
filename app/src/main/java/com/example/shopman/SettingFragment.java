@@ -27,8 +27,7 @@ public class SettingFragment extends Fragment {
 
         // Thiết lập sự kiện click
         logOutButton.setOnClickListener(v -> {
-            // Xử lý đăng xuất (ví dụ: xóa dữ liệu người dùng)
-            clearUserData();
+            MyPreferences.setString(getActivity(), "current_user_meta_data", "");
 
             // Chuyển về giao diện login
             Intent intent = new Intent(getActivity(), LoginActivity.class);

@@ -26,10 +26,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Product product = productList.get(position);
-        holder.productImage.setImageResource(product.getImageResId());
-        holder.productName.setText(product.getName());
-        holder.productPrice.setText(product.getPrice());
+        holder.bind(product);
     }
+
 
     @Override
     public int getItemCount() {
@@ -46,5 +45,20 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             productName = itemView.findViewById(R.id.productName);
             productPrice = itemView.findViewById(R.id.productPrice);
         }
+
+        public void bind(Product product) {
+            productImage.setImageResource(product.getImageResId());
+            productName.setText(product.getName());
+            productPrice.setText(product.getPrice());
+
+            itemView.setOnClickListener(v -> {
+                // Tạo Intent và gửi dữ liệu sang ProductDetailsActivity
+                android.content.Context context = itemView.getContext();
+                android.content.Intent intent = new android.content.Intent(context, ProductDetailsActivity.class);
+                intent.putExtra("product", product); // Product phải implement Serializable
+                context.startActivity(intent);
+            });
+        }
     }
+
 }

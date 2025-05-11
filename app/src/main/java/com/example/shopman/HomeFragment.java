@@ -33,11 +33,10 @@ public class HomeFragment extends Fragment {
     private TabLayout bannerDots;
     private BannerAdapter bannerAdapter;
     private List<Banner> bannerList;
-    private RecyclerView dealRecyclerView, trendingRecyclerView;
-    private ProductAdapter dealAdapter, trendingAdapter;
+    private RecyclerView  trendingRecyclerView;
+    private ProductAdapter trendingAdapter;
     private List<Product> dealList, trendingList;
-    private TextView dealViewAll, trendingViewAll, newArrivalsViewAll;
-    private Button visitNowButton;
+    private TextView trendingViewAll, newArrivalsViewAll;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -56,19 +55,20 @@ public class HomeFragment extends Fragment {
 
         // Initialize views
         etSearch = view.findViewById(R.id.etSearch);
-        ivVoiceSearch = view.findViewById(R.id.ivVoiceSearch);
+        ivVoiceSearch = view.findViewById(R.id.ivSearch);
         categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
         bannerViewPager = view.findViewById(R.id.bannerViewPager);
         bannerDots = view.findViewById(R.id.bannerDots);
-        dealRecyclerView = view.findViewById(R.id.dealRecyclerView);
         trendingRecyclerView = view.findViewById(R.id.trendingRecyclerView);
-        dealViewAll = view.findViewById(R.id.dealViewAll);
         trendingViewAll = view.findViewById(R.id.trendingViewAll);
         newArrivalsViewAll = view.findViewById(R.id.newArrivalsViewAll);
-        visitNowButton = view.findViewById(R.id.visitNowButton);
 
         // Set up search bar
-        ivVoiceSearch.setOnClickListener(v -> Toast.makeText(getActivity(), "Voice Search clicked", Toast.LENGTH_SHORT).show());
+        ivVoiceSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }});
 
 
         // Set up RecyclerView for categories
@@ -107,14 +107,6 @@ public class HomeFragment extends Fragment {
         dealList.add(new Product("Women Printed Kurta", "Neque porro quisquam est qui", "₹1500", R.drawable.deal_image_1, 4.5f, sizes, "A beautiful printed kurta for women, perfect for casual wear."));
         dealList.add(new Product("HRX by Hrithik Roshan", "Neque porro quisquam est qui", "₹2499", R.drawable.deal_image_2, 4.0f, sizes, "A stylish and comfortable outfit by HRX, designed for active lifestyles."));
 
-        dealAdapter = new ProductAdapter(dealList);
-        dealRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-        dealRecyclerView.setAdapter(dealAdapter);
-
-        dealViewAll.setOnClickListener(v -> Toast.makeText(getActivity(), "Deal View All clicked", Toast.LENGTH_SHORT).show());
-
-        // Set up Special Offers
-        visitNowButton.setOnClickListener(v -> Toast.makeText(getActivity(), "Visit Now clicked", Toast.LENGTH_SHORT).show());
 
         // Set up RecyclerView for Trending Products
         trendingList = new ArrayList<>();
@@ -125,7 +117,13 @@ public class HomeFragment extends Fragment {
         trendingRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         trendingRecyclerView.setAdapter(trendingAdapter);
 
-        trendingViewAll.setOnClickListener(v -> Toast.makeText(getActivity(), "Trending View All clicked", Toast.LENGTH_SHORT).show());
+        trendingViewAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(),TrendingProductActivity.class);
+                startActivity(intent);
+            }
+        });
 
         newArrivalsViewAll.setOnClickListener(v -> Toast.makeText(getActivity(), "New Arrivals View All clicked", Toast.LENGTH_SHORT).show());
     }

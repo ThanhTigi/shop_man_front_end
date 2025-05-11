@@ -23,6 +23,8 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private LinearLayout sizeContainer;
     private Button goToCartButton, buyNowButton;
     private Button selectedSizeButton;
+    private ImageView backImageView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,15 @@ public class ProductDetailsActivity extends AppCompatActivity {
         sizeContainer = findViewById(R.id.sizeContainer);
         goToCartButton = findViewById(R.id.goToCartButton);
         buyNowButton = findViewById(R.id.buyNowButton);
+        backImageView = findViewById(R.id.backiv);
+
+
+        backImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         // Get product data from Intent
         Product product = (Product) getIntent().getSerializableExtra("product");

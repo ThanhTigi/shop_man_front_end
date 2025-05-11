@@ -1,72 +1,128 @@
 package com.example.shopman;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.shopman.models.UserMetadata;
+import com.example.shopman.models.profile.getuserprofile.Address;
+import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
+import com.example.shopman.models.profile.updateuserprofile.UpdateProfileAddress;
+import com.example.shopman.models.profile.updateuserprofile.UpdateProfileRequest;
+import com.example.shopman.models.profile.updateuserprofile.UpdateProfileUser;
+import com.example.shopman.models.profile.getuserprofile.UserProfileMetadata;
+import com.example.shopman.remote.ApiManager;
+import com.example.shopman.remote.ApiResponseListener;
+import com.google.gson.Gson;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private ImageView ivBack, ivCheckout, ivProfileImage;
-    private EditText etEmail, etPassword, etFlatNo, etAddress, etCity, etZipCode, etCountry;
-    private EditText etAccountNumber, etAccountHolderName, etIfscCode;
-    private TextView tvChangePassword;
+    private ImageView ivBack, ivProfileImage;
+    private EditText etEmail, etName, etPhoneNumber, etAddress, etPincode, etCity, etCountry;
     private Button btnSave;
+
+    private String accessToken;
+    private String avatar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        // Initialize views
         ivBack = findViewById(R.id.ivBack);
-        ivCheckout = findViewById(R.id.ivCheckout);
         ivProfileImage = findViewById(R.id.ivProfileImage);
         etEmail = findViewById(R.id.etEmail);
-        etPassword = findViewById(R.id.etPassword);
-        etFlatNo = findViewById(R.id.etFlatNo);
+        etName = findViewById(R.id.etName);
+        etPhoneNumber = findViewById(R.id.etPhoneNumber);
         etAddress = findViewById(R.id.etAddress);
+        etPincode = findViewById(R.id.etPincode);
         etCity = findViewById(R.id.etCity);
-        etZipCode = findViewById(R.id.etZipCode);
         etCountry = findViewById(R.id.etCountry);
-        etAccountNumber = findViewById(R.id.etAccountNumber);
-        etAccountHolderName = findViewById(R.id.etAccountHolderName);
-        etIfscCode = findViewById(R.id.etIfscCode);
-        tvChangePassword = findViewById(R.id.tvChangePassword);
         btnSave = findViewById(R.id.btnSave);
 
-        // Set up click listeners
-        ivBack.setOnClickListener(v -> finish()); // Go back to previous activity
+        UserMetadata userMetadata = UserMetadata.fromJson(MyPreferences.getString(ProfileActivity.this, "current_user_meta_data", ""));
+        ApiManager apiManager = new ApiManager();
+        accessToken = userMetadata.getTokens().getAccessToken();
+        apiManager.getUserProfile(accessToken, new ApiResponseListener<GetUserProfileResponse>() {
+            @Override
+            public void onSuccess(GetUserProfileResponse response) {
 
-        ivCheckout.setOnClickListener(v -> Toast.makeText(ProfileActivity.this, "Checkout clicked", Toast.LENGTH_SHORT).show());
+                System.out.println("======" + new Gson().toJson(response.getUserProfileMetaData().getUserProfileMetaData()));
+                UserProfileMetadata user = response.getUserProfileMetaData().getUserProfileMetaData();
+                etEmail.setText(user.getEmail());
+                etName.setText(user.getName());
+                etPhoneNumber.setText(user.getPhone());
+                avatar = user.getAvatar();
+                if (!user.getAddress().isEmpty()) {
+                    Address address = user.getAddress().get(0);
+                    etPincode.setText(address.getPincode());
+                    etAddress.setText(address.getAddress());
+                    etCity.setText(address.getCity() );
+                    etCountry.setText(address.getCountry());
+                } else {
+                    etPincode.setText("");
+                    etAddress.setText("");
+                    etCity.setText("");
+                    etCountry.setText("");
+                }
+            }
 
-        tvChangePassword.setOnClickListener(v -> Toast.makeText(ProfileActivity.this, "Change Password clicked", Toast.LENGTH_SHORT).show());
-
-        btnSave.setOnClickListener(v -> {
-            // Validate and save profile details
-            String email = etEmail.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
-            String flatNo = etFlatNo.getText().toString().trim();
-            String address = etAddress.getText().toString().trim();
-            String city = etCity.getText().toString().trim();
-            String zipCode = etZipCode.getText().toString().trim();
-            String country = etCountry.getText().toString().trim();
-            String accountNumber = etAccountNumber.getText().toString().trim();
-            String accountHolderName = etAccountHolderName.getText().toString().trim();
-            String ifscCode = etIfscCode.getText().toString().trim();
-
-            if (email.isEmpty() || password.isEmpty() || flatNo.isEmpty() || address.isEmpty() ||
-                    city.isEmpty() || zipCode.isEmpty() || country.isEmpty() || accountNumber.isEmpty() ||
-                    accountHolderName.isEmpty() || ifscCode.isEmpty()) {
-                Toast.makeText(ProfileActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(ProfileActivity.this, "Profile saved successfully", Toast.LENGTH_SHORT).show();
-                finish();
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(ProfileActivity.this, "User Profile fail!", Toast.LENGTH_SHORT).show();
             }
         });
+
+
+        ivBack.setOnClickListener(v -> finish());
+
+
+        btnSave.setOnClickListener(v -> {
+            String name = etName.getText().toString();
+            String phoneNumber = etPhoneNumber.getText().toString();
+            String pincode = etPincode.getText().toString();
+            String address = etAddress.getText().toString();
+            String city = etCity.getText().toString();
+            String country = etCountry.getText().toString();
+
+            if (name.isEmpty() || phoneNumber.isEmpty() || pincode.isEmpty() || address.isEmpty() || city.isEmpty()|| country.isEmpty()) {
+                Toast.makeText(ProfileActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            }
+            else if (!isInteger(pincode))
+            {
+                Toast.makeText(ProfileActivity.this, "Pincode must be a number", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                UpdateProfileUser user = new UpdateProfileUser(name,phoneNumber,avatar);
+                UpdateProfileAddress address1 = new UpdateProfileAddress("main",Integer.parseInt(pincode),address,city,country);
+                UpdateProfileRequest request = new UpdateProfileRequest(user, address1);
+                apiManager.updateUserProfile(accessToken, request, new ApiManager.BooleanCallback() {
+                    @Override
+                    public void onResult(boolean result) {
+                        if (result)
+                        {
+                            Toast.makeText(ProfileActivity.this, "Update User Profile success!", Toast.LENGTH_SHORT).show();
+                        }
+                        else
+                        {
+                            Toast.makeText(ProfileActivity.this, "Update User Profile fail!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    public boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

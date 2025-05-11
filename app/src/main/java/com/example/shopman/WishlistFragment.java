@@ -22,7 +22,6 @@ public class WishlistFragment extends Fragment {
     private EditText etSearch;
     private ImageView ivVoiceSearch;
     private TextView itemCount;
-    private Button sortButton, filterButton;
     private RecyclerView wishlistRecyclerView;
     private ProductAdapter wishlistAdapter;
     private List<Product> wishlistItems;
@@ -39,18 +38,12 @@ public class WishlistFragment extends Fragment {
 
         // Ánh xạ các view
         etSearch = view.findViewById(R.id.etSearch);
-        ivVoiceSearch = view.findViewById(R.id.ivVoiceSearch);
+        ivVoiceSearch = view.findViewById(R.id.ivSearch);
         itemCount = view.findViewById(R.id.itemCount);
-        sortButton = view.findViewById(R.id.sortButton);
-        filterButton = view.findViewById(R.id.filterButton);
         wishlistRecyclerView = view.findViewById(R.id.wishlistRecyclerView);
 
         // Xử lý sự kiện search
         ivVoiceSearch.setOnClickListener(v -> Toast.makeText(getContext(), "Voice Search clicked", Toast.LENGTH_SHORT).show());
-
-        // Xử lý sự kiện Sort và Filter
-        sortButton.setOnClickListener(v -> Toast.makeText(getContext(), "Sort button clicked", Toast.LENGTH_SHORT).show());
-        filterButton.setOnClickListener(v -> Toast.makeText(getContext(), "Filter button clicked", Toast.LENGTH_SHORT).show());
 
         // Cấu hình RecyclerView
         wishlistRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));

@@ -1,8 +1,10 @@
 package com.example.shopman.remote;
 
-import com.example.shopman.models.changepassword.ChangePasswordRequest;
-import com.example.shopman.models.changepassword.ForgotPasswordRequest;
-import com.example.shopman.models.changepassword.ForgotPasswordResponse;
+import com.example.shopman.models.changepassword.request.ChangePasswordRequest;
+import com.example.shopman.models.changepassword.request.ForgotPasswordRequest;
+import com.example.shopman.models.changepassword.request.ForgotPasswordResponse;
+import com.example.shopman.models.changepassword.response.ChangePasswordResponse;
+import com.example.shopman.models.checkotp.CheckOTPResponse;
 import com.example.shopman.models.login.LoginRequest;
 import com.example.shopman.models.login.LoginResponse;
 import com.example.shopman.models.OTPRequest;
@@ -32,10 +34,10 @@ public interface ApiService {
     Call<ForgotPasswordResponse> forgotPassword(@Body ForgotPasswordRequest request);
 
     @POST("/api/v1/auth/check-otp")
-    Call<ForgotPasswordResponse> checkOTP(@Body OTPRequest request);
+    Call<CheckOTPResponse> checkOTP(@Body OTPRequest request);
 
     @POST("/api/v1/auth/change-password")
-    Call<LoginResponse> changePassword(@Body ChangePasswordRequest request);
+    Call<ChangePasswordResponse> changePassword(@Body ChangePasswordRequest request);
 
     @GET("/api/v1/user/profile")
     Call<GetUserProfileResponse> getUserProfile(@Header("authorization") String token);

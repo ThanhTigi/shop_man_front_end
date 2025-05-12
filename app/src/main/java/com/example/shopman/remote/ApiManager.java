@@ -2,10 +2,12 @@ package com.example.shopman.remote;
 
 import android.content.Context;
 
+import com.example.shopman.models.changepassword.response.ChangePasswordResponse;
+import com.example.shopman.models.checkotp.CheckOTPResponse;
 import com.example.shopman.utilitis.MyPreferences;
-import com.example.shopman.models.changepassword.ChangePasswordRequest;
-import com.example.shopman.models.changepassword.ForgotPasswordRequest;
-import com.example.shopman.models.changepassword.ForgotPasswordResponse;
+import com.example.shopman.models.changepassword.request.ChangePasswordRequest;
+import com.example.shopman.models.changepassword.request.ForgotPasswordRequest;
+import com.example.shopman.models.changepassword.request.ForgotPasswordResponse;
 import com.example.shopman.models.login.LoginRequest;
 import com.example.shopman.models.login.LoginResponse;
 import com.example.shopman.models.OTPRequest;
@@ -98,14 +100,14 @@ public class ApiManager {
         });
     }
 
-    public void checkOTP(String otp, final ApiResponseListener<ForgotPasswordResponse> listener) {
+    public void checkOTP(String otp, final ApiResponseListener<CheckOTPResponse> listener) {
         OTPRequest request = new OTPRequest(otp);
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<ForgotPasswordResponse> call = apiService.checkOTP(request);
+        Call<CheckOTPResponse> call = apiService.checkOTP(request);
 
-        call.enqueue(new Callback<ForgotPasswordResponse>() {
+        call.enqueue(new Callback<CheckOTPResponse>() {
             @Override
-            public void onResponse(Call<ForgotPasswordResponse> call, Response<ForgotPasswordResponse> response) {
+            public void onResponse(Call<CheckOTPResponse> call, Response<CheckOTPResponse> response) {
                 if (response.isSuccessful()) {
                     listener.onSuccess(response.body());
                 } else {
@@ -114,22 +116,25 @@ public class ApiManager {
             }
 
             @Override
-            public void onFailure(Call<ForgotPasswordResponse> call, Throwable t) {
+            public void onFailure(Call<CheckOTPResponse> call, Throwable t) {
                 listener.onError("Network Error: " + t.getMessage());
             }
         });
     }
 
     public void changePassword(String resetToken, String newPassword, String confirmPassword,
-                               final ApiResponseListener<LoginResponse> listener) {
+                               final ApiResponseListener<ChangePasswordResponse> listener) {
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         ChangePasswordRequest request = new ChangePasswordRequest(resetToken,newPassword, confirmPassword);
+        System.out.println("====" + resetToken);
+        System.out.println("====" + newPassword);
+        System.out.println("====" + confirmPassword);
 
-        Call<LoginResponse> call = apiService.changePassword(request);
+        Call<ChangePasswordResponse> call = apiService.changePassword(request);
 
-        call.enqueue(new Callback<LoginResponse>() {
+        call.enqueue(new Callback<ChangePasswordResponse>() {
             @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+            public void onResponse(Call<ChangePasswordResponse> call, Response<ChangePasswordResponse> response) {
                 if (response.isSuccessful()) {
                     listener.onSuccess(response.body());
                 } else {
@@ -138,7 +143,7 @@ public class ApiManager {
             }
 
             @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
+            public void onFailure(Call<ChangePasswordResponse> call, Throwable t) {
                 listener.onError("Network Error: " + t.getMessage());
             }
         });

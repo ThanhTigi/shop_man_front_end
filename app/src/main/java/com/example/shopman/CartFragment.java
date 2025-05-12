@@ -31,7 +31,6 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
     private Button btnCheckout;
 
     public CartFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -45,28 +44,31 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
         tvTotalAmount = view.findViewById(R.id.tvTotalAmount);
         btnCheckout = view.findViewById(R.id.btnCheckout);
 
+        return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
         loadAddressAndContact();
 
-        cartItems = new ArrayList<>();
-        List<String> sizes = new ArrayList<>();
-        sizes.add("6 UK");
-        sizes.add("7 UK");
-        sizes.add("8 UK");
-        sizes.add("9 UK");
-        sizes.add("10 UK");
+        CartProducts cartProducts;
 
-        Product product1 = new Product("Women's Casual Wear", "Floral Dress", "$34.00", R.drawable.trending_image_1, 4.8f, sizes, "A beautiful floral dress for women.");
-        Product product2 = new Product("Men's Jacket", "Casual Jacket", "$45.00", R.drawable.trending_image_2, 4.7f, sizes, "A stylish jacket for men.");
+        if (MyPreferences.getString(getContext(),"cart_products","").isEmpty())
+        {
+            cartProducts = new CartProducts(new ArrayList<>());
+        }
+        else
+        {
+            cartProducts = CartProducts.fromJson(MyPreferences.getString(getContext(),"cart_products",""));
+        }
 
-        cartItems.add(new CartItem(product1, 1, false, "Black"));
-        cartItems.add(new CartItem(product2, 1, false, "Green"));
+        cartItems = cartProducts.getProducts();
 
-        // Set up RecyclerView
         cartAdapter = new CartAdapter(cartItems, this);
         cartRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         cartRecyclerView.setAdapter(cartAdapter);
 
-        // Set up Select All checkbox
         cbSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
             for (CartItem item : cartItems) {
                 item.setSelected(isChecked);
@@ -75,10 +77,10 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
             updateTotalAmount();
         });
 
-        // Add click listener to tvAddress to edit address
+        onItemSelectionChanged();
+
         tvAddress.setOnClickListener(v -> showEditAddressDialog());
 
-        // Inside btnCheckout.setOnClickListener in CartFragment.java
         btnCheckout.setOnClickListener(v -> {
             List<CartItem> selectedItems = new ArrayList<>();
             for (CartItem item : cartItems) {
@@ -96,9 +98,8 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
         });
 
         updateTotalAmount();
-
-        return view;
     }
+
 
     private void loadAddressAndContact() {
         String savedAddress = MyPreferences.getString(getContext(),"user_address","216 St Paul’s Rd, London N1 2LL, UK");
@@ -144,7 +145,6 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
             MyPreferences.setString(getContext(),"user_address",fullAddress);
             MyPreferences.setString(getContext(),"user_phone_number",fullContact);
 
-            // Update UI
             tvAddress.setText(fullAddress);
             tvContact.setText(fullContact);
             dialog.dismiss();
@@ -178,6 +178,10 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
                 total += item.getTotalPrice();
             }
         }
+
+        CartProducts cartProducts = new CartProducts(cartItems);
+        MyPreferences.setString(getContext(),"cart_products",cartProducts.toJson());
+
         tvTotalAmount.setText("$" + String.format("%.2f", total));
     }
 }

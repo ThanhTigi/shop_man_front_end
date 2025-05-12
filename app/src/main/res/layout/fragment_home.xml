@@ -101,20 +101,10 @@
                 android:paddingHorizontal="16dp"
                 android:layout_marginBottom="16dp">
 
-                <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/bannerViewPager"
+                <ImageView
+                    android:id="@+id/bannerImageView"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp" />
-
-                <com.google.android.material.tabs.TabLayout
-                    android:id="@+id/bannerDots"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    app:tabBackground="@android:color/transparent"
-                    app:tabGravity="center"
-                    app:tabIndicatorHeight="0dp"
-                    app:tabRippleColor="@android:color/transparent" />
+                    android:layout_height="wrap_content"/>
 
             </LinearLayout>
 

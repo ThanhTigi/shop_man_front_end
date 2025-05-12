@@ -79,7 +79,6 @@ public class LoginActivity extends AppCompatActivity {
                     apiManager.login(username, password, new ApiResponseListener<LoginResponse>() {
                         @Override
                         public void onSuccess(LoginResponse response) {
-                            // Lưu thông tin người dùng vào SharedPreferences
                             if (response != null && response.getMetadata() != null) {
                                 UserMetadata userMetadata = response.getMetadata().getMetadata();
                                 if (userMetadata != null) {

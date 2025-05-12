@@ -1,6 +1,7 @@
 package com.example.shopman;
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,9 +29,7 @@ public class HomeFragment extends Fragment {
     private RecyclerView categoryRecyclerView;
     private CategoryAdapter categoryAdapter;
     private List<Category> categoryList;
-    private List<Banner> bannerList;
-    private ViewPager2 bannerViewPager;
-    private TabLayout bannerDots;
+    private ImageView bannerImageView;
     private BannerAdapter bannerAdapter;
     private RecyclerView  trendingRecyclerView;
     private ProductAdapter trendingAdapter;
@@ -57,8 +56,7 @@ public class HomeFragment extends Fragment {
         trendingRecyclerView = view.findViewById(R.id.trendingRecyclerView);
         trendingViewAll = view.findViewById(R.id.trendingViewAll);
         productRecyclerView = view.findViewById(R.id.productRecyclerView);
-        bannerViewPager = view.findViewById(R.id.bannerViewPager);
-        bannerDots = view.findViewById(R.id.bannerDots);
+        bannerImageView = view.findViewById(R.id.bannerImageView);
 
         ivSearch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,18 +79,7 @@ public class HomeFragment extends Fragment {
         categoryRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         categoryRecyclerView.setAdapter(categoryAdapter);
 
-        bannerList = new ArrayList<>();
-        bannerList.add(new Banner(R.drawable.banner_image));
-        bannerList.add(new Banner(R.drawable.banner_image));
-        bannerList.add(new Banner(R.drawable.banner_image));
-
-        bannerAdapter = new BannerAdapter(bannerList, () -> {
-            System.out.println("Check");
-        });
-        bannerViewPager.setAdapter(bannerAdapter);
-
-        new TabLayoutMediator(bannerDots, bannerViewPager, (tab, position) -> {}).attach();
-
+        bannerImageView.setImageResource(R.drawable.banner_image);
 
         trendingList = new ArrayList<>();
         trendingList.add(ProductsConst.totalProducts.get(0));

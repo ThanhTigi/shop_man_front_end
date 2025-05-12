@@ -43,11 +43,9 @@ public class OnboardingActivity extends AppCompatActivity {
         tvSkip = findViewById(R.id.tvSkip);
         llDots = findViewById(R.id.llDots);
 
-        // Set up ViewPager with adapter
         OnboardingAdapter adapter = new OnboardingAdapter(getSupportFragmentManager());
         viewPager.setAdapter(adapter);
 
-        // Add dot indicators
         addDots(0);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -78,7 +76,6 @@ public class OnboardingActivity extends AppCompatActivity {
             public void onPageScrollStateChanged(int state) {}
         });
 
-        // Navigation button listeners
         tvPrev.setOnClickListener(v -> viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true));
         tvNext.setOnClickListener(v -> viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true));
         tvGetStarted.setOnClickListener(v -> {

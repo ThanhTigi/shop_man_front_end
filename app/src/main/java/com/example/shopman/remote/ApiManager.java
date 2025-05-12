@@ -3,15 +3,15 @@ package com.example.shopman.remote;
 import android.content.Context;
 
 import com.example.shopman.MyPreferences;
-import com.example.shopman.models.ChangePasswordRequest;
-import com.example.shopman.models.ForgotPasswordRequest;
-import com.example.shopman.models.ForgotPasswordResponse;
-import com.example.shopman.models.LoginRequest;
-import com.example.shopman.models.LoginResponse;
+import com.example.shopman.models.changepassword.ChangePasswordRequest;
+import com.example.shopman.models.changepassword.ForgotPasswordRequest;
+import com.example.shopman.models.changepassword.ForgotPasswordResponse;
+import com.example.shopman.models.login.LoginRequest;
+import com.example.shopman.models.login.LoginResponse;
 import com.example.shopman.models.OTPRequest;
-import com.example.shopman.models.SignUpRequest;
-import com.example.shopman.models.SignUpResponse;
-import com.example.shopman.models.UserMetadata;
+import com.example.shopman.models.signup.SignUpRequest;
+import com.example.shopman.models.signup.SignUpResponse;
+import com.example.shopman.models.login.UserMetadata;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileRequest;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileResponse;
@@ -229,32 +229,6 @@ public class ApiManager {
             }
         });
 
-    }
-
-    public void searchProducts(String keyword, final ApiResponseListener<SearchProductsResponse> listener)
-    {
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<SearchProductsResponse> call = apiService.searchProducts(keyword);
-
-        call.enqueue(new Callback<SearchProductsResponse>() {
-            @Override
-            public void onResponse(Call<SearchProductsResponse> call, Response<SearchProductsResponse> response) {
-                if (response.isSuccessful())
-                {
-                    listener.onSuccess(response.body());
-                }
-                else
-                {
-                    listener.onError(response.message());
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<SearchProductsResponse> call, Throwable t) {
-                listener.onError("Network Error: " + t.getMessage());
-            }
-        });
     }
 
 

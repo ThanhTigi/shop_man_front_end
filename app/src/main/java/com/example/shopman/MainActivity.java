@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Set up the ViewPager2 with a FragmentStateAdapter
         FragmentStateAdapter pagerAdapter = new FragmentStateAdapter(this) {
             @Override
             public Fragment createFragment(int position) {
@@ -58,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public int getItemCount() {
-                return 5; // Total number of fragments
+                return 5;
             }
         };
 
@@ -81,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        // Sync BottomNavigationView when the page changes
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -106,4 +104,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    public void switchToSearchWithData(String keywordSearch) {
+        AppConfig.isSearch = true;
+        AppConfig.keywordSearch = keywordSearch;
+
+        viewPager.setCurrentItem(3, false);
+    }
+
 }

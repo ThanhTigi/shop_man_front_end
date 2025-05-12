@@ -1,13 +1,13 @@
 package com.example.shopman.remote;
 
-import com.example.shopman.models.ChangePasswordRequest;
-import com.example.shopman.models.ForgotPasswordRequest;
-import com.example.shopman.models.ForgotPasswordResponse;
-import com.example.shopman.models.LoginRequest;
-import com.example.shopman.models.LoginResponse;
+import com.example.shopman.models.changepassword.ChangePasswordRequest;
+import com.example.shopman.models.changepassword.ForgotPasswordRequest;
+import com.example.shopman.models.changepassword.ForgotPasswordResponse;
+import com.example.shopman.models.login.LoginRequest;
+import com.example.shopman.models.login.LoginResponse;
 import com.example.shopman.models.OTPRequest;
-import com.example.shopman.models.SignUpRequest;
-import com.example.shopman.models.SignUpResponse;
+import com.example.shopman.models.signup.SignUpRequest;
+import com.example.shopman.models.signup.SignUpResponse;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileRequest;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileResponse;

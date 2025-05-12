@@ -27,7 +27,7 @@
             android:exported="true">
         </activity>
         <activity
-            android:name=".CategoryProductActivity"
+            android:name=".fragments.home.CategoryProductActivity"
             android:exported="true">
         </activity>
         <activity
@@ -45,13 +45,13 @@
         <activity android:name=".auth.ChangePasswordActivity"
             android:exported="false">
         </activity>
-        <activity android:name=".CheckoutActivity"
+        <activity android:name=".fragments.cart.CheckoutActivity"
             android:exported="false">
         </activity>
-        <activity android:name=".TrendingProductActivity"
+        <activity android:name=".fragments.home.TrendingProductActivity"
             android:exported="false">
         </activity>
-        <activity android:name=".PaymentActivity"
+        <activity android:name=".fragments.cart.PaymentActivity"
             android:exported="false">
         </activity>
         <activity android:name=".ProfileActivity"

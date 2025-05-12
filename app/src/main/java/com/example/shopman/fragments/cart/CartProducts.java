@@ -1,6 +1,5 @@
-package com.example.shopman;
+package com.example.shopman.fragments.cart;
 
-import com.example.shopman.models.login.UserMetadata;
 import com.google.gson.Gson;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.example.shopman;
+package com.example.shopman.fragments.home;
 
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -9,8 +9,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.shopman.Product;
+import com.example.shopman.ProductAdapter;
+import com.example.shopman.R;
+import com.example.shopman.utilitis.ProductsConst;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class CategoryProductActivity extends AppCompatActivity {

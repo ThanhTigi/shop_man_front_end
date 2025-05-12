@@ -1,4 +1,7 @@
-package com.example.shopman;
+package com.example.shopman.utilitis;
+
+import com.example.shopman.Product;
+import com.example.shopman.R;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.example.shopman;
+package com.example.shopman.utilitis;
 
 public abstract class AppConfig {
     public static boolean isSearch;

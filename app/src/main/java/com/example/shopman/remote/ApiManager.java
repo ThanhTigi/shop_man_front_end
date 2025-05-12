@@ -2,7 +2,7 @@ package com.example.shopman.remote;
 
 import android.content.Context;
 
-import com.example.shopman.MyPreferences;
+import com.example.shopman.utilitis.MyPreferences;
 import com.example.shopman.models.changepassword.ChangePasswordRequest;
 import com.example.shopman.models.changepassword.ForgotPasswordRequest;
 import com.example.shopman.models.changepassword.ForgotPasswordResponse;
@@ -15,7 +15,6 @@ import com.example.shopman.models.login.UserMetadata;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileRequest;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileResponse;
-import com.example.shopman.models.searchproducts.SearchProductsResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;

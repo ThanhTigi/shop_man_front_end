@@ -11,6 +11,12 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.shopman.fragments.cart.CartFragment;
+import com.example.shopman.fragments.home.HomeFragment;
+import com.example.shopman.fragments.search.SearchFragment;
+import com.example.shopman.fragments.setting.SettingFragment;
+import com.example.shopman.fragments.wishlist.WishlistFragment;
+import com.example.shopman.utilitis.AppConfig;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {

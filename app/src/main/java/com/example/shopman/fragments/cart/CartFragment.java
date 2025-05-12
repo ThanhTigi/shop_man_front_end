@@ -1,8 +1,6 @@
-package com.example.shopman;
+package com.example.shopman.fragments.cart;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +15,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.shopman.R;
+import com.example.shopman.utilitis.MyPreferences;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +71,10 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
         cartRecyclerView.setAdapter(cartAdapter);
 
         cbSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!isChecked)
+            {
+                return;
+            }
             for (CartItem item : cartItems) {
                 item.setSelected(isChecked);
             }
@@ -182,6 +187,6 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
         CartProducts cartProducts = new CartProducts(cartItems);
         MyPreferences.setString(getContext(),"cart_products",cartProducts.toJson());
 
-        tvTotalAmount.setText("$" + String.format("%.2f", total));
+        tvTotalAmount.setText("đ" + String.format("%.2f", total));
     }
 }

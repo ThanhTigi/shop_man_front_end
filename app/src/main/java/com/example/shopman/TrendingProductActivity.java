@@ -35,29 +35,17 @@ public class TrendingProductActivity extends AppCompatActivity {
         rvProducts.setAdapter(adapter);
     }
 
-    // Sample method to get products based on category
     private List<Product> getSampleProducts() {
         List<Product> products = new ArrayList<>();
-        List<String> sizes = Arrays.asList("S", "M", "L");
+        products.add(ProductsConst.totalProducts.get(11));
+        products.add(ProductsConst.totalProducts.get(12));
+        products.add(ProductsConst.totalProducts.get(7));
+        products.add(ProductsConst.totalProducts.get(5));
+        products.add(ProductsConst.totalProducts.get(9));
+        products.add(ProductsConst.totalProducts.get(3));
+        products.add(ProductsConst.totalProducts.get(1));
+        products.add(ProductsConst.totalProducts.get(2));
 
-        products.add(new Product(
-                "Lipstick",
-                "Matte Red Lipstick",
-                "$10",
-                R.drawable.ic_launcher_background,
-                4.5f,
-                sizes,
-                "This is a long-lasting matte red lipstick suitable for all occasions."
-        ));
-        products.add(new Product(
-                "Foundation",
-                "Full Coverage Foundation",
-                "$15",
-                R.drawable.ic_launcher_background,
-                4.2f,
-                sizes,
-                "A full coverage foundation with a natural finish."
-        ));
 
         return products;
     }

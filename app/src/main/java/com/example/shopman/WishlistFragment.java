@@ -4,11 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -20,66 +19,93 @@ import java.util.List;
 public class WishlistFragment extends Fragment {
 
     private EditText etSearch;
-    private ImageView ivVoiceSearch;
+    private ImageView ivSearch;
     private TextView itemCount;
     private RecyclerView wishlistRecyclerView;
     private ProductAdapter wishlistAdapter;
+    private List<Product> totalItems;
     private List<Product> wishlistItems;
 
     public WishlistFragment() {
-        // Required empty public constructor
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Đảm bảo đúng layout của Fragment
-        View view = inflater.inflate(R.layout.activity_wishlist, container, false);
+        View view = inflater.inflate(R.layout.fragment_wishlist, container, false);
 
-        // Ánh xạ các view
         etSearch = view.findViewById(R.id.etSearch);
-        ivVoiceSearch = view.findViewById(R.id.ivSearch);
+        ivSearch = view.findViewById(R.id.ivSearch);
         itemCount = view.findViewById(R.id.itemCount);
         wishlistRecyclerView = view.findViewById(R.id.wishlistRecyclerView);
 
-        // Xử lý sự kiện search
-        ivVoiceSearch.setOnClickListener(v -> Toast.makeText(getContext(), "Voice Search clicked", Toast.LENGTH_SHORT).show());
+        ivSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("====== clicked");
+                searchItem();
+            }
+        });
 
-        // Cấu hình RecyclerView
+        totalItems = new ArrayList<>();
+        totalItems.add(ProductsConst.totalProducts.get(17));
+        totalItems.add(ProductsConst.totalProducts.get(5));
+        totalItems.add(ProductsConst.totalProducts.get(7));
+        totalItems.add(ProductsConst.totalProducts.get(9));
+        totalItems.add(ProductsConst.totalProducts.get(11));
+        totalItems.add(ProductsConst.totalProducts.get(13));
+        totalItems.add(ProductsConst.totalProducts.get(15));
+
         wishlistRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        // Khởi tạo danh sách sản phẩm yêu thích
         wishlistItems = new ArrayList<>();
         loadWishlistData();
 
-        // Gán Adapter
         wishlistAdapter = new ProductAdapter(wishlistItems);
         wishlistRecyclerView.setAdapter(wishlistAdapter);
 
-        // Cập nhật số lượng sản phẩm
         itemCount.setText(wishlistItems.size() + " Items");
 
         return view;
     }
 
     private void loadWishlistData() {
-        List<String> sizes = new ArrayList<>();
-        sizes.add("6 UK");
-        sizes.add("7 UK");
-        sizes.add("8 UK");
-        sizes.add("9 UK");
-        sizes.add("10 UK");
 
-        wishlistItems.add(new Product("Black Winter Jacket", "Autumn And Winter Casual Cotton padded jacket", "₹499", R.drawable.trending_image_1, 4.0f, sizes, "A warm and stylish jacket for winter."));
-        wishlistItems.add(new Product("Mens Starry Shirt", "100% Cotton Fabric", "₹999", R.drawable.trending_image_2, 4.5f, sizes, "A starry-patterned shirt made of 100% cotton."));
-        wishlistItems.add(new Product("Black Dress", "Solid Black Dress For Women, Sexy Chain Shorts Ladi...", "₹2000", R.drawable.trending_image_1, 4.0f, sizes, "A chic black dress with chain shorts for women."));
-        wishlistItems.add(new Product("Pink Embroidered Dress", "Earthen Rose Pink Embroidered Tiered Max...", "₹1900", R.drawable.trending_image_2, 4.5f, sizes, "A beautiful pink embroidered tiered maxi dress."));
-        wishlistItems.add(new Product("Flare Dress", "Anthaea Black & Rust Orange Floral Print Tiered Midi F...", "₹1990", R.drawable.deal_image_1, 4.0f, sizes, "A floral print midi dress with a flared design."));
-        wishlistItems.add(new Product("Denim Dress", "Casual Denim Dress", "₹1500", R.drawable.deal_image_2, 4.0f, sizes, "A casual denim dress for everyday wear."));
+        wishlistItems.add(ProductsConst.totalProducts.get(17));
+        wishlistItems.add(ProductsConst.totalProducts.get(5));
+        wishlistItems.add(ProductsConst.totalProducts.get(7));
+        wishlistItems.add(ProductsConst.totalProducts.get(9));
+        wishlistItems.add(ProductsConst.totalProducts.get(11));
+        wishlistItems.add(ProductsConst.totalProducts.get(13));
+        wishlistItems.add(ProductsConst.totalProducts.get(15));
 
-        // Cập nhật RecyclerView nếu Adapter đã được gán
         if (wishlistAdapter != null) {
             wishlistAdapter.notifyDataSetChanged();
         }
     }
+
+    private void searchItem()
+    {
+        List<Product> result = new ArrayList<>();
+
+        if (etSearch.getText().toString().toLowerCase().trim().isEmpty()) {
+            result = totalItems;
+        }
+        else
+        {
+            for (Product product : totalItems) {
+                if (product.getName().toLowerCase().contains(etSearch.getText().toString().toLowerCase())) {
+                    result.add(product);
+                }
+            }
+        }
+
+        wishlistRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        wishlistAdapter = new ProductAdapter(result);
+        wishlistRecyclerView.setAdapter(wishlistAdapter);
+
+        itemCount.setText(result.size() + " Items");
+    }
+
+
 }

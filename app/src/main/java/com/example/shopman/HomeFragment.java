@@ -5,13 +5,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -25,53 +24,51 @@ import java.util.List;
 public class HomeFragment extends Fragment {
 
     private EditText etSearch;
-    private ImageView ivVoiceSearch;
+    private ImageView ivSearch;
     private RecyclerView categoryRecyclerView;
     private CategoryAdapter categoryAdapter;
     private List<Category> categoryList;
+    private List<Banner> bannerList;
     private ViewPager2 bannerViewPager;
     private TabLayout bannerDots;
     private BannerAdapter bannerAdapter;
-    private List<Banner> bannerList;
     private RecyclerView  trendingRecyclerView;
     private ProductAdapter trendingAdapter;
-    private List<Product> dealList, trendingList;
-    private TextView trendingViewAll, newArrivalsViewAll;
+    private List<Product> trendingList;
+    private TextView trendingViewAll;
+    private RecyclerView productRecyclerView;
 
     public HomeFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the fragment's layout
-        return inflater.inflate(R.layout.activity_home, container, false);
+        return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Initialize views
         etSearch = view.findViewById(R.id.etSearch);
-        ivVoiceSearch = view.findViewById(R.id.ivSearch);
+        ivSearch = view.findViewById(R.id.ivSearch);
         categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
-        bannerViewPager = view.findViewById(R.id.bannerViewPager);
-        bannerDots = view.findViewById(R.id.bannerDots);
         trendingRecyclerView = view.findViewById(R.id.trendingRecyclerView);
         trendingViewAll = view.findViewById(R.id.trendingViewAll);
-        newArrivalsViewAll = view.findViewById(R.id.newArrivalsViewAll);
+        productRecyclerView = view.findViewById(R.id.productRecyclerView);
+        bannerViewPager = view.findViewById(R.id.bannerViewPager);
+        bannerDots = view.findViewById(R.id.bannerDots);
 
-        // Set up search bar
-        ivVoiceSearch.setOnClickListener(new View.OnClickListener() {
+        ivSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).switchToSearchWithData(etSearch.getText().toString());
+                }
             }});
 
 
-        // Set up RecyclerView for categories
         categoryList = new ArrayList<>();
         categoryList.add(new Category("Beauty", R.drawable.ic_beauty));
         categoryList.add(new Category("Fashion", R.drawable.ic_fashion));
@@ -79,40 +76,28 @@ public class HomeFragment extends Fragment {
         categoryList.add(new Category("Men", R.drawable.ic_mens));
         categoryList.add(new Category("Women", R.drawable.ic_womens));
 
+
         categoryAdapter = new CategoryAdapter(categoryList);
         categoryRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         categoryRecyclerView.setAdapter(categoryAdapter);
 
-        // Set up ViewPager2 for banners
         bannerList = new ArrayList<>();
         bannerList.add(new Banner(R.drawable.banner_image));
         bannerList.add(new Banner(R.drawable.banner_image));
         bannerList.add(new Banner(R.drawable.banner_image));
 
         bannerAdapter = new BannerAdapter(bannerList, () -> {
-            Toast.makeText(getActivity(), "Shop Now clicked", Toast.LENGTH_SHORT).show();
+            System.out.println("Check");
         });
         bannerViewPager.setAdapter(bannerAdapter);
 
         new TabLayoutMediator(bannerDots, bannerViewPager, (tab, position) -> {}).attach();
 
-        // Set up RecyclerView for Deal of the Day
-        dealList = new ArrayList<>();
-        List<String> sizes = new ArrayList<>();
-        sizes.add("6 UK");
-        sizes.add("7 UK");
-        sizes.add("8 UK");
-        sizes.add("9 UK");
-        sizes.add("10 UK");
-        dealList.add(new Product("Women Printed Kurta", "Neque porro quisquam est qui", "₹1500", R.drawable.deal_image_1, 4.5f, sizes, "A beautiful printed kurta for women, perfect for casual wear."));
-        dealList.add(new Product("HRX by Hrithik Roshan", "Neque porro quisquam est qui", "₹2499", R.drawable.deal_image_2, 4.0f, sizes, "A stylish and comfortable outfit by HRX, designed for active lifestyles."));
 
-
-        // Set up RecyclerView for Trending Products
         trendingList = new ArrayList<>();
-        trendingList.add(new Product("IMC Smartwatch", "SHH 2019 2014 44mm", "₹2500", R.drawable.trending_image_1, 4.2f, sizes, "A smartwatch with advanced features for fitness tracking."));
-        trendingList.add(new Product("Labbin White", "For Men and Female", "₹1500", R.drawable.trending_image_2, 3.8f, sizes, "A versatile white shirt suitable for both men and women."));
-
+        trendingList.add(ProductsConst.totalProducts.get(0));
+        trendingList.add(ProductsConst.totalProducts.get(1));
+        trendingList.add(ProductsConst.totalProducts.get(2));
         trendingAdapter = new ProductAdapter(trendingList);
         trendingRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         trendingRecyclerView.setAdapter(trendingAdapter);
@@ -125,6 +110,10 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        newArrivalsViewAll.setOnClickListener(v -> Toast.makeText(getActivity(), "New Arrivals View All clicked", Toast.LENGTH_SHORT).show());
+        productRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
+
+        ProductAdapter productAdapter = new ProductAdapter(ProductsConst.totalProducts);
+        productRecyclerView.setAdapter(productAdapter);
     }
 }

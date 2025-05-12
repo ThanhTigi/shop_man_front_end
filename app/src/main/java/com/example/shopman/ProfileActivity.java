@@ -1,8 +1,6 @@
 package com.example.shopman;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,7 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.shopman.auth.LoginActivity;
-import com.example.shopman.models.UserMetadata;
+import com.example.shopman.models.login.UserMetadata;
 import com.example.shopman.models.profile.getuserprofile.Address;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileAddress;
@@ -21,7 +19,6 @@ import com.example.shopman.models.profile.updateuserprofile.UpdateProfileUser;
 import com.example.shopman.models.profile.getuserprofile.UserProfileMetadata;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
-import com.google.gson.Gson;
 
 public class ProfileActivity extends AppCompatActivity {
 

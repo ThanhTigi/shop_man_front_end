@@ -48,25 +48,21 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.ratingText.setText(String.valueOf(product.getRating()));
         holder.productPrice.setText(product.getPrice());
 
-        // Calculate original price and discount (example logic)
         String priceStr = product.getPrice().replace("$", "").trim();
         double price = Double.parseDouble(priceStr);
-        double originalPrice = price / 0.67; // Assuming 33% off
+        double originalPrice = price / 0.67;
         holder.productOriginalPrice.setText("$" + String.format("%.2f", originalPrice));
-        // Apply strikethrough effect
         holder.productOriginalPrice.setPaintFlags(holder.productOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
         holder.productDiscount.setText("upto 33% off");
         holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
         holder.tvTotalOrder.setText("TOTAL ORDER (" + cartItem.getQuantity() + "): $" + String.format("%.2f", cartItem.getTotalPrice()));
 
-        // Handle checkbox selection
         holder.cbSelect.setOnCheckedChangeListener((buttonView, isChecked) -> {
             cartItem.setSelected(isChecked);
             listener.onItemSelectionChanged();
         });
 
-        // Handle quantity changes
         holder.btnDecrease.setOnClickListener(v -> {
             int quantity = cartItem.getQuantity();
             if (quantity > 1) {

@@ -5,12 +5,12 @@
     android:orientation="vertical"
     android:background="#F5F5F5">
 
-    <!-- Toolbar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:layout_marginTop="20dp"
         android:padding="8dp">
 
         <ImageView
@@ -24,17 +24,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Shopping Bag"
+            android:text="Checkout"
             android:textSize="20sp"
             android:textStyle="bold"
             android:gravity="center" />
 
-        <ImageView
-            android:id="@+id/ivWishlist"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_menu_favorite"
-            android:contentDescription="Wishlist" />
+
     </LinearLayout>
 
     <ScrollView
@@ -49,14 +44,12 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Product Section (RecyclerView) -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/checkoutRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Apply Coupons Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -127,36 +120,6 @@
                         android:textSize="14sp" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="8dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Convenience"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/tvConvenienceFee"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Know More"
-                        android:textSize="14sp"
-                        android:textColor="#FF0000" />
-
-                    <TextView
-                        android:id="@+id/tvConvenienceFeeValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Apply Coupon"
-                        android:textSize="14sp"
-                        android:layout_marginStart="8dp"
-                        android:textColor="#FF0000" />
-                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -185,16 +148,16 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:layout_marginBottom="16dp"
                 android:background="@android:color/white"
-                android:padding="16dp"
-                android:layout_marginBottom="16dp">
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
@@ -207,15 +170,15 @@
                         android:id="@+id/tvOriginalAmount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="₹7,000.00"
+                        android:text="đ7,000.00"
                         android:textSize="14sp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
@@ -228,9 +191,9 @@
                         android:id="@+id/tvDiscountAmount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="₹0.00"
-                        android:textSize="14sp"
-                        android:textColor="#00FF00" />
+                        android:text="đ0.00"
+                        android:textColor="#00FF00"
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -250,31 +213,15 @@
                         android:id="@+id/tvOrderTotal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="₹7,000.00"
+                        android:text="đ7,000.00"
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- EMI Available Section -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="EMI AVAILABLE"
-                android:textSize="14sp"
-                android:textColor="#888888"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="View Details"
-                android:textSize="14sp"
-                android:textColor="#FF0000" />
         </LinearLayout>
     </ScrollView>
 
-    <!-- Proceed to Payment Button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -288,7 +235,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="₹7,000.00"
+            android:text="đ7,000.00"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -298,7 +245,7 @@
             android:layout_height="wrap_content"
             android:text="Proceed to Payment"
             android:textColor="@android:color/white"
-            android:backgroundTint="#FF0000"
+            android:backgroundTint="#F8373E"
             android:paddingHorizontal="16dp" />
     </LinearLayout>
 </LinearLayout>

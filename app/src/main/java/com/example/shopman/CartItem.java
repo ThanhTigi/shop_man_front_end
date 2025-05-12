@@ -44,7 +44,6 @@ public class CartItem implements Serializable {
     }
 
     public double getTotalPrice() {
-        // Assuming the price is in the format "$34.00", extract the numeric value
         String priceStr = product.getPrice().replace("$", "").trim();
         double price = Double.parseDouble(priceStr);
         return price * quantity;

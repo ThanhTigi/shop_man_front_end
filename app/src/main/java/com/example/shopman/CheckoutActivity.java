@@ -18,8 +18,8 @@ import androidx.appcompat.app.AlertDialog;
 
 public class CheckoutActivity extends AppCompatActivity {
 
-    private ImageView ivBack, ivWishlist;
-    private TextView tvSelectCoupon, tvOrderAmount, tvConvenienceFee, tvConvenienceFeeValue, tvDeliveryFee;
+    private ImageView ivBack;
+    private TextView tvSelectCoupon, tvOrderAmount, tvDeliveryFee;
     private TextView tvOriginalAmount, tvDiscountAmount, tvOrderTotal, tvFinalTotal;
     private Button btnProceedToPayment;
     private RecyclerView checkoutRecyclerView;
@@ -28,21 +28,17 @@ public class CheckoutActivity extends AppCompatActivity {
     private List<Coupon> couponList;
     private double orderTotal;
     private double discount = 0.0;
-    private AlertDialog couponDialog; // Để quản lý dialog
+    private AlertDialog couponDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_checkout);
 
-        // Initialize views
         ivBack = findViewById(R.id.ivBack);
-        ivWishlist = findViewById(R.id.ivWishlist);
         checkoutRecyclerView = findViewById(R.id.checkoutRecyclerView);
         tvSelectCoupon = findViewById(R.id.tvSelectCoupon);
         tvOrderAmount = findViewById(R.id.tvOrderAmount);
-        tvConvenienceFee = findViewById(R.id.tvConvenienceFee);
-        tvConvenienceFeeValue = findViewById(R.id.tvConvenienceFeeValue);
         tvDeliveryFee = findViewById(R.id.tvDeliveryFee);
         tvOriginalAmount = findViewById(R.id.tvOriginalAmount);
         tvDiscountAmount = findViewById(R.id.tvDiscountAmount);
@@ -50,7 +46,6 @@ public class CheckoutActivity extends AppCompatActivity {
         tvFinalTotal = findViewById(R.id.tvFinalTotal);
         btnProceedToPayment = findViewById(R.id.btnProceedToPayment);
 
-        // Get selected cart items from Intent
         selectedCartItems = (ArrayList<CartItem>) getIntent().getSerializableExtra("selectedCartItems");
         if (selectedCartItems == null || selectedCartItems.isEmpty()) {
             Toast.makeText(this, "No items selected for checkout", Toast.LENGTH_SHORT).show();
@@ -58,34 +53,26 @@ public class CheckoutActivity extends AppCompatActivity {
             return;
         }
 
-        // Set up RecyclerView
         checkoutAdapter = new CheckoutAdapter(selectedCartItems);
         checkoutRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         checkoutRecyclerView.setAdapter(checkoutAdapter);
 
-        // Calculate order total
         orderTotal = 0.0;
         for (CartItem item : selectedCartItems) {
             orderTotal += item.getTotalPrice();
         }
 
-        // Initialize coupon list with percentage discounts (0% - 80%)
         couponList = new ArrayList<>();
         couponList.add(new Coupon("SUMMER500", "31 May 2025", 10, 50.0)); // 50% off
         couponList.add(new Coupon("WINTER200", "15 Dec 2025", 20, 20.0)); // 20% off
         couponList.add(new Coupon("FESTIVE1000", "1 Jan 2026", 5, 80.0)); // 80% off
 
-        // Update order payment details
         tvOrderAmount.setText("₹" + String.format("%.2f", orderTotal));
-        tvConvenienceFee.setText("Know More");
-        tvConvenienceFeeValue.setText("Apply Coupon");
         tvDeliveryFee.setText("FREE");
         updateOrderTotal();
 
-        // Set up click listeners
         ivBack.setOnClickListener(v -> finish());
 
-        ivWishlist.setOnClickListener(v -> Toast.makeText(CheckoutActivity.this, "Added to Wishlist", Toast.LENGTH_SHORT).show());
 
         tvSelectCoupon.setOnClickListener(v -> showCouponDialog());
 
@@ -107,7 +94,7 @@ public class CheckoutActivity extends AppCompatActivity {
         CouponAdapter couponAdapter = new CouponAdapter(couponList, coupon -> {
             applyCoupon(coupon);
             if (couponDialog != null) {
-                couponDialog.dismiss(); // Đóng dialog sau khi chọn
+                couponDialog.dismiss();
             }
         });
         rvCoupons.setAdapter(couponAdapter);
@@ -119,16 +106,16 @@ public class CheckoutActivity extends AppCompatActivity {
     }
 
     private void applyCoupon(Coupon coupon) {
-        discount = coupon.calculateDiscount(orderTotal); // Tính số tiền giảm
+        discount = coupon.calculateDiscount(orderTotal);
         tvSelectCoupon.setText(coupon.getCode());
         updateOrderTotal();
     }
 
     private void updateOrderTotal() {
         double finalTotal = orderTotal - discount;
-        tvOriginalAmount.setText("₹" + String.format("%.2f", orderTotal));
-        tvDiscountAmount.setText("-₹" + String.format("%.2f", discount));
-        tvOrderTotal.setText("₹" + String.format("%.2f", finalTotal));
-        tvFinalTotal.setText("₹" + String.format("%.2f", finalTotal));
+        tvOriginalAmount.setText("đ" + String.format("%.2f", orderTotal));
+        tvDiscountAmount.setText("-đ" + String.format("%.2f", discount));
+        tvOrderTotal.setText("đ" + String.format("%.2f", finalTotal));
+        tvFinalTotal.setText("đ" + String.format("%.2f", finalTotal));
     }
 }

@@ -23,7 +23,6 @@ import retrofit2.Response;
 
 public class ApiManager {
 
-    // Đảm bảo có thể sử dụng Retrofit từ bên ngoài
     private ApiService apiService;
 
     public ApiManager() {
@@ -224,7 +223,6 @@ public class ApiManager {
 
             @Override
             public void onFailure(Call<UpdateProfileResponse> call, Throwable t) {
-                System.out.println("=========failed" + t.getMessage());
                 callback.onResult(false);
             }
         });

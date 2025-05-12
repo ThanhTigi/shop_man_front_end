@@ -16,7 +16,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Product Image -->
             <ImageView
                 android:id="@+id/productImage"
                 android:layout_width="match_parent"
@@ -24,12 +23,11 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/trending_image_1" />
 
-            <!-- Size Selection -->
             <TextView
                 android:id="@+id/selectedSizeText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Size: 7 UK"
+                android:text="Type: 7 UK"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginTop="16dp" />
@@ -41,10 +39,8 @@
                 android:orientation="horizontal"
                 android:layout_marginTop="8dp"
                 android:gravity="center_vertical">
-                <!-- Sizes will be added dynamically -->
             </LinearLayout>
 
-            <!-- Product Name and Price -->
             <TextView
                 android:id="@+id/productName"
                 android:layout_width="wrap_content"
@@ -83,11 +79,10 @@
                     android:layout_height="wrap_content"
                     android:text=" 50% OFF"
                     android:textSize="14sp"
-                    android:textColor="#FF0000"
+                    android:textColor="#F87088"
                     android:layout_marginStart="8dp" />
             </LinearLayout>
 
-            <!-- Rating -->
             <RatingBar
                 android:id="@+id/productRating"
                 android:layout_width="wrap_content"
@@ -99,7 +94,6 @@
                 android:layout_marginTop="8dp"
                 style="@style/Widget.AppCompat.RatingBar.Small" />
 
-            <!-- Product Details -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -118,7 +112,6 @@
                 android:layout_marginTop="8dp" />
 
 
-            <!-- Buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -131,7 +124,7 @@
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="Go to Cart"
-                    android:backgroundTint="#FF0000"
+                    android:backgroundTint="#3179DE"
                     android:textColor="#FFFFFF"
                     android:layout_marginEnd="8dp" />
 
@@ -141,7 +134,7 @@
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="Buy Now"
-                    android:backgroundTint="#00FF00"
+                    android:backgroundTint="#60E697"
                     android:textColor="#FFFFFF"
                     android:layout_marginStart="8dp" />
             </LinearLayout>

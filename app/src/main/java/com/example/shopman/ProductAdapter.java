@@ -52,7 +52,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             productPrice.setText(product.getPrice());
 
             itemView.setOnClickListener(v -> {
-                // Tạo Intent và gửi dữ liệu sang ProductDetailsActivity
                 android.content.Context context = itemView.getContext();
                 android.content.Intent intent = new android.content.Intent(context, ProductDetailsActivity.class);
                 intent.putExtra("product", product); // Product phải implement Serializable

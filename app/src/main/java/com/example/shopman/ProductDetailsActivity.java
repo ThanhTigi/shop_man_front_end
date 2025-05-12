@@ -31,7 +31,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_details);
 
-        // Initialize views
         productImage = findViewById(R.id.productImage);
         productName = findViewById(R.id.productName);
         productDescription = findViewById(R.id.productDescription);
@@ -52,7 +51,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
             }
         });
 
-        // Get product data from Intent
         Product product = (Product) getIntent().getSerializableExtra("product");
         if (product != null) {
             productImage.setImageResource(product.getImageResId());
@@ -62,7 +60,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
             productDetailedDescription.setText(product.getDetailedDescription());
             productRating.setRating(product.getRating());
 
-            // Dynamically add size buttons
             List<String> sizes = product.getSizes();
             for (int i = 0; i < sizes.size(); i++) {
                 String size = sizes.get(i);
@@ -79,34 +76,28 @@ public class ProductDetailsActivity extends AppCompatActivity {
                 params.setMargins(8, 0, 8, 0);
                 sizeButton.setLayoutParams(params);
 
-                // Set the first size as the default selected size
                 if (i == 0) {
                     sizeButton.setSelected(true);
                     selectedSizeButton = sizeButton;
-                    selectedSizeText.setText("Size: " + size);
+                    selectedSizeText.setText("Type: " + size);
                 }
 
-                // Handle size selection
                 sizeButton.setOnClickListener(v -> {
-                    // Deselect the previously selected button
                     if (selectedSizeButton != null) {
                         selectedSizeButton.setSelected(false);
                     }
-                    // Select the new button
                     sizeButton.setSelected(true);
                     selectedSizeButton = sizeButton;
-                    selectedSizeText.setText("Size: " + size);
-                    Toast.makeText(this, "Selected size: " + size, Toast.LENGTH_SHORT).show();
+                    selectedSizeText.setText("Type: " + size);
                 });
 
                 sizeContainer.addView(sizeButton);
             }
         } else {
             Toast.makeText(this, "Product data not found", Toast.LENGTH_SHORT).show();
-            finish(); // Close the activity if no product data is received
+            finish();
         }
 
-        // Set up buttons
         goToCartButton.setOnClickListener(v -> Toast.makeText(this, "Go to Cart clicked", Toast.LENGTH_SHORT).show());
         buyNowButton.setOnClickListener(v -> Toast.makeText(this, "Buy Now clicked", Toast.LENGTH_SHORT).show());
 

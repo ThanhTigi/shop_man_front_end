@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import com.example.shopman.R;
+import com.example.shopman.models.changepassword.response.ChangePasswordResponse;
 import com.example.shopman.models.login.LoginResponse;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
@@ -21,7 +22,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private EditText etSignUpPassword, etConfirmPassword;
     private ImageView ivShowSignUpPassword, ivShowConfirmPassword;
     private AppCompatButton btnCreateAccount;
-    private String email;
     private boolean isSignUpPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
     private ApiManager apiManager;
@@ -40,11 +40,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
         ivShowConfirmPassword = findViewById(R.id.ivShowConfirmPassword);
         btnCreateAccount = findViewById(R.id.btnChangePassword);
         apiManager = new ApiManager();
-        email = getIntent().getStringExtra("email");
-        if (email == null) {
-            email = "unknown@example.com"; // Default value if email is not passed
-        }
-
+        resetToken = getIntent().getStringExtra("resetToken");
         ivBack.setOnClickListener(v -> finish());
 
         ivShowSignUpPassword.setOnClickListener(v -> {
@@ -84,9 +80,9 @@ public class ChangePasswordActivity extends AppCompatActivity {
             } else if (!password.equals(confirmPassword)) {
                 Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
             } else {
-                apiManager.changePassword(resetToken, password, confirmPassword, new ApiResponseListener<LoginResponse>() {
+                apiManager.changePassword(resetToken, password, confirmPassword, new ApiResponseListener<ChangePasswordResponse>() {
                     @Override
-                    public void onSuccess(LoginResponse response) {
+                    public void onSuccess(ChangePasswordResponse response) {
                         Intent intent = new Intent(ChangePasswordActivity.this, LoginActivity.class);
                         startActivity(intent);
                         finish();
@@ -94,7 +90,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(String errorMessage) {
-                        // Hiển thị lỗi
                         Toast.makeText(ChangePasswordActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                     }
                 });

@@ -32,15 +32,13 @@ public class PaymentActivity extends AppCompatActivity {
     private Button btnContinue;
     private double orderTotal;
     private List<CartItem> selectedCartItems;
-    private int selectedPaymentMethod = -1; // -1 means no method selected
-    private SharedPreferences sharedPreferences;
+    private int selectedPaymentMethod = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
-        // Initialize views
         ivBack = findViewById(R.id.ivBack);
         tvOrderAmount = findViewById(R.id.tvOrderAmount);
         tvShippingFee = findViewById(R.id.tvShippingFee);
@@ -51,32 +49,24 @@ public class PaymentActivity extends AppCompatActivity {
         llOther2 = findViewById(R.id.llOther2);
         btnContinue = findViewById(R.id.btnContinue);
 
-        // Initialize SharedPreferences
-        sharedPreferences = getSharedPreferences("PaymentPrefs", Context.MODE_PRIVATE);
 
-        // Get data from Intent
         orderTotal = getIntent().getDoubleExtra("orderTotal", 0.0);
         selectedCartItems = (ArrayList<CartItem>) getIntent().getSerializableExtra("selectedCartItems");
 
-        // Calculate shipping fee (hardcoded for now)
         double shippingFee = 30.0;
         double totalWithShipping = orderTotal + shippingFee;
 
-        // Update order summary
-        tvOrderAmount.setText("₹" + String.format("%.2f", orderTotal));
-        tvShippingFee.setText("₹" + String.format("%.2f", shippingFee));
-        tvTotalAmount.setText("₹" + String.format("%.2f", totalWithShipping));
+        tvOrderAmount.setText("đ" + String.format("%.2f", orderTotal));
+        tvShippingFee.setText("đ" + String.format("%.2f", shippingFee));
+        tvTotalAmount.setText("đ" + String.format("%.2f", totalWithShipping));
 
-        // Set up click listeners for payment methods
         llVisa.setOnClickListener(v -> showCardInfoDialog(0, "VISA", llVisa, R.id.tvVisaInfo, R.id.tvVisaHolderName, R.id.tvVisaCardNumber, R.id.tvVisaExpiryDate));
         llPaypal.setOnClickListener(v -> showCardInfoDialog(1, "PayPal", llPaypal, R.id.tvPaypalInfo, R.id.tvPaypalHolderName, R.id.tvPaypalCardNumber, R.id.tvPaypalExpiryDate));
         llOther1.setOnClickListener(v -> showCardInfoDialog(2, "Mastercard", llOther1, R.id.tvMastercardInfo, R.id.tvMastercardHolderName, R.id.tvMastercardCardNumber, R.id.tvMastercardExpiryDate));
         llOther2.setOnClickListener(v -> showCardInfoDialog(3, "Apple Pay", llOther2, R.id.tvApplePayInfo, R.id.tvApplePayHolderName, R.id.tvApplePayCardNumber, R.id.tvApplePayExpiryDate));
 
-        // Set up back button
         ivBack.setOnClickListener(v -> finish());
 
-        // Set up Continue button
         btnContinue.setOnClickListener(v -> {
             if (selectedPaymentMethod == -1) {
                 Toast.makeText(PaymentActivity.this, "Please select a payment method", Toast.LENGTH_SHORT).show();
@@ -94,7 +84,6 @@ public class PaymentActivity extends AppCompatActivity {
         DatePicker dpExpiryDate = dialogView.findViewById(R.id.dpExpiryDate);
         Button btnDone = dialogView.findViewById(R.id.btnDone);
 
-        // Set minimum date to today to prevent selecting past dates
         dpExpiryDate.setMinDate(System.currentTimeMillis());
 
         builder.setView(dialogView);
@@ -117,14 +106,10 @@ public class PaymentActivity extends AppCompatActivity {
                 return;
             }
 
-            // Save card info
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString(methodName + "_holder", cardHolderName);
-            editor.putString(methodName + "_number", cardNumber);
-            editor.putString(methodName + "_expiry", expiryDate);
-            editor.apply();
+            MyPreferences.setString(this,methodName + "_holder", cardHolderName);
+            MyPreferences.setString(this,methodName + "_number", cardNumber);
+            MyPreferences.setString(this,methodName + "_expiry", expiryDate);
 
-            // Update UI with bold labels
             TextView tvInfo = findViewById(infoTextId);
             TextView tvHolderName = findViewById(holderNameTextId);
             TextView tvCardNumber = findViewById(cardNumberTextId);
@@ -132,32 +117,27 @@ public class PaymentActivity extends AppCompatActivity {
 
             tvInfo.setText(methodName);
 
-            // Bold "Họ tên:" part
             String holderText = "Họ tên: " + cardHolderName;
             SpannableString holderSpannable = new SpannableString(holderText);
             holderSpannable.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, "Họ tên:".length(), 0);
             tvHolderName.setText(holderSpannable);
 
-            // Bold "Mã thẻ:" part
             String cardText = "Mã thẻ: **** **** **** " + cardNumber.substring(cardNumber.length() - 4);
             SpannableString cardSpannable = new SpannableString(cardText);
             cardSpannable.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, "Mã thẻ:".length(), 0);
             tvCardNumber.setText(cardSpannable);
 
-            // Bold "Ngày hết hạn:" part
             String expiryText = "Ngày hết hạn: " + expiryDate;
             SpannableString expirySpannable = new SpannableString(expiryText);
             expirySpannable.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, "Ngày hết hạn:".length(), 0);
             tvExpiryDate.setText(expirySpannable);
 
-            // Hide other payment methods
             selectedPaymentMethod = method;
             llVisa.setVisibility(method == 0 ? View.VISIBLE : View.GONE);
             llPaypal.setVisibility(method == 1 ? View.VISIBLE : View.GONE);
             llOther1.setVisibility(method == 2 ? View.VISIBLE : View.GONE);
             llOther2.setVisibility(method == 3 ? View.VISIBLE : View.GONE);
 
-            // Highlight selected method
             selectedLayout.setBackgroundColor(Color.parseColor("#FFF0F0"));
 
             dialog.dismiss();

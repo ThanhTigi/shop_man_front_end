@@ -5,12 +5,12 @@
     android:orientation="vertical"
     android:background="#F5F5F5">
 
-    <!-- Toolbar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:layout_marginTop="20dp"
         android:padding="8dp">
 
         <ImageView
@@ -24,7 +24,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Checkout"
+            android:text="Payment"
             android:textSize="20sp"
             android:textStyle="bold"
             android:gravity="center" />
@@ -42,7 +42,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Order Summary Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -68,7 +67,7 @@
                         android:id="@+id/tvOrderAmount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="₹7,000"
+                        android:text="đ7,000"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -89,7 +88,7 @@
                         android:id="@+id/tvShippingFee"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="₹30"
+                        android:text="đ30"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -110,13 +109,12 @@
                         android:id="@+id/tvTotalAmount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="₹7,030"
+                        android:text="đ7,030"
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Payment Options Section -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -125,7 +123,6 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp" />
 
-            <!-- Visa -->
             <LinearLayout
                 android:id="@+id/llVisa"
                 android:layout_width="match_parent"

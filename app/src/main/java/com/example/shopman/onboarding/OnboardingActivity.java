@@ -9,7 +9,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
-import com.example.shopman.MyPreferences;
+import com.example.shopman.utilitis.MyPreferences;
 import com.example.shopman.R;
 import com.example.shopman.auth.LoginActivity;
 

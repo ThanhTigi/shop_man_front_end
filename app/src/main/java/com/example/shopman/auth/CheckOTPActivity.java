@@ -12,7 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import com.example.shopman.R;
-import com.example.shopman.models.changepassword.ForgotPasswordResponse;
+import com.example.shopman.models.changepassword.request.ForgotPasswordResponse;
+import com.example.shopman.models.checkotp.CheckOTPResponse;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
 
@@ -74,17 +75,17 @@ public class CheckOTPActivity extends AppCompatActivity {
             } else if (otp.length() != 6) {
                 Toast.makeText(this, "OTP must be 6 digits", Toast.LENGTH_SHORT).show();
             } else {
-                apiManager.checkOTP(otp, new ApiResponseListener<ForgotPasswordResponse>() {
+                apiManager.checkOTP(otp, new ApiResponseListener<CheckOTPResponse>() {
                     @Override
-                    public void onSuccess(ForgotPasswordResponse response) {
+                    public void onSuccess(CheckOTPResponse response) {
+                        String resetToken = response.getMetadata().getMetadata().getResetToken();
                         Intent otpIntent = new Intent(CheckOTPActivity.this, ChangePasswordActivity.class);
-                        otpIntent.putExtra("resetToken", response.getMetaData().getMessage()); // Pass the email as an extra
+                        otpIntent.putExtra("resetToken", resetToken);
                         startActivity(otpIntent);
                     }
 
                     @Override
                     public void onError(String errorMessage) {
-                        // Hiển thị lỗi
                         Toast.makeText(CheckOTPActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                     }
                 });

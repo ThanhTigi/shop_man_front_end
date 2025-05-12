@@ -10,8 +10,12 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.shopman.fragments.cart.CartItem;
+import com.example.shopman.fragments.cart.CartProducts;
+import com.example.shopman.fragments.cart.CheckoutActivity;
+import com.example.shopman.utilitis.MyPreferences;
+
 import java.util.ArrayList;
 import java.util.List;
 

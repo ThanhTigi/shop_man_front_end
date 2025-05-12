@@ -1,4 +1,4 @@
-package com.example.shopman;
+package com.example.shopman.fragments.home;
 
 public class Category {
     private String name;

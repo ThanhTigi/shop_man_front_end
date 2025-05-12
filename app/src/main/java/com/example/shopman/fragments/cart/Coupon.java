@@ -1,4 +1,4 @@
-package com.example.shopman;
+package com.example.shopman.fragments.cart;
 
 import java.io.Serializable;
 

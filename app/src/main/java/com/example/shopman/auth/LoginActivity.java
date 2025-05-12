@@ -12,7 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.shopman.MainActivity;
-import com.example.shopman.MyPreferences;
+import com.example.shopman.utilitis.MyPreferences;
 import com.example.shopman.R;
 import com.example.shopman.models.login.LoginResponse;
 import com.example.shopman.models.login.UserMetadata;

@@ -1,4 +1,4 @@
-package com.example.shopman;
+package com.example.shopman.utilitis;
 
 import android.content.Context;
 import android.content.SharedPreferences;

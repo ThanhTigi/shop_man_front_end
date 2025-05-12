@@ -1,4 +1,4 @@
-package com.example.shopman;
+package com.example.shopman.fragments.search;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,6 +13,12 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.shopman.Product;
+import com.example.shopman.ProductAdapter;
+import com.example.shopman.R;
+import com.example.shopman.utilitis.AppConfig;
+import com.example.shopman.utilitis.ProductsConst;
 
 import java.util.List;
 
@@ -46,6 +52,14 @@ public class SearchFragment extends Fragment {
             }
         });
 
+
+
+        return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
         if (AppConfig.isSearch) {
             String keywordSearch = AppConfig.keywordSearch;
             AppConfig.isSearch = false;
@@ -59,8 +73,6 @@ public class SearchFragment extends Fragment {
             searchRecyclerView.setAdapter(searchAdapter);
             itemCount.setText(ProductsConst.totalProducts.size() + " Items");
         }
-
-        return view;
     }
 
     private void searchProduct(String keyword)

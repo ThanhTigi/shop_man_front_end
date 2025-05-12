@@ -2,7 +2,7 @@ package com.example.shopman.remote;
 
 import android.content.Context;
 
-import com.example.shopman.MyPreferences;
+import com.example.shopman.utilitis.MyPreferences;
 import com.example.shopman.models.changepassword.ChangePasswordRequest;
 import com.example.shopman.models.changepassword.ForgotPasswordRequest;
 import com.example.shopman.models.changepassword.ForgotPasswordResponse;

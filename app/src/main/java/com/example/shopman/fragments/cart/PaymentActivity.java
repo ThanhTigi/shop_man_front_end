@@ -1,8 +1,6 @@
-package com.example.shopman;
+package com.example.shopman.fragments.cart;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -20,6 +18,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.shopman.MainActivity;
+import com.example.shopman.R;
+import com.example.shopman.utilitis.MyPreferences;
 
 import java.util.ArrayList;
 import java.util.List;

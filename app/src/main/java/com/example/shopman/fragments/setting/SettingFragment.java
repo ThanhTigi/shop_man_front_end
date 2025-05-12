@@ -1,5 +1,4 @@
-package com.example.shopman;
-import android.content.Context;
+package com.example.shopman.fragments.setting;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,7 +12,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.example.shopman.ProfileActivity;
+import com.example.shopman.R;
 import com.example.shopman.auth.LoginActivity;
+import com.example.shopman.utilitis.MyPreferences;
 
 public class SettingFragment extends Fragment {
     public SettingFragment() {
@@ -29,7 +31,7 @@ public class SettingFragment extends Fragment {
 
         accountButton.setOnClickListener(v ->
         {
-            Intent intent = new Intent(getContext(),ProfileActivity.class);
+            Intent intent = new Intent(getContext(), ProfileActivity.class);
             startActivity(intent);
         });
 

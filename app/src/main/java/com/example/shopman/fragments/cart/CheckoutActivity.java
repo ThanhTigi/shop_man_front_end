@@ -1,4 +1,4 @@
-package com.example.shopman;
+package com.example.shopman.fragments.cart;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +15,8 @@ import java.util.List;
 
 
 import androidx.appcompat.app.AlertDialog;
+
+import com.example.shopman.R;
 
 public class CheckoutActivity extends AppCompatActivity {
 
@@ -67,7 +69,7 @@ public class CheckoutActivity extends AppCompatActivity {
         couponList.add(new Coupon("WINTER200", "15 Dec 2025", 20, 20.0)); // 20% off
         couponList.add(new Coupon("FESTIVE1000", "1 Jan 2026", 5, 80.0)); // 80% off
 
-        tvOrderAmount.setText("₹" + String.format("%.2f", orderTotal));
+        tvOrderAmount.setText("đ" + String.format("%.2f", orderTotal));
         tvDeliveryFee.setText("FREE");
         updateOrderTotal();
 

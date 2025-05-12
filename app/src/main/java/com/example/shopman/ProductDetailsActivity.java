@@ -1,5 +1,6 @@
 package com.example.shopman;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -24,6 +25,8 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private Button goToCartButton, buyNowButton;
     private Button selectedSizeButton;
     private ImageView backImageView;
+
+    private Product product;
 
 
     @Override
@@ -51,7 +54,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
             }
         });
 
-        Product product = (Product) getIntent().getSerializableExtra("product");
+        product = (Product) getIntent().getSerializableExtra("product");
         if (product != null) {
             productImage.setImageResource(product.getImageResId());
             productName.setText(product.getName());
@@ -98,8 +101,46 @@ public class ProductDetailsActivity extends AppCompatActivity {
             finish();
         }
 
-        goToCartButton.setOnClickListener(v -> Toast.makeText(this, "Go to Cart clicked", Toast.LENGTH_SHORT).show());
-        buyNowButton.setOnClickListener(v -> Toast.makeText(this, "Buy Now clicked", Toast.LENGTH_SHORT).show());
+        goToCartButton.setOnClickListener(v ->
+        {
+            CartProducts currentCartProducts;
+            if (MyPreferences.getString(this,"cart_products","").isEmpty())
+            {
+                currentCartProducts = new CartProducts(new ArrayList<>());
+            }
+            else
+            {
+                currentCartProducts = CartProducts.fromJson(MyPreferences.getString(this,"cart_products",""));
+            }
+
+
+            boolean check = false;
+            for (CartItem cartItem:currentCartProducts.getProducts()) {
+                if (cartItem.getProduct().getName().equals(product.getName()))
+                {
+                    check = true;
+                    break;
+                }
+            }
+            if (!check)
+            {
+                currentCartProducts.getProducts().add(new CartItem(product,1,
+                        false,selectedSizeButton.getText().toString()));
+
+                MyPreferences.setString(this,"cart_products",currentCartProducts.toJson());
+            }
+
+            Toast.makeText(this, "Added to cart", Toast.LENGTH_SHORT).show();
+        });
+        buyNowButton.setOnClickListener(v->
+        {
+            CartItem item = new CartItem(product,1,true,selectedSizeButton.getText().toString());
+            ArrayList<CartItem> selectedItems = new ArrayList<>();
+            selectedItems.add(item);
+            Intent checkoutIntent = new Intent(ProductDetailsActivity.this, CheckoutActivity.class);
+            checkoutIntent.putExtra("selectedCartItems", selectedItems);
+            startActivity(checkoutIntent);
+        });
 
     }
 }

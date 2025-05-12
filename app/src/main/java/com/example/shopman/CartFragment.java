@@ -29,7 +29,6 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
     private CartAdapter cartAdapter;
     private List<CartItem> cartItems;
     private Button btnCheckout;
-    private SharedPreferences sharedPreferences;
 
     public CartFragment() {
         // Required empty public constructor
@@ -37,9 +36,8 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.cart_fragment, container, false);
+        View view = inflater.inflate(R.layout.fragment_cart, container, false);
 
-        // Initialize views
         tvAddress = view.findViewById(R.id.tvAddress);
         tvContact = view.findViewById(R.id.tvContact);
         cbSelectAll = view.findViewById(R.id.cbSelectAll);
@@ -47,13 +45,8 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
         tvTotalAmount = view.findViewById(R.id.tvTotalAmount);
         btnCheckout = view.findViewById(R.id.btnCheckout);
 
-        // Initialize SharedPreferences
-        sharedPreferences = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-
-        // Load saved address and contact
         loadAddressAndContact();
 
-        // Set up cart items
         cartItems = new ArrayList<>();
         List<String> sizes = new ArrayList<>();
         sizes.add("6 UK");
@@ -102,17 +95,16 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
             }
         });
 
-        // Initial total amount update
         updateTotalAmount();
 
         return view;
     }
 
     private void loadAddressAndContact() {
-        String savedAddress = sharedPreferences.getString("address", "Address: 216 St Paul’s Rd, London N1 2LL, UK");
-        String savedContact = sharedPreferences.getString("contact", "Contact: +44-7848232");
-        tvAddress.setText(savedAddress);
-        tvContact.setText(savedContact);
+        String savedAddress = MyPreferences.getString(getContext(),"user_address","216 St Paul’s Rd, London N1 2LL, UK");
+        String savedContact = MyPreferences.getString(getContext(),"user_phone_number", "0326749576");
+        tvAddress.setText("Address: " + savedAddress);
+        tvContact.setText("Contact: " + savedContact);
     }
 
     private void showEditAddressDialog() {
@@ -124,7 +116,6 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
         EditText etContact = dialogView.findViewById(R.id.etContact);
         Button btnUpdateAddress = dialogView.findViewById(R.id.btnUpdateAddress);
 
-        // Pre-fill with current values
         String[] addressParts = tvAddress.getText().toString().replace("Address: ", "").split(", ");
         if (addressParts.length >= 3) {
             etCountry.setText(addressParts[0]);
@@ -147,15 +138,11 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
                 return;
             }
 
-            // Format address and contact
-            String fullAddress = "Address: " + country + ", " + city + ", " + detailedAddress;
-            String fullContact = "Contact: " + contact;
+            String fullAddress = country + ", " + city + ", " + detailedAddress;
+            String fullContact = contact;
 
-            // Save to SharedPreferences
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString("address", fullAddress);
-            editor.putString("contact", fullContact);
-            editor.apply();
+            MyPreferences.setString(getContext(),"user_address",fullAddress);
+            MyPreferences.setString(getContext(),"user_phone_number",fullContact);
 
             // Update UI
             tvAddress.setText(fullAddress);

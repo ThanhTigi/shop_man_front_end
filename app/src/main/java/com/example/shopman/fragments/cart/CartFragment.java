@@ -82,7 +82,7 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
             updateTotalAmount();
         });
 
-        onItemSelectionChanged();
+//        onItemSelectionChanged();
 
         tvAddress.setOnClickListener(v -> showEditAddressDialog());
 

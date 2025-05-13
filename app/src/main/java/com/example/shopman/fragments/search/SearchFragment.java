@@ -85,8 +85,5 @@ public class SearchFragment extends Fragment {
         itemCount.setText(result.size() + " Items");
     }
 
-    public void searchWithKeyword(String keyword) {
-        searchProduct(keyword);
-    }
 
 }

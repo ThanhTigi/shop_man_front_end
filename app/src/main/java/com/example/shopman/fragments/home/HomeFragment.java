@@ -31,7 +31,6 @@ public class HomeFragment extends Fragment {
     private CategoryAdapter categoryAdapter;
     private List<Category> categoryList;
     private ImageView bannerImageView;
-    private BannerAdapter bannerAdapter;
     private RecyclerView  trendingRecyclerView;
     private ProductAdapter trendingAdapter;
     private List<Product> trendingList;

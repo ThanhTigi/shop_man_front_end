@@ -53,30 +53,31 @@ public class SearchFragment extends Fragment {
         });
 
 
-
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        searchRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        searchAdapter = new ProductAdapter(ProductsConst.totalProducts);
+        searchRecyclerView.setAdapter(searchAdapter);
+        itemCount.setText(ProductsConst.totalProducts.size() + " Items");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         if (AppConfig.isSearch) {
             String keywordSearch = AppConfig.keywordSearch;
             AppConfig.isSearch = false;
             etSearch.setText(AppConfig.keywordSearch);
             searchProduct(keywordSearch);
         }
-        else
-        {
-            searchRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-            searchAdapter = new ProductAdapter(ProductsConst.totalProducts);
-            searchRecyclerView.setAdapter(searchAdapter);
-            itemCount.setText(ProductsConst.totalProducts.size() + " Items");
-        }
     }
 
-    private void searchProduct(String keyword)
-    {
+
+    private void searchProduct(String keyword) {
         List<Product> result = ProductsConst.searchProductsByName(keyword);
         searchRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         searchAdapter = new ProductAdapter(result);

@@ -70,11 +70,21 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
         cartRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         cartRecyclerView.setAdapter(cartAdapter);
 
-        cbSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (!isChecked)
-            {
-                return;
-            }
+//        cbSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//            if (!isChecked)
+//            {
+//                return;
+//            }
+//            for (CartItem item : cartItems) {
+//                item.setSelected(isChecked);
+//            }
+//            cartAdapter.notifyDataSetChanged();
+//            updateTotalAmount();
+//        });
+
+        cbSelectAll.setOnClickListener(v ->
+        {
+            boolean isChecked = cbSelectAll.isChecked();
             for (CartItem item : cartItems) {
                 item.setSelected(isChecked);
             }

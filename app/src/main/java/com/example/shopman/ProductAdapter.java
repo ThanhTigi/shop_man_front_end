@@ -37,24 +37,26 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView productImage;
-        TextView productName, productPrice;
+        TextView productName, productPrice, productDescription;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             productImage = itemView.findViewById(R.id.productImage);
             productName = itemView.findViewById(R.id.productName);
             productPrice = itemView.findViewById(R.id.productPrice);
+            productDescription = itemView.findViewById(R.id.productDescription);
         }
 
         public void bind(Product product) {
             productImage.setImageResource(product.getImageResId());
             productName.setText(product.getName());
             productPrice.setText(product.getPrice());
+            productDescription.setText(product.getDescription());
 
             itemView.setOnClickListener(v -> {
                 android.content.Context context = itemView.getContext();
                 android.content.Intent intent = new android.content.Intent(context, ProductDetailsActivity.class);
-                intent.putExtra("product", product); // Product phải implement Serializable
+                intent.putExtra("product", product);
                 context.startActivity(intent);
             });
         }

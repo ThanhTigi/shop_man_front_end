@@ -1,11 +1,13 @@
 package com.example.shopman.models.signup;
 
-import com.example.shopman.models.login.UserMetadata;
+import com.example.shopman.models.login.InnerMetadata;
+import com.google.gson.annotations.SerializedName;
 
 public class SignUpMetadata {
-    private UserMetadata userMetadata;
+    @SerializedName("metadata")
+    private InnerMetadata userMetadata;
 
-    public UserMetadata getMetadata() {
+    public InnerMetadata getMetadata() {
         return userMetadata;
     }
 }

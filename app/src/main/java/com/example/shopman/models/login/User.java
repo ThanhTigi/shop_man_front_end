@@ -1,72 +1,47 @@
 package com.example.shopman.models.login;
 
-import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 public class User {
-    private String id;
+    @SerializedName("id")
+    private int id;
+
+    @SerializedName("name")
     private String name;
+
+    @SerializedName("email")
     private String email;
+
+    @SerializedName("phone")
     private String phone;
+
+    @SerializedName("status")
     private String status;
+
+    @SerializedName("avatar")
     private String avatar;
 
-    public String getId() {
+    public int getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getEmail() {
         return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getPhone() {
         return phone;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
     public String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getAvatar() {
         return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-// Getters and Setters
-
-    public String toJson() {
-        return new Gson().toJson(this);
-    }
-
-    public static User fromJson(String json)
-    {
-        Gson gson = new Gson();
-        User user = gson.fromJson(json, User.class);
-        return user;
     }
 }

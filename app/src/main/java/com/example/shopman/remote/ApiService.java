@@ -1,5 +1,6 @@
 package com.example.shopman.remote;
 
+import com.example.shopman.models.auth.RefreshTokenResponse;
 import com.example.shopman.models.changepassword.request.ChangePasswordRequest;
 import com.example.shopman.models.changepassword.request.ForgotPasswordRequest;
 import com.example.shopman.models.changepassword.request.ForgotPasswordResponse;
@@ -12,7 +13,6 @@ import com.example.shopman.models.signup.SignUpRequest;
 import com.example.shopman.models.signup.SignUpResponse;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileRequest;
-import com.example.shopman.models.profile.updateuserprofile.UpdateProfileResponse;
 import com.example.shopman.models.searchproducts.SearchProductsResponse;
 
 import retrofit2.Call;
@@ -39,11 +39,14 @@ public interface ApiService {
     @POST("/api/v1/auth/change-password")
     Call<ChangePasswordResponse> changePassword(@Body ChangePasswordRequest request);
 
-    @GET("/api/v1/user/profile")
-    Call<GetUserProfileResponse> getUserProfile(@Header("authorization") String token);
+    @POST("/api/v1/auth/refresh-token")
+    Call<RefreshTokenResponse> refreshToken(@Header("x-rtoken-id") String refreshToken);
 
-    @PUT("/api/v1/user/profile/update")
-    Call<UpdateProfileResponse> updateUserProfile(@Header("authorization") String token,@Body UpdateProfileRequest request);
+    @GET("/user/profile")
+    Call<GetUserProfileResponse> getUserProfile(@Header("Authorization") String authorization);
+
+    @PUT("/user/profile/update")
+    Call<GetUserProfileResponse> updateUserProfile(@Header("Authorization") String authorization, @Body UpdateProfileRequest request);
 
     @GET("/api/v1/product/search")
     Call<SearchProductsResponse> searchProducts(@Query("query") String query);

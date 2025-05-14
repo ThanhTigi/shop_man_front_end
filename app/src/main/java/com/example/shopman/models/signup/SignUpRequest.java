@@ -1,14 +1,20 @@
 package com.example.shopman.models.signup;
 
-public class SignUpRequest
-{
-    private String email;
+import com.google.gson.annotations.SerializedName;
+
+public class SignUpRequest {
+    @SerializedName("name")
     private String name;
+
+    @SerializedName("email")
+    private String email;
+
+    @SerializedName("password")
     private String password;
 
-    public SignUpRequest(String email, String name, String password) {
-        this.email = email;
+    public SignUpRequest(String name, String email, String password) {
         this.name = name;
+        this.email = email;
         this.password = password;
     }
 }

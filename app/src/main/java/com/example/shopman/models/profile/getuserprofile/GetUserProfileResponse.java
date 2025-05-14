@@ -1,14 +1,26 @@
 package com.example.shopman.models.profile.getuserprofile;
 
+import com.google.gson.annotations.SerializedName;
+
 public class GetUserProfileResponse {
-    private String messsage;
+    @SerializedName("message")
+    private String message;
+
+    @SerializedName("status")
     private int status;
 
-    private GetUserProfileMetaData metadata;
+    @SerializedName("metadata")
+    private UserProfileMetadata userProfileMetaData;
 
-    public GetUserProfileMetaData getUserProfileMetaData()
-    {
-        return metadata;
+    public String getMessage() {
+        return message;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public UserProfileMetadata getUserProfileMetaData() {
+        return userProfileMetaData;
+    }
 }

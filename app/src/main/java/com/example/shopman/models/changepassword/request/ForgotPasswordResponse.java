@@ -1,15 +1,35 @@
 package com.example.shopman.models.changepassword.request;
 
-public class ForgotPasswordResponse {
-    private String message;
-    private int status;
-    private ForgotPasswordMetadata metaData;
+import com.google.gson.annotations.SerializedName;
 
-    public ForgotPasswordMetadata getMetaData() {
-        return metaData;
+public class ForgotPasswordResponse {
+    @SerializedName("message")
+    private String message;
+
+    @SerializedName("status")
+    private int status;
+
+    @SerializedName("metadata")
+    private Metadata metadata;
+
+    public String getMessage() {
+        return message;
     }
 
-    public void setMetaData(ForgotPasswordMetadata metaData) {
-        this.metaData = metaData;
+    public int getStatus() {
+        return status;
+    }
+
+    public Metadata getMetadata() {
+        return metadata;
+    }
+
+    public static class Metadata {
+        @SerializedName("message")
+        private String message;
+
+        public String getMessage() {
+            return message;
+        }
     }
 }

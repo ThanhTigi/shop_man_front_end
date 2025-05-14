@@ -1,11 +1,16 @@
 package com.example.shopman.models.profile.updateuserprofile;
 
+import com.google.gson.annotations.SerializedName;
+
 public class UpdateProfileRequest {
-    private UpdateProfileUser User;
-    private UpdateProfileAddress Address;
+    @SerializedName("User")
+    private UpdateProfileUser user;
+
+    @SerializedName("Address")
+    private UpdateProfileAddress address;
 
     public UpdateProfileRequest(UpdateProfileUser user, UpdateProfileAddress address) {
-        User = user;
-        this.Address = address;
+        this.user = user;
+        this.address = address;
     }
 }

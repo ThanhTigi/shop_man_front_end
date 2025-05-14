@@ -1,48 +1,51 @@
 package com.example.shopman.remote;
 
 import android.content.Context;
+import android.util.Log;
 
-import com.example.shopman.models.changepassword.response.ChangePasswordResponse;
-import com.example.shopman.models.checkotp.CheckOTPResponse;
-import com.example.shopman.utilitis.MyPreferences;
 import com.example.shopman.models.changepassword.request.ChangePasswordRequest;
 import com.example.shopman.models.changepassword.request.ForgotPasswordRequest;
 import com.example.shopman.models.changepassword.request.ForgotPasswordResponse;
+import com.example.shopman.models.changepassword.response.ChangePasswordResponse;
+import com.example.shopman.models.checkotp.CheckOTPResponse;
 import com.example.shopman.models.login.LoginRequest;
 import com.example.shopman.models.login.LoginResponse;
 import com.example.shopman.models.OTPRequest;
 import com.example.shopman.models.signup.SignUpRequest;
 import com.example.shopman.models.signup.SignUpResponse;
-import com.example.shopman.models.login.UserMetadata;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileRequest;
-import com.example.shopman.models.profile.updateuserprofile.UpdateProfileResponse;
+import com.example.shopman.utilitis.MyPreferences;
+import com.google.gson.Gson;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ApiManager {
-
     private ApiService apiService;
+    private Context context;
 
-    public ApiManager() {
-            apiService = RetrofitClient.getClient().create(ApiService.class);
+    public ApiManager(Context context) {
+        this.context = context;
+        apiService = RetrofitClient.getClient().create(ApiService.class);
     }
 
-    // Login API
     public void login(String email, String password, final ApiResponseListener<LoginResponse> listener) {
+        Log.d("ApiManager", "Login Request: email=" + email);
         LoginRequest request = new LoginRequest(email, password);
-
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<LoginResponse> call = apiService.login(request);
 
         call.enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.isSuccessful()) {
+                Log.d("ApiManager", "Login Response: " + (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
+                    LoginResponse loginResponse = response.body();
+                    MyPreferences.setString(context, "access_token", loginResponse.getMetadata().getMetadata().getTokens().getAccessToken());
+                    MyPreferences.setString(context, "refresh_token", loginResponse.getMetadata().getMetadata().getTokens().getRefreshToken());
+                    MyPreferences.setString(context, "current_user_meta_data", new Gson().toJson(loginResponse.getMetadata().getMetadata().getUser()));
                     listener.onSuccess(response.body());
-
                 } else {
                     listener.onError("Login failed: " + response.message());
                 }
@@ -50,21 +53,24 @@ public class ApiManager {
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
+                Log.e("ApiManager", "Login Error: " + t.getMessage());
                 listener.onError("Network Error: " + t.getMessage());
             }
         });
     }
 
-    public void signUp(String email, String name, String password, final ApiResponseListener<SignUpResponse> listener) {
-        SignUpRequest request = new SignUpRequest(email,name, password);
-
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+    public void signUp(SignUpRequest request, ApiResponseListener<SignUpResponse> listener) {
+        Log.d("ApiManager", "Sign Up Request: " + new Gson().toJson(request));
         Call<SignUpResponse> call = apiService.signUp(request);
-
         call.enqueue(new Callback<SignUpResponse>() {
             @Override
             public void onResponse(Call<SignUpResponse> call, Response<SignUpResponse> response) {
-                if (response.isSuccessful()) {
+                Log.d("ApiManager", "Sign Up Response: " + (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
+                    SignUpResponse signUpResponse = response.body();
+                    MyPreferences.setString(context, "access_token", signUpResponse.getMetaData().getMetadata().getTokens().getAccessToken());
+                    MyPreferences.setString(context, "refresh_token", signUpResponse.getMetaData().getMetadata().getTokens().getRefreshToken());
+                    MyPreferences.setString(context, "current_user_meta_data", new Gson().toJson(signUpResponse.getMetaData().getMetadata().getUser()));
                     listener.onSuccess(response.body());
                 } else {
                     listener.onError("Sign up failed: " + response.message());
@@ -73,170 +79,121 @@ public class ApiManager {
 
             @Override
             public void onFailure(Call<SignUpResponse> call, Throwable t) {
+                Log.e("ApiManager", "Sign Up Error: " + t.getMessage());
                 listener.onError("Network Error: " + t.getMessage());
             }
         });
     }
 
-    public void forgotPassword(String email, final ApiResponseListener<ForgotPasswordResponse> listener) {
-        ForgotPasswordRequest request = new ForgotPasswordRequest(email);
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<ForgotPasswordResponse> call = apiService.forgotPassword(request);
-
-        call.enqueue(new Callback<ForgotPasswordResponse>() {
-            @Override
-            public void onResponse(Call<ForgotPasswordResponse> call, Response<ForgotPasswordResponse> response) {
-                if (response.isSuccessful()) {
-                    listener.onSuccess(response.body());
-                } else {
-                    listener.onError("Forgot failed: " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ForgotPasswordResponse> call, Throwable t) {
-                listener.onError("Network Error: " + t.getMessage());
-            }
-        });
-    }
-
-    public void checkOTP(String otp, final ApiResponseListener<CheckOTPResponse> listener) {
-        OTPRequest request = new OTPRequest(otp);
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<CheckOTPResponse> call = apiService.checkOTP(request);
-
-        call.enqueue(new Callback<CheckOTPResponse>() {
-            @Override
-            public void onResponse(Call<CheckOTPResponse> call, Response<CheckOTPResponse> response) {
-                if (response.isSuccessful()) {
-                    listener.onSuccess(response.body());
-                } else {
-                    listener.onError("OTP failed: " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<CheckOTPResponse> call, Throwable t) {
-                listener.onError("Network Error: " + t.getMessage());
-            }
-        });
-    }
-
-    public void changePassword(String resetToken, String newPassword, String confirmPassword,
-                               final ApiResponseListener<ChangePasswordResponse> listener) {
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        ChangePasswordRequest request = new ChangePasswordRequest(resetToken,newPassword, confirmPassword);
-        System.out.println("====" + resetToken);
-        System.out.println("====" + newPassword);
-        System.out.println("====" + confirmPassword);
-
+    public void changePassword(ChangePasswordRequest request, ApiResponseListener<ChangePasswordResponse> listener) {
+        Log.d("ApiManager", "Change Password Request: " + new Gson().toJson(request));
         Call<ChangePasswordResponse> call = apiService.changePassword(request);
-
         call.enqueue(new Callback<ChangePasswordResponse>() {
             @Override
             public void onResponse(Call<ChangePasswordResponse> call, Response<ChangePasswordResponse> response) {
-                if (response.isSuccessful()) {
+                Log.d("ApiManager", "Change Password Response: " + (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
+                    ChangePasswordResponse changePasswordResponse = response.body();
+                    MyPreferences.setString(context, "access_token", changePasswordResponse.getMetaData().getMetadata().getTokens().getAccessToken());
+                    MyPreferences.setString(context, "refresh_token", changePasswordResponse.getMetaData().getMetadata().getTokens().getRefreshToken());
+                    MyPreferences.setString(context, "current_user_meta_data", new Gson().toJson(changePasswordResponse.getMetaData().getMetadata().getUser()));
                     listener.onSuccess(response.body());
                 } else {
-                    listener.onError("Change password failed: " + response.message());
+                    listener.onError("Failed to change password: " + response.message());
                 }
             }
 
             @Override
             public void onFailure(Call<ChangePasswordResponse> call, Throwable t) {
+                Log.e("ApiManager", "Change Password Error: " + t.getMessage());
                 listener.onError("Network Error: " + t.getMessage());
             }
         });
     }
 
-    public void checkUserLogin(Context context, BooleanCallback callback)
-    {
-        if (MyPreferences.getString(context,"current_user_meta_data",null) == null)
-        {
-            callback.onResult(false);
-        }
-        String userJson = MyPreferences.getString(context,"current_user_meta_data","");
-        UserMetadata userMetadata = UserMetadata.fromJson(MyPreferences.getString(context,"current_user_meta_data",""));
-        if (userMetadata == null || userMetadata.getTokens() == null) {
-            callback.onResult(false);
-            return;
-        }
-
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<GetUserProfileResponse> call = apiService.getUserProfile("Bearer " + userMetadata.getTokens().getAccessToken());
-
-        call.enqueue(new Callback<GetUserProfileResponse>() {
+    public void forgotPassword(ForgotPasswordRequest request, ApiResponseListener<ForgotPasswordResponse> listener) {
+        Log.d("ApiManager", "Forgot Password Request: " + new Gson().toJson(request));
+        Call<ForgotPasswordResponse> call = apiService.forgotPassword(request);
+        call.enqueue(new Callback<ForgotPasswordResponse>() {
             @Override
-            public void onResponse(Call<GetUserProfileResponse> call, Response<GetUserProfileResponse> response) {
-                if (response.isSuccessful()) {
-                    callback.onResult(true);
-                } else {
-                    callback.onResult(false);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<GetUserProfileResponse> call, Throwable t) {
-                callback.onResult(false);
-            }
-        });
-    }
-
-    public void getUserProfile(String accessToken, final ApiResponseListener<GetUserProfileResponse> listener)
-    {
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<GetUserProfileResponse> call = apiService.getUserProfile("Bearer " + accessToken);
-
-        call.enqueue(new Callback<GetUserProfileResponse>() {
-            @Override
-            public void onResponse(Call<GetUserProfileResponse> call, Response<GetUserProfileResponse> response) {
-                if (response.isSuccessful())
-                {
+            public void onResponse(Call<ForgotPasswordResponse> call, Response<ForgotPasswordResponse> response) {
+                Log.d("ApiManager", "Forgot Password Response: " + (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
                     listener.onSuccess(response.body());
+                } else {
+                    listener.onError("Failed to send OTP: " + response.message());
                 }
-                else
-                {
-                    listener.onError(response.message());
-                }
-
             }
 
             @Override
-            public void onFailure(Call<GetUserProfileResponse> call, Throwable t) {
+            public void onFailure(Call<ForgotPasswordResponse> call, Throwable t) {
+                Log.e("ApiManager", "Forgot Password Error: " + t.getMessage());
                 listener.onError("Network Error: " + t.getMessage());
             }
         });
     }
 
-
-    public void updateUserProfile(String token, UpdateProfileRequest request, BooleanCallback callback)
-    {
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<UpdateProfileResponse> call = apiService.updateUserProfile("Bearer " + token, request);
-
-        call.enqueue(new Callback<UpdateProfileResponse>() {
+    public void checkOTP(OTPRequest request, ApiResponseListener<CheckOTPResponse> listener) {
+        Log.d("ApiManager", "Check OTP Request: " + new Gson().toJson(request));
+        Call<CheckOTPResponse> call = apiService.checkOTP(request);
+        call.enqueue(new Callback<CheckOTPResponse>() {
             @Override
-            public void onResponse(Call<UpdateProfileResponse> call, Response<UpdateProfileResponse> response) {
-                System.out.println("==" + response.body());
-                if (response.isSuccessful()) {
-                    callback.onResult(true);
+            public void onResponse(Call<CheckOTPResponse> call, Response<CheckOTPResponse> response) {
+                Log.d("ApiManager", "Check OTP Response: " + (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
                 } else {
-                    callback.onResult(false);
+                    listener.onError("Failed to verify OTP: " + response.message());
                 }
             }
 
             @Override
-            public void onFailure(Call<UpdateProfileResponse> call, Throwable t) {
-                callback.onResult(false);
+            public void onFailure(Call<CheckOTPResponse> call, Throwable t) {
+                Log.e("ApiManager", "Check OTP Error: " + t.getMessage());
+                listener.onError("Network Error: " + t.getMessage());
             }
         });
-
     }
 
+    public void getUserProfile(String accessToken, ApiResponseListener<GetUserProfileResponse> listener) {
+        Call<GetUserProfileResponse> call = apiService.getUserProfile("Bearer " + accessToken);
+        call.enqueue(new Callback<GetUserProfileResponse>() {
+            @Override
+            public void onResponse(Call<GetUserProfileResponse> call, Response<GetUserProfileResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    listener.onError("Failed to fetch profile");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetUserProfileResponse> call, Throwable t) {
+                listener.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void updateUserProfile(String accessToken, UpdateProfileRequest request, ApiResponseListener<GetUserProfileResponse> listener) {
+        Call<GetUserProfileResponse> call = apiService.updateUserProfile("Bearer " + accessToken, request);
+        call.enqueue(new Callback<GetUserProfileResponse>() {
+            @Override
+            public void onResponse(Call<GetUserProfileResponse> call, Response<GetUserProfileResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    listener.onError("Failed to update profile");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetUserProfileResponse> call, Throwable t) {
+                listener.onError(t.getMessage());
+            }
+        });
+    }
 
     public interface BooleanCallback {
         void onResult(boolean result);
     }
-
 }
-

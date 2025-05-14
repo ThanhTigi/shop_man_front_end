@@ -107,7 +107,7 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
 
 
     private void loadAddressAndContact() {
-        String savedAddress = MyPreferences.getString(getContext(),"user_address","216 St Paul’s Rd, London N1 2LL, UK");
+        String savedAddress = MyPreferences.getString(getContext(),"user_address","216 St Paul's Rd, London N1 2LL, UK");
         String savedContact = MyPreferences.getString(getContext(),"user_phone_number", "0326749576");
         tvAddress.setText("Address: " + savedAddress);
         tvContact.setText("Contact: " + savedContact);
@@ -144,14 +144,19 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
                 return;
             }
 
+            if (!contact.matches("\\d{10}")) {
+                Toast.makeText(getActivity(), "Contact must be a 10-digit phone number", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             String fullAddress = country + ", " + city + ", " + detailedAddress;
             String fullContact = contact;
 
             MyPreferences.setString(getContext(),"user_address",fullAddress);
             MyPreferences.setString(getContext(),"user_phone_number",fullContact);
 
-            tvAddress.setText(fullAddress);
-            tvContact.setText(fullContact);
+            tvAddress.setText("Address: " + fullAddress);
+            tvContact.setText("Contact: " + fullContact);
             dialog.dismiss();
         });
 

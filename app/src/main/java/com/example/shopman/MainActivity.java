@@ -85,30 +85,31 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
+        viewPager.setUserInputEnabled(false);
 
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                switch (position) {
-                    case 0:
-                        bottomNavigationView.setSelectedItemId(R.id.nav_home);
-                        break;
-                    case 1:
-                        bottomNavigationView.setSelectedItemId(R.id.nav_wishlist);
-                        break;
-                    case 2:
-                        bottomNavigationView.setSelectedItemId(R.id.nav_cart);
-                        break;
-                    case 3:
-                        bottomNavigationView.setSelectedItemId(R.id.nav_search);
-                        break;
-                    case 4:
-                        bottomNavigationView.setSelectedItemId(R.id.nav_settings);
-                        break;
-                }
-            }
-        });
+//        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+//            @Override
+//            public void onPageSelected(int position) {
+//                super.onPageSelected(position);
+//                switch (position) {
+//                    case 0:
+//                        bottomNavigationView.setSelectedItemId(R.id.nav_home);
+//                        break;
+//                    case 1:
+//                        bottomNavigationView.setSelectedItemId(R.id.nav_wishlist);
+//                        break;
+//                    case 2:
+//                        bottomNavigationView.setSelectedItemId(R.id.nav_cart);
+//                        break;
+//                    case 3:
+//                        bottomNavigationView.setSelectedItemId(R.id.nav_search);
+//                        break;
+//                    case 4:
+//                        bottomNavigationView.setSelectedItemId(R.id.nav_settings);
+//                        break;
+//                }
+//            }
+//        });
     }
 
     public void switchToSearchWithData(String keywordSearch) {

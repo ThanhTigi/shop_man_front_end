@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.shopman.Product;
 import com.example.shopman.ProductAdapter;
 import com.example.shopman.R;
+import com.example.shopman.utilitis.MyPreferences;
 import com.example.shopman.utilitis.ProductsConst;
 
 import java.util.ArrayList;
@@ -48,42 +49,39 @@ public class WishlistFragment extends Fragment {
         ivSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("====== clicked");
                 searchItem();
             }
         });
 
+
+
+        return view;
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
         totalItems = new ArrayList<>();
-        totalItems.add(ProductsConst.totalProducts.get(17));
-        totalItems.add(ProductsConst.totalProducts.get(5));
-        totalItems.add(ProductsConst.totalProducts.get(7));
-        totalItems.add(ProductsConst.totalProducts.get(9));
-        totalItems.add(ProductsConst.totalProducts.get(11));
-        totalItems.add(ProductsConst.totalProducts.get(13));
-        totalItems.add(ProductsConst.totalProducts.get(15));
-
         wishlistRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-
-        wishlistItems = new ArrayList<>();
         loadWishlistData();
 
         wishlistAdapter = new ProductAdapter(wishlistItems);
         wishlistRecyclerView.setAdapter(wishlistAdapter);
 
         itemCount.setText(wishlistItems.size() + " Items");
-
-        return view;
     }
 
     private void loadWishlistData() {
-
-        wishlistItems.add(ProductsConst.totalProducts.get(17));
-        wishlistItems.add(ProductsConst.totalProducts.get(5));
-        wishlistItems.add(ProductsConst.totalProducts.get(7));
-        wishlistItems.add(ProductsConst.totalProducts.get(9));
-        wishlistItems.add(ProductsConst.totalProducts.get(11));
-        wishlistItems.add(ProductsConst.totalProducts.get(13));
-        wishlistItems.add(ProductsConst.totalProducts.get(15));
+        String jsonData = MyPreferences.getString(getContext(),"user_wishlist_products","");
+        if (jsonData.isEmpty())
+        {
+            wishlistItems = new ArrayList<>();
+        }
+        else
+        {
+            wishlistItems = WishlistProducts.fromJson(jsonData).getTotalProducts();
+        }
 
         if (wishlistAdapter != null) {
             wishlistAdapter.notifyDataSetChanged();

@@ -40,7 +40,7 @@
                     android:id="@+id/tvAddress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Address: 216 St Paul’s Rd, London N1 2LL, UK"
+                    android:text="Address: Phu Phuong, Ba Vi, Ha Noi"
                     android:textSize="14sp"
                     android:layout_marginBottom="8dp" />
 

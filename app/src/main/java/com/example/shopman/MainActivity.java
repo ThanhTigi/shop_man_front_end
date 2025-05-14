@@ -14,6 +14,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.shopman.fragments.cart.CartFragment;
 import com.example.shopman.fragments.home.HomeFragment;
 import com.example.shopman.fragments.search.SearchFragment;
+import com.example.shopman.fragments.setting.ProfileActivity;
 import com.example.shopman.fragments.setting.SettingFragment;
 import com.example.shopman.fragments.wishlist.WishlistFragment;
 import com.example.shopman.utilitis.AppConfig;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         profileImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,ProfileActivity.class);
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                 startActivity(intent);
             }
         });

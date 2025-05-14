@@ -12,7 +12,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import com.example.shopman.ProfileActivity;
 import com.example.shopman.R;
 import com.example.shopman.auth.LoginActivity;
 import com.example.shopman.utilitis.MyPreferences;
@@ -84,6 +83,11 @@ public class SettingFragment extends Fragment {
 
             if (country.isEmpty() || city.isEmpty() || detailedAddress.isEmpty() || contact.isEmpty()) {
                 Toast.makeText(getActivity(), "Please fill all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!contact.matches("\\d{10}")) {
+                Toast.makeText(getActivity(), "Contact must be a 10-digit phone number", Toast.LENGTH_SHORT).show();
                 return;
             }
 

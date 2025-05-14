@@ -1,4 +1,4 @@
-package com.example.shopman;
+package com.example.shopman.fragments.setting;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.shopman.R;
 import com.example.shopman.auth.LoginActivity;
 import com.example.shopman.models.login.UserMetadata;
 import com.example.shopman.models.profile.getuserprofile.Address;

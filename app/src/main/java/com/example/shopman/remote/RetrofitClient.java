@@ -2,6 +2,7 @@ package com.example.shopman.remote;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.example.shopman.models.auth.RefreshTokenResponse;
 import com.example.shopman.utilitis.MyPreferences;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -18,7 +20,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
     private static Retrofit retrofit;
-    private static final String BASE_URL = "https://shopman.onrender.com";
+    private static final String BASE_URL = "https://shopman.onrender.com"; // Thay bằng ngrok hoặc Render URL
     private static Context appContext;
     private static boolean isRefreshing = false;
 
@@ -29,7 +31,11 @@ public class RetrofitClient {
 
     public static Retrofit getClient() {
         if (retrofit == null) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor(message -> Log.d("OkHttp", message));
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
             OkHttpClient client = new OkHttpClient.Builder()
+                    .addInterceptor(logging)
                     .addInterceptor(new AuthInterceptor())
                     .addInterceptor(new RefreshTokenInterceptor())
                     .build();
@@ -78,7 +84,6 @@ public class RetrofitClient {
             if (response.code() == 401) {
                 synchronized (RetrofitClient.class) {
                     if (isRefreshing) {
-                        // Nếu đang làm mới token, chờ và thử lại với token mới
                         return waitForNewToken(chain, originalRequest);
                     }
 
@@ -87,7 +92,6 @@ public class RetrofitClient {
 
                     if (!TextUtils.isEmpty(refreshToken)) {
                         try {
-                            // Gọi API refresh token
                             ApiService apiService = getClient().create(ApiService.class);
                             Call<RefreshTokenResponse> refreshCall = apiService.refreshToken(refreshToken);
                             Response<RefreshTokenResponse> refreshResponse = refreshCall.execute();
@@ -96,17 +100,14 @@ public class RetrofitClient {
                                 String newAccessToken = refreshResponse.body().getMetadata().getMetadata().getAccessToken();
                                 String newRefreshToken = refreshResponse.body().getMetadata().getMetadata().getRefreshToken();
 
-                                // Lưu token mới
                                 MyPreferences.setString(appContext, "access_token", newAccessToken);
                                 MyPreferences.setString(appContext, "refresh_token", newRefreshToken);
 
-                                // Thử lại yêu cầu với token mới
                                 Request newRequest = originalRequest.newBuilder()
                                         .header("Authorization", "Bearer " + newAccessToken)
                                         .build();
                                 return chain.proceed(newRequest);
                             } else {
-                                // Refresh token thất bại
                                 MyPreferences.clear(appContext);
                                 throw new IOException("Refresh token failed");
                             }
@@ -130,7 +131,7 @@ public class RetrofitClient {
             synchronized (RetrofitClient.class) {
                 while (isRefreshing) {
                     try {
-                        Thread.sleep(100); // Chờ 100ms trước khi kiểm tra lại
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         throw new IOException("Interrupted while waiting for token refresh", e);
                     }

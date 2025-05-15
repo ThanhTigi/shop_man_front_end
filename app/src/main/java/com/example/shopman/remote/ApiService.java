@@ -6,6 +6,7 @@ import com.example.shopman.models.changepassword.request.ForgotPasswordRequest;
 import com.example.shopman.models.changepassword.request.ForgotPasswordResponse;
 import com.example.shopman.models.changepassword.response.ChangePasswordResponse;
 import com.example.shopman.models.checkotp.CheckOTPResponse;
+import com.example.shopman.models.login.GoogleLoginRequest;
 import com.example.shopman.models.login.LoginRequest;
 import com.example.shopman.models.login.LoginResponse;
 import com.example.shopman.models.OTPRequest;
@@ -14,6 +15,7 @@ import com.example.shopman.models.signup.SignUpResponse;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileRequest;
 import com.example.shopman.models.searchproducts.SearchProductsResponse;
+import com.example.shopman.models.FcmTokenRequest;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -26,6 +28,9 @@ import retrofit2.http.Query;
 public interface ApiService {
     @POST("/api/v1/auth/login")
     Call<LoginResponse> login(@Body LoginRequest request);
+
+    @POST("/api/v1/auth/login-with-google")
+    Call<LoginResponse> loginWithGoogle(@Body GoogleLoginRequest request);
 
     @POST("/api/v1/auth/signup")
     Call<SignUpResponse> signUp(@Body SignUpRequest request);
@@ -50,4 +55,7 @@ public interface ApiService {
 
     @GET("/api/v1/product/search")
     Call<SearchProductsResponse> searchProducts(@Query("query") String query);
+
+    @POST("/api/v1/user/update-fcm-token")
+    Call<Void> updateFcmToken(@Header("Authorization") String authorization, @Body FcmTokenRequest request);
 }

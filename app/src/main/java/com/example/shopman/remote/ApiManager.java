@@ -3,11 +3,13 @@ package com.example.shopman.remote;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.shopman.models.FcmTokenRequest;
 import com.example.shopman.models.changepassword.request.ChangePasswordRequest;
 import com.example.shopman.models.changepassword.request.ForgotPasswordRequest;
 import com.example.shopman.models.changepassword.request.ForgotPasswordResponse;
 import com.example.shopman.models.changepassword.response.ChangePasswordResponse;
 import com.example.shopman.models.checkotp.CheckOTPResponse;
+import com.example.shopman.models.login.GoogleLoginRequest;
 import com.example.shopman.models.login.LoginRequest;
 import com.example.shopman.models.login.LoginResponse;
 import com.example.shopman.models.OTPRequest;
@@ -54,6 +56,34 @@ public class ApiManager {
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 Log.e("ApiManager", "Login Error: " + t.getMessage());
+                listener.onError("Network Error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void loginWithGoogle(String idToken, final ApiResponseListener<LoginResponse> listener) {
+        Log.d("ApiManager", "Google Login Request: idToken=" + idToken);
+        GoogleLoginRequest request = new GoogleLoginRequest(idToken);
+        Call<LoginResponse> call = apiService.loginWithGoogle(request);
+
+        call.enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                Log.d("ApiManager", "Google Login Response: " + (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
+                    LoginResponse loginResponse = response.body();
+                    MyPreferences.setString(context, "access_token", loginResponse.getMetadata().getMetadata().getTokens().getAccessToken());
+                    MyPreferences.setString(context, "refresh_token", loginResponse.getMetadata().getMetadata().getTokens().getRefreshToken());
+                    MyPreferences.setString(context, "current_user_meta_data", new Gson().toJson(loginResponse.getMetadata().getMetadata().getUser()));
+                    listener.onSuccess(response.body());
+                } else {
+                    listener.onError("Google login failed: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                Log.e("ApiManager", "Google Login Error: " + t.getMessage());
                 listener.onError("Network Error: " + t.getMessage());
             }
         });
@@ -189,6 +219,30 @@ public class ApiManager {
             @Override
             public void onFailure(Call<GetUserProfileResponse> call, Throwable t) {
                 listener.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void updateFcmToken(String accessToken, String fcmToken, ApiResponseListener<Void> listener) {
+        Log.d("ApiManager", "Update FCM Token Request: fcmToken=" + fcmToken);
+        FcmTokenRequest request = new FcmTokenRequest(fcmToken);
+        Call<Void> call = apiService.updateFcmToken("Bearer " + accessToken, request);
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Log.d("ApiManager", "Update FCM Token Response: " + response.code());
+                if (response.isSuccessful()) {
+                    listener.onSuccess(null);
+                } else {
+                    listener.onError("Failed to update FCM token: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("ApiManager", "Update FCM Token Error: " + t.getMessage());
+                listener.onError("Network Error: " + t.getMessage());
             }
         });
     }

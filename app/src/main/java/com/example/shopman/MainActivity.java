@@ -1,10 +1,11 @@
 package com.example.shopman;
 
-
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -17,30 +18,44 @@ import com.example.shopman.fragments.search.SearchFragment;
 import com.example.shopman.fragments.setting.ProfileActivity;
 import com.example.shopman.fragments.setting.SettingFragment;
 import com.example.shopman.fragments.wishlist.WishlistFragment;
+import com.example.shopman.remote.ApiManager;
+import com.example.shopman.remote.ApiResponseListener;
 import com.example.shopman.utilitis.AppConfig;
+import com.example.shopman.utilitis.MyPreferences;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 public class MainActivity extends AppCompatActivity {
 
     private ImageView profileImageView;
     private ViewPager2 viewPager;
     private BottomNavigationView bottomNavigationView;
+    private ApiManager apiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        apiManager = new ApiManager(this);
         viewPager = findViewById(R.id.viewPager);
         bottomNavigationView = findViewById(R.id.bottomNavigation);
         profileImageView = findViewById(R.id.ivProfile);
 
-        profileImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                startActivity(intent);
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                String fcmToken = task.getResult();
+                sendFcmTokenToServer(fcmToken);
+            } else {
+                Toast.makeText(MainActivity.this, "Failed to get FCM token", Toast.LENGTH_SHORT).show();
             }
+        });
+
+        profileImageView.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+            startActivity(intent);
         });
 
         FragmentStateAdapter pagerAdapter = new FragmentStateAdapter(this) {
@@ -86,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -112,10 +126,24 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void sendFcmTokenToServer(String fcmToken) {
+        String accessToken = MyPreferences.getString(this, "access_token", "");
+        apiManager.updateFcmToken(accessToken, fcmToken, new ApiResponseListener<Void>() {
+            @Override
+            public void onSuccess(Void response) {
+                Log.d("MainActivity", "FCM token updated successfully");
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Log.e("MainActivity", "Failed to update FCM token: " + errorMessage);
+            }
+        });
+    }
+
     public void switchToSearchWithData(String keywordSearch) {
         AppConfig.isSearch = true;
         AppConfig.keywordSearch = keywordSearch;
-
         viewPager.setCurrentItem(3, false);
     }
 

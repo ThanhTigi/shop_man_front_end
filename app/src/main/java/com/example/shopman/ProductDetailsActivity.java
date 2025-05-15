@@ -10,10 +10,12 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 
 import com.example.shopman.fragments.cart.CartItem;
 import com.example.shopman.fragments.cart.CartProducts;
 import com.example.shopman.fragments.cart.CheckoutActivity;
+import com.example.shopman.fragments.wishlist.WishlistProducts;
 import com.example.shopman.utilitis.MyPreferences;
 
 import java.util.ArrayList;
@@ -31,6 +33,8 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private ImageView backImageView;
 
     private Product product;
+    private WishlistProducts wishlistProducts;
+
 
 
     @Override
@@ -57,6 +61,8 @@ public class ProductDetailsActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+
 
         product = (Product) getIntent().getSerializableExtra("product");
         if (product != null) {
@@ -104,6 +110,42 @@ public class ProductDetailsActivity extends AppCompatActivity {
             Toast.makeText(this, "Product data not found", Toast.LENGTH_SHORT).show();
             finish();
         }
+
+        String jsonData = MyPreferences.getString(this,"user_wishlist_products","");
+        wishlistProducts = new WishlistProducts(new ArrayList<>());
+        if (!jsonData.isEmpty())
+        {
+            wishlistProducts.setTotalProducts(WishlistProducts.fromJson(jsonData).getTotalProducts());
+        }
+
+
+        AppCompatButton heartButton = findViewById(R.id.heartButton);
+
+        boolean checkContains = false;
+        for (Product product1: wishlistProducts.getTotalProducts()) {
+            if (product1.getName().equals(product.getName()))
+            {
+                checkContains = true;
+                break;
+            }
+        }
+
+        heartButton.setSelected(checkContains);
+
+        heartButton.setOnClickListener(v -> {
+            boolean nowSelected = !heartButton.isSelected();
+            heartButton.setSelected(nowSelected);
+            if (nowSelected)
+            {
+                wishlistProducts.AddProduct(product);
+                MyPreferences.setString(this,"user_wishlist_products",wishlistProducts.toJson());
+            }
+            else
+            {
+                wishlistProducts.RemoveProduct(product);
+                MyPreferences.setString(this,"user_wishlist_products",wishlistProducts.toJson());
+            }
+        });
 
         goToCartButton.setOnClickListener(v ->
         {

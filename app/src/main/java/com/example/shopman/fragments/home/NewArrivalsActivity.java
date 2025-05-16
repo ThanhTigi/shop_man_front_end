@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.shopman.Product;
 import com.example.shopman.ProductAdapter;
 import com.example.shopman.R;
-import com.example.shopman.utilitis.ProductsConst;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +27,7 @@ public class NewArrivalsActivity extends AppCompatActivity {
 
         // Khởi tạo danh sách New Arrivals (lấy 6 sản phẩm làm ví dụ)
         newArrivalsList = new ArrayList<>();
-        for (int i = 9; i < 15 && i < ProductsConst.totalProducts.size(); i++) {
-            newArrivalsList.add(ProductsConst.totalProducts.get(i));
-        }
+
 
         newArrivalsAdapter = new ProductAdapter(newArrivalsList);
         newArrivalsRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));

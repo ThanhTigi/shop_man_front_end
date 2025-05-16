@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.shopman.Product;
 import com.example.shopman.ProductAdapter;
 import com.example.shopman.R;
-import com.example.shopman.utilitis.ProductsConst;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,14 +38,7 @@ public class TrendingProductActivity extends AppCompatActivity {
 
     private List<Product> getSampleProducts() {
         List<Product> products = new ArrayList<>();
-        products.add(ProductsConst.totalProducts.get(11));
-        products.add(ProductsConst.totalProducts.get(12));
-        products.add(ProductsConst.totalProducts.get(7));
-        products.add(ProductsConst.totalProducts.get(5));
-        products.add(ProductsConst.totalProducts.get(9));
-        products.add(ProductsConst.totalProducts.get(3));
-        products.add(ProductsConst.totalProducts.get(1));
-        products.add(ProductsConst.totalProducts.get(2));
+
 
 
         return products;

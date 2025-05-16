@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,7 +20,6 @@ import com.example.shopman.MainActivity;
 import com.example.shopman.Product;
 import com.example.shopman.ProductAdapter;
 import com.example.shopman.R;
-import com.example.shopman.utilitis.ProductsConst;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -123,21 +121,11 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "Category RecyclerView set up");
 
         // Kiểm tra kích thước của ProductsConst.totalProducts
-        if (ProductsConst.totalProducts == null || ProductsConst.totalProducts.size() < 9) {
-            Log.e(TAG, "ProductsConst.totalProducts không đủ dữ liệu: " +
-                    (ProductsConst.totalProducts != null ? ProductsConst.totalProducts.size() : "null"));
-            if (getContext() != null) {
-                Toast.makeText(getContext(), "Không đủ dữ liệu sản phẩm", Toast.LENGTH_LONG).show();
-            }
-            return; // Thoát nếu không đủ dữ liệu
-        }
+
         Log.d(TAG, "ProductsConst.totalProducts has enough data");
 
         // Deal of the Day
         dealList = new ArrayList<>();
-        dealList.add(ProductsConst.totalProducts.get(3));
-        dealList.add(ProductsConst.totalProducts.get(4));
-        dealList.add(ProductsConst.totalProducts.get(5));
         dealAdapter = new ProductAdapter(dealList);
         if (getActivity() != null) {
             dealRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
@@ -171,9 +159,6 @@ public class HomeFragment extends Fragment {
 
         // Trending Products
         trendingList = new ArrayList<>();
-        trendingList.add(ProductsConst.totalProducts.get(0));
-        trendingList.add(ProductsConst.totalProducts.get(1));
-        trendingList.add(ProductsConst.totalProducts.get(2));
         trendingAdapter = new ProductAdapter(trendingList);
         if (getActivity() != null) {
             trendingRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));

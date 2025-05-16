@@ -1,6 +1,7 @@
 package com.example.shopman.remote;
 
 import android.content.Context;
+import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -19,37 +20,47 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
+    private static final String TAG = "RetrofitClient";
+    private static final String BASE_URL = "https://shopman.onrender.com"; // Thay bằng URL của bạn
+    private static final int MAX_RETRIES = 3;
     private static Retrofit retrofit;
-    private static final String BASE_URL = "https://shopman.onrender.com"; // Thay bằng ngrok hoặc Render URL
     private static Context appContext;
-    private static boolean isRefreshing = false;
+    private static volatile boolean isRefreshing = false;
 
     // Khởi tạo context
     public static void init(Context context) {
+        if (context == null) {
+            throw new IllegalArgumentException("Context cannot be null");
+        }
         appContext = context.getApplicationContext();
     }
 
+    // Lấy instance Retrofit
     public static Retrofit getClient() {
         if (retrofit == null) {
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor(message -> Log.d("OkHttp", message));
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+            synchronized (RetrofitClient.class) {
+                if (retrofit == null) {
+                    HttpLoggingInterceptor logging = new HttpLoggingInterceptor(message -> Log.d(TAG, message));
+                    logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .addInterceptor(logging)
-                    .addInterceptor(new AuthInterceptor())
-                    .addInterceptor(new RefreshTokenInterceptor())
-                    .build();
+                    OkHttpClient client = new OkHttpClient.Builder()
+                            .addInterceptor(logging)
+                            .addInterceptor(new AuthInterceptor())
+                            .addInterceptor(new RefreshTokenInterceptor())
+                            .build();
 
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .client(client)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
+                    retrofit = new Retrofit.Builder()
+                            .baseUrl(BASE_URL)
+                            .client(client)
+                            .addConverterFactory(GsonConverterFactory.create())
+                            .build();
+                }
+            }
         }
         return retrofit;
     }
 
-    // Interceptor để thêm header
+    // Interceptor để thêm header xác thực
     private static class AuthInterceptor implements Interceptor {
         @Override
         public okhttp3.Response intercept(Chain chain) throws IOException {
@@ -57,16 +68,20 @@ public class RetrofitClient {
             Request.Builder requestBuilder = originalRequest.newBuilder();
 
             String url = originalRequest.url().toString();
-            if (url.contains("/api/v1/auth/refresh-token") || url.contains("/api/v1/auth/logout")) {
-                String refreshToken = MyPreferences.getString(appContext, "refresh_token", null);
-                if (!TextUtils.isEmpty(refreshToken)) {
-                    requestBuilder.header("x-rtoken-id", refreshToken);
+            try {
+                if (url.contains("/api/v1/auth/refresh-token") || url.contains("/api/v1/auth/logout")) {
+                    String refreshToken = MyPreferences.getString(appContext, "refresh_token", null);
+                    if (!TextUtils.isEmpty(refreshToken)) {
+                        requestBuilder.header("x-rtoken-id", refreshToken);
+                    }
+                } else if (!url.contains("/api/v1/auth/")) {
+                    String accessToken = MyPreferences.getString(appContext, "access_token", null);
+                    if (!TextUtils.isEmpty(accessToken)) {
+                        requestBuilder.header("Authorization", "Bearer " + accessToken);
+                    }
                 }
-            } else if (!url.contains("/api/v1/auth/")) {
-                String accessToken = MyPreferences.getString(appContext, "access_token", null);
-                if (!TextUtils.isEmpty(accessToken)) {
-                    requestBuilder.header("Authorization", "Bearer " + accessToken);
-                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in AuthInterceptor: " + e.getMessage());
             }
 
             Request newRequest = requestBuilder.build();
@@ -76,22 +91,32 @@ public class RetrofitClient {
 
     // Interceptor để xử lý lỗi 401 và làm mới token
     private static class RefreshTokenInterceptor implements Interceptor {
+        private static final String TAG = "RetrofitClient";
+        private static final int MAX_RETRIES = 3;
+        private static volatile boolean isRefreshing = false;
+
         @Override
         public okhttp3.Response intercept(Chain chain) throws IOException {
             Request originalRequest = chain.request();
             okhttp3.Response response = chain.proceed(originalRequest);
+            Log.d(TAG, "intercept: HTTP " + response.code() + " for " + originalRequest.url());
 
-            if (response.code() == 401) {
+            if (response.code() == 401) { // Chỉ kiểm tra 401
                 synchronized (RetrofitClient.class) {
                     if (isRefreshing) {
                         return waitForNewToken(chain, originalRequest);
                     }
 
                     isRefreshing = true;
-                    String refreshToken = MyPreferences.getString(appContext, "refresh_token", null);
+                    int retryCount = 0;
 
-                    if (!TextUtils.isEmpty(refreshToken)) {
+                    while (retryCount < MAX_RETRIES) {
                         try {
+                            String refreshToken = MyPreferences.getString(appContext, "refresh_token", null);
+                            if (TextUtils.isEmpty(refreshToken)) {
+                                throw new IOException("No refresh token available");
+                            }
+
                             ApiService apiService = getClient().create(ApiService.class);
                             Call<RefreshTokenResponse> refreshCall = apiService.refreshToken(refreshToken);
                             Response<RefreshTokenResponse> refreshResponse = refreshCall.execute();
@@ -100,28 +125,40 @@ public class RetrofitClient {
                                 String newAccessToken = refreshResponse.body().getMetadata().getMetadata().getAccessToken();
                                 String newRefreshToken = refreshResponse.body().getMetadata().getMetadata().getRefreshToken();
 
-                                MyPreferences.setString(appContext, "access_token", newAccessToken);
-                                MyPreferences.setString(appContext, "refresh_token", newRefreshToken);
+                                try {
+                                    MyPreferences.setString(appContext, "access_token", newAccessToken);
+                                    MyPreferences.setString(appContext, "refresh_token", newRefreshToken);
+                                    Log.d(TAG, "Successfully refreshed tokens");
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Failed to save new tokens: " + e.getMessage());
+                                    throw new IOException("Failed to save new tokens");
+                                }
 
                                 Request newRequest = originalRequest.newBuilder()
                                         .header("Authorization", "Bearer " + newAccessToken)
                                         .build();
+                                isRefreshing = false;
                                 return chain.proceed(newRequest);
                             } else {
-                                MyPreferences.clear(appContext);
-                                throw new IOException("Refresh token failed");
+                                retryCount++;
+                                Thread.sleep(500);
+                                Log.w(TAG, "Refresh token attempt " + retryCount + " failed: HTTP " + refreshResponse.code());
                             }
                         } catch (Exception e) {
-                            MyPreferences.clear(appContext);
-                            throw new IOException("Error refreshing token", e);
-                        } finally {
-                            isRefreshing = false;
+                            retryCount++;
+                            Log.e(TAG, "Error refreshing token: " + e.getMessage());
                         }
-                    } else {
-                        isRefreshing = false;
-                        MyPreferences.clear(appContext);
-                        throw new IOException("No refresh token available");
                     }
+
+                    isRefreshing = false;
+                    try {
+                        MyPreferences.clear(appContext);
+                        notifyLogout();
+                        Log.d(TAG, "Cleared preferences due to failed token refresh");
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to clear preferences: " + e.getMessage());
+                    }
+                    throw new IOException("Failed to refresh token after " + MAX_RETRIES + " attempts");
                 }
             }
             return response;
@@ -145,6 +182,16 @@ public class RetrofitClient {
                 return chain.proceed(newRequest);
             }
             throw new IOException("No valid access token available");
+        }
+
+        private void notifyLogout() {
+            try {
+                Intent intent = new Intent("com.example.shopman.ACTION_LOGOUT");
+                appContext.sendBroadcast(intent);
+                Log.d(TAG, "Sent logout broadcast");
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to send logout broadcast: " + e.getMessage());
+            }
         }
     }
 }

@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.shopman.Product;
 import com.example.shopman.ProductAdapter;
 import com.example.shopman.R;
-import com.example.shopman.utilitis.ProductsConst;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,13 +53,7 @@ public class WishlistFragment extends Fragment {
         });
 
         totalItems = new ArrayList<>();
-        totalItems.add(ProductsConst.totalProducts.get(17));
-        totalItems.add(ProductsConst.totalProducts.get(5));
-        totalItems.add(ProductsConst.totalProducts.get(7));
-        totalItems.add(ProductsConst.totalProducts.get(9));
-        totalItems.add(ProductsConst.totalProducts.get(11));
-        totalItems.add(ProductsConst.totalProducts.get(13));
-        totalItems.add(ProductsConst.totalProducts.get(15));
+
 
         wishlistRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
@@ -77,13 +70,7 @@ public class WishlistFragment extends Fragment {
 
     private void loadWishlistData() {
 
-        wishlistItems.add(ProductsConst.totalProducts.get(17));
-        wishlistItems.add(ProductsConst.totalProducts.get(5));
-        wishlistItems.add(ProductsConst.totalProducts.get(7));
-        wishlistItems.add(ProductsConst.totalProducts.get(9));
-        wishlistItems.add(ProductsConst.totalProducts.get(11));
-        wishlistItems.add(ProductsConst.totalProducts.get(13));
-        wishlistItems.add(ProductsConst.totalProducts.get(15));
+
 
         if (wishlistAdapter != null) {
             wishlistAdapter.notifyDataSetChanged();

@@ -5,12 +5,6 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class UserProfileMetadata {
-    @SerializedName("message")
-    private String message;
-
-    @SerializedName("metadata")
-    private UserProfileMetadata userProfileMetaData;
-
     @SerializedName("id")
     private int id;
 
@@ -35,6 +29,9 @@ public class UserProfileMetadata {
     @SerializedName("status")
     private String status;
 
+    @SerializedName("fcmToken")
+    private String fcmToken; // Thêm trường mới
+
     @SerializedName("createdAt")
     private String createdAt;
 
@@ -46,14 +43,6 @@ public class UserProfileMetadata {
 
     @SerializedName("address")
     private List<Address> address;
-
-    public String getMessage() {
-        return message;
-    }
-
-    public UserProfileMetadata getUserProfileMetaData() {
-        return userProfileMetaData;
-    }
 
     public int getId() {
         return id;
@@ -85,6 +74,10 @@ public class UserProfileMetadata {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getFcmToken() {
+        return fcmToken;
     }
 
     public String getCreatedAt() {

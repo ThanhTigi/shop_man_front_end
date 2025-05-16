@@ -1,5 +1,6 @@
 package com.example.shopman.remote;
 
+import com.example.shopman.models.ProductDetails.ProductDetailResponse;
 import com.example.shopman.models.auth.RefreshTokenResponse;
 import com.example.shopman.models.changepassword.request.ChangePasswordRequest;
 import com.example.shopman.models.changepassword.request.ForgotPasswordRequest;
@@ -23,6 +24,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
@@ -47,15 +49,21 @@ public interface ApiService {
     @POST("/api/v1/auth/refresh-token")
     Call<RefreshTokenResponse> refreshToken(@Header("x-rtoken-id") String refreshToken);
 
-    @GET("/user/profile")
+    @GET("/api/v1/user/profile")
     Call<GetUserProfileResponse> getUserProfile(@Header("Authorization") String authorization);
 
-    @PUT("/user/profile/update")
+    @PUT("/api/v1/user/profile/update")
     Call<GetUserProfileResponse> updateUserProfile(@Header("Authorization") String authorization, @Body UpdateProfileRequest request);
 
     @GET("/api/v1/product/search")
-    Call<SearchProductsResponse> searchProducts(@Query("query") String query);
+    Call<SearchProductsResponse> searchProducts(
+            @Query("query") String query,
+            @Query("lastSortValues") String lastSortValues, // Gửi dưới dạng JSON string
+            @Query("pageSize") int pageSize
+    );
 
-    @POST("/api/v1/user/update-fcm-token")
+    @POST("/api/v1/auth/update-fcm-token")
     Call<Void> updateFcmToken(@Header("Authorization") String authorization, @Body FcmTokenRequest request);
+    @GET("/api/v1/product/detail/{slug}")
+    Call<ProductDetailResponse> getProductDetail(@Path("slug") String slug);
 }

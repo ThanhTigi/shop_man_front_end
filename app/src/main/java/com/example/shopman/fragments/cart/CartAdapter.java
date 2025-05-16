@@ -44,7 +44,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         Product product = cartItem.getProduct();
 
         holder.cbSelect.setChecked(cartItem.isSelected());
-        holder.productImage.setImageResource(product.getImageResId());
+        holder.productImage.setImageResource(product.getShopId());
         holder.productName.setText(product.getName());
         holder.productVariations.setText("Variations: " + cartItem.getSelectedVariation());
         holder.productRating.setRating(product.getRating());

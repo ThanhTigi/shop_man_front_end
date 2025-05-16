@@ -10,7 +10,7 @@ public class GetUserProfileResponse {
     private int status;
 
     @SerializedName("metadata")
-    private UserProfileMetadata userProfileMetaData;
+    private MetadataWrapper metadata; // Sử dụng MetadataWrapper thay vì UserProfileMetadata
 
     public String getMessage() {
         return message;
@@ -20,7 +20,7 @@ public class GetUserProfileResponse {
         return status;
     }
 
-    public UserProfileMetadata getUserProfileMetaData() {
-        return userProfileMetaData;
+    public MetadataWrapper getMetadata() {
+        return metadata;
     }
 }

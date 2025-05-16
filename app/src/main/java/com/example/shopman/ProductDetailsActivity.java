@@ -2,149 +2,115 @@ package com.example.shopman;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.shopman.fragments.cart.CartItem;
-import com.example.shopman.fragments.cart.CartProducts;
-import com.example.shopman.fragments.cart.CheckoutActivity;
-import com.example.shopman.utilitis.MyPreferences;
+import com.bumptech.glide.Glide;
+import com.example.shopman.models.ProductDetails.ProductDetail;
+import com.example.shopman.models.ProductDetails.ProductDetailResponse;
+import com.example.shopman.models.Sku;
+import com.example.shopman.models.SpuToSku;
 
-import java.util.ArrayList;
+import com.example.shopman.remote.ApiManager;
+import com.example.shopman.remote.ApiResponseListener;
+
 import java.util.List;
+import java.util.Map;
 
 public class ProductDetailsActivity extends AppCompatActivity {
 
-    private ImageView productImage;
-    private TextView productName, productDescription, productPrice, productDetailedDescription;
-    private RatingBar productRating;
-    private TextView selectedSizeText;
-    private LinearLayout sizeContainer;
-    private Button goToCartButton, buyNowButton;
-    private Button selectedSizeButton;
-    private ImageView backImageView;
-
-    private Product product;
-
+    private ImageView ivProduct;
+    private TextView tvName, tvPrice, tvDescription, tvRating;
+    private ApiManager apiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_details);
 
-        productImage = findViewById(R.id.productImage);
-        productName = findViewById(R.id.productName);
-        productDescription = findViewById(R.id.productDescription);
-        productPrice = findViewById(R.id.productPrice);
-        productDetailedDescription = findViewById(R.id.productDetailedDescription);
-        productRating = findViewById(R.id.productRating);
-        selectedSizeText = findViewById(R.id.selectedSizeText);
-        sizeContainer = findViewById(R.id.sizeContainer);
-        goToCartButton = findViewById(R.id.goToCartButton);
-        buyNowButton = findViewById(R.id.buyNowButton);
-        backImageView = findViewById(R.id.backiv);
+        ivProduct = findViewById(R.id.ivProduct);
+        tvName = findViewById(R.id.tvName);
+        tvPrice = findViewById(R.id.tvPrice);
+        tvDescription = findViewById(R.id.tvDescription);
+        tvRating = findViewById(R.id.tvRating);
 
+        apiManager = new ApiManager(this);
 
-        backImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
-        product = (Product) getIntent().getSerializableExtra("product");
-        if (product != null) {
-            productImage.setImageResource(product.getImageResId());
-            productName.setText(product.getName());
-            productDescription.setText(product.getDescription());
-            productPrice.setText(product.getPrice());
-            productDetailedDescription.setText(product.getDetailedDescription());
-            productRating.setRating(product.getRating());
-
-            List<String> sizes = product.getSizes();
-            for (int i = 0; i < sizes.size(); i++) {
-                String size = sizes.get(i);
-                Button sizeButton = new Button(this);
-                sizeButton.setText(size);
-                sizeButton.setTextSize(14);
-                sizeButton.setBackgroundResource(R.drawable.size_button_background);
-                sizeButton.setTextColor(getResources().getColor(android.R.color.black));
-                sizeButton.setPadding(16, 8, 16, 8);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-                params.setMargins(8, 0, 8, 0);
-                sizeButton.setLayoutParams(params);
-
-                if (i == 0) {
-                    sizeButton.setSelected(true);
-                    selectedSizeButton = sizeButton;
-                    selectedSizeText.setText("Type: " + size);
-                }
-
-                sizeButton.setOnClickListener(v -> {
-                    if (selectedSizeButton != null) {
-                        selectedSizeButton.setSelected(false);
-                    }
-                    sizeButton.setSelected(true);
-                    selectedSizeButton = sizeButton;
-                    selectedSizeText.setText("Type: " + size);
-                });
-
-                sizeContainer.addView(sizeButton);
-            }
+        String slug = getIntent().getStringExtra("product_slug");
+        if (slug != null) {
+            loadProductDetail(slug);
         } else {
-            Toast.makeText(this, "Product data not found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Invalid product", Toast.LENGTH_SHORT).show();
             finish();
         }
+    }
 
-        goToCartButton.setOnClickListener(v ->
-        {
-            CartProducts currentCartProducts;
-            if (MyPreferences.getString(this,"cart_products","").isEmpty())
-            {
-                currentCartProducts = new CartProducts(new ArrayList<>());
-            }
-            else
-            {
-                currentCartProducts = CartProducts.fromJson(MyPreferences.getString(this,"cart_products",""));
-            }
-
-
-            boolean check = false;
-            for (CartItem cartItem:currentCartProducts.getProducts()) {
-                if (cartItem.getProduct().getName().equals(product.getName()))
-                {
-                    check = true;
-                    break;
+    private void loadProductDetail(String slug) {
+        apiManager.getProductDetail(slug, new ApiResponseListener<ProductDetailResponse>() {
+            @Override
+            public void onSuccess(ProductDetailResponse response) {
+                if (response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
+                    ProductDetail productDetail = response.getMetadata().getMetadata();
+                    Product product = mapProductDetailToProduct(productDetail);
+                    displayProduct(product);
+                } else {
+                    Toast.makeText(ProductDetailsActivity.this, "Invalid response", Toast.LENGTH_SHORT).show();
                 }
             }
-            if (!check)
-            {
-                currentCartProducts.getProducts().add(new CartItem(product,1,
-                        false,selectedSizeButton.getText().toString()));
 
-                MyPreferences.setString(this,"cart_products",currentCartProducts.toJson());
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(ProductDetailsActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
             }
-
-            Toast.makeText(this, "Added to cart", Toast.LENGTH_SHORT).show();
         });
-        buyNowButton.setOnClickListener(v->
-        {
-            CartItem item = new CartItem(product,1,true,selectedSizeButton.getText().toString());
-            ArrayList<CartItem> selectedItems = new ArrayList<>();
-            selectedItems.add(item);
-            Intent checkoutIntent = new Intent(ProductDetailsActivity.this, CheckoutActivity.class);
-            checkoutIntent.putExtra("selectedCartItems", selectedItems);
-            startActivity(checkoutIntent);
-        });
+    }
 
+    private Product mapProductDetailToProduct(ProductDetail pd) {
+        Product product = new Product();
+        product.setId(String.valueOf(pd.getId()));
+        product.setName(pd.getName());
+        product.setDesc(pd.getDesc());
+        product.setDesc_plain(pd.getDesc_plain());
+        product.setPrice(pd.getPrice());
+        product.setThumb(pd.getThumb());
+        product.setRating(pd.getRating());
+        product.setDiscount_percentage(pd.getDiscount_percentage());
+        product.setSlug(pd.getSlug());
+        product.setCategoryId(pd.getCategoryId());
+        product.setCategoryPath(pd.getCategoryPath());
+        product.setShopId(pd.getShopId());
+        product.setSale_count(pd.getSale_count());
+        product.setAttrs(pd.getAttrs());
+        product.setSpuToSkus(pd.getSpuToSkus());
+        product.setHas_variations(pd.isHas_variations());
+        return product;
+    }
+
+    private void displayProduct(Product product) {
+        tvName.setText(product.getName());
+        tvPrice.setText(product.getPrice());
+        tvDescription.setText(product.getDesc());
+        tvRating.setText(String.valueOf(product.getRating()));
+        Glide.with(this).load(product.getThumb()).into(ivProduct);
+
+        // Hiển thị attrs
+        Map<String, Object> attrs = product.getAttrs();
+        if (attrs != null) {
+            List<String> sizes = (List<String>) attrs.get("sizes");
+            // Hiển thị sizes, colors, v.v. trong UI
+        }
+
+        // Hiển thị SpuToSkus
+        List<SpuToSku> skus = product.getSpuToSkus();
+        if (skus != null) {
+            for (SpuToSku spuToSku : skus) {
+                Sku sku = spuToSku.getSku();
+                Map<String, String> skuAttrs = sku.getSkuAttr().getSku_attrs();
+                // Hiển thị size, color, stock trong UI
+            }
+        }
     }
 }

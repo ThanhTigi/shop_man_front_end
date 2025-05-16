@@ -4,8 +4,11 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
+        android:name=".ShopManApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -15,82 +18,82 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopMan"
         tools:targetApi="31"
-        tools:replace="android:allowBackup">
+        tools:replace="android:allowBackup,android:fullBackupContent">
 
-        <!-- Meta-data for Google Play Services -->
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+    <!-- Meta-data for Google Play Services -->
+    <meta-data
+        android:name="com.google.android.gms.version"
+        android:value="@integer/google_play_services_version" />
 
-        <!-- Meta-data for Firebase Messaging -->
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_notification" />
+    <!-- Meta-data for Firebase Messaging -->
+    <meta-data
+        android:name="com.google.firebase.messaging.default_notification_icon"
+        android:resource="@drawable/ic_notification" />
 
-        <!-- Firebase Messaging Service -->
-        <service
-            android:name=".services.MyFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
+    <!-- Firebase Messaging Service -->
+    <service
+        android:name=".services.MyFirebaseMessagingService"
+        android:exported="false">
+        <intent-filter>
+            <action android:name="com.google.firebase.MESSAGING_EVENT" />
+        </intent-filter>
+    </service>
 
-        <!-- Activities -->
-        <activity
-            android:name=".onboarding.OnboardingActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".auth.LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ProductDetailsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".fragments.home.CategoryProductActivity"
-            android:exported="false" />
-        <activity
-            android:name=".auth.CheckOTPActivity"
-            android:exported="false" />
-        <activity
-            android:name=".auth.ChangePasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".fragments.cart.CheckoutActivity"
-            android:exported="false" />
-        <activity
-            android:name=".fragments.home.TrendingProductActivity"
-            android:exported="false" />
-        <activity
-            android:name=".fragments.cart.PaymentActivity"
-            android:exported="false" />
-        <activity
-            android:name=".fragments.setting.ProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".auth.ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".auth.SignUpActivity"
-            android:exported="false" />
-        <activity
-            android:name=".fragments.home.DealActivity"
-            android:exported="false" />
-        <activity
-            android:name=".fragments.home.SpecialOffersActivity"
-            android:exported="false" />
-        <activity
-            android:name=".fragments.home.NewArrivalsActivity"
-            android:exported="false" />
+    <!-- Activities -->
+    <activity
+        android:name=".onboarding.OnboardingActivity"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+    </activity>
+    <activity
+        android:name=".auth.LoginActivity"
+        android:exported="false" />
+    <activity
+        android:name=".MainActivity"
+        android:exported="false" />
+    <activity
+        android:name=".ProductDetailsActivity"
+        android:exported="false" />
+    <activity
+        android:name=".fragments.home.CategoryProductActivity"
+        android:exported="false" />
+    <activity
+        android:name=".auth.CheckOTPActivity"
+        android:exported="false" />
+    <activity
+        android:name=".auth.ChangePasswordActivity"
+        android:exported="false" />
+    <activity
+        android:name=".fragments.cart.CheckoutActivity"
+        android:exported="false" />
+    <activity
+        android:name=".fragments.home.TrendingProductActivity"
+        android:exported="false" />
+    <activity
+        android:name=".fragments.cart.PaymentActivity"
+        android:exported="false" />
+    <activity
+        android:name=".fragments.setting.ProfileActivity"
+        android:exported="false" />
+    <activity
+        android:name=".auth.ForgotPasswordActivity"
+        android:exported="false" />
+    <activity
+        android:name=".auth.SignUpActivity"
+        android:exported="false" />
+    <activity
+        android:name=".fragments.home.DealActivity"
+        android:exported="false" />
+    <activity
+        android:name=".fragments.home.SpecialOffersActivity"
+        android:exported="false" />
+    <activity
+        android:name=".fragments.home.NewArrivalsActivity"
+        android:exported="false" />
 
-    </application>
+</application>
 
-</manifest>
+    </manifest>

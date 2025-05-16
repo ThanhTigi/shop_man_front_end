@@ -33,9 +33,9 @@ public class CheckoutAdapter extends RecyclerView.Adapter<CheckoutAdapter.Checko
         CartItem cartItem = cartItems.get(position);
         Product product = cartItem.getProduct();
 
-        holder.productImage.setImageResource(product.getImageResId());
+        holder.productImage.setImageResource(product.getShopId());
         holder.productName.setText(product.getName());
-        holder.productDescription.setText(product.getDescription());
+        holder.productDescription.setText(product.getDesc());
         holder.productSize.setText("Size " + cartItem.getSelectedVariation());
         holder.productQuantity.setText("Qty " + cartItem.getQuantity());
         holder.deliveryDate.setText("Delivery by 10 May 20XX");

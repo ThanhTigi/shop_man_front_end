@@ -44,9 +44,20 @@ public class TrendingProductActivity extends AppCompatActivity {
         products.add(ProductsConst.totalProducts.get(7));
         products.add(ProductsConst.totalProducts.get(5));
         products.add(ProductsConst.totalProducts.get(9));
-        products.add(ProductsConst.totalProducts.get(3));
         products.add(ProductsConst.totalProducts.get(1));
         products.add(ProductsConst.totalProducts.get(2));
+        products.add(ProductsConst.totalProducts.get(14));
+        products.add(ProductsConst.totalProducts.get(15));
+        products.add(ProductsConst.totalProducts.get(20));
+        products.add(ProductsConst.totalProducts.get(24));
+        products.add(ProductsConst.totalProducts.get(25));
+        products.add(ProductsConst.totalProducts.get(28));
+        products.add(ProductsConst.totalProducts.get(32));
+        products.add(ProductsConst.totalProducts.get(33));
+        products.add(ProductsConst.totalProducts.get(34));
+        products.add(ProductsConst.totalProducts.get(36));
+        products.add(ProductsConst.totalProducts.get(38));
+        products.add(ProductsConst.totalProducts.get(46));
 
 
         return products;

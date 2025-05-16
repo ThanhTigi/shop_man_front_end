@@ -84,7 +84,9 @@ public class HomeFragment extends Fragment {
         trendingList = new ArrayList<>();
         trendingList.add(ProductsConst.totalProducts.get(0));
         trendingList.add(ProductsConst.totalProducts.get(1));
-        trendingList.add(ProductsConst.totalProducts.get(2));
+        trendingList.add(ProductsConst.totalProducts.get(3));
+        trendingList.add(ProductsConst.totalProducts.get(4));
+        trendingList.add(ProductsConst.totalProducts.get(5));
         trendingAdapter = new ProductAdapter(trendingList);
         trendingRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         trendingRecyclerView.setAdapter(trendingAdapter);

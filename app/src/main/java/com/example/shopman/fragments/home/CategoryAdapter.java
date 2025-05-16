@@ -36,7 +36,6 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         holder.categoryName.setText(category.getName());
         holder.categoryImage.setImageResource(category.getImageResId());
 
-        // Set click listener to navigate to CategoryProductsActivity
         holder.itemView.setOnClickListener(v -> {
             Context context = holder.itemView.getContext();
             Intent intent = new Intent(context, CategoryProductActivity.class);

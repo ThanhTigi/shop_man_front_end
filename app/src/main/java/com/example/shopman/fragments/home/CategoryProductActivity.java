@@ -53,28 +53,64 @@ public class CategoryProductActivity extends AppCompatActivity {
 
         switch (category.toLowerCase()) {
             case "beauty":
-                products.add(ProductsConst.totalProducts.get(1));
-                products.add(ProductsConst.totalProducts.get(2));
-                break;
-            case "fashion":
+                products.add(ProductsConst.totalProducts.get(0));
                 products.add(ProductsConst.totalProducts.get(3));
                 products.add(ProductsConst.totalProducts.get(4));
+                products.add(ProductsConst.totalProducts.get(19));
+                products.add(ProductsConst.totalProducts.get(21));
+                break;
+            case "fashion":
+                products.add(ProductsConst.totalProducts.get(16));
+                products.add(ProductsConst.totalProducts.get(17));
+                products.add(ProductsConst.totalProducts.get(26));
+                products.add(ProductsConst.totalProducts.get(27));
+                products.add(ProductsConst.totalProducts.get(29));
+                products.add(ProductsConst.totalProducts.get(30));
+                products.add(ProductsConst.totalProducts.get(31));
+                products.add(ProductsConst.totalProducts.get(43));
+                products.add(ProductsConst.totalProducts.get(45));
+                products.add(ProductsConst.totalProducts.get(49));
                 break;
             case "kids":
-                products.add(ProductsConst.totalProducts.get(5));
                 products.add(ProductsConst.totalProducts.get(6));
+                products.add(ProductsConst.totalProducts.get(8));
+                products.add(ProductsConst.totalProducts.get(18));
+                products.add(ProductsConst.totalProducts.get(22));
+                products.add(ProductsConst.totalProducts.get(35));
+                products.add(ProductsConst.totalProducts.get(37));
+                products.add(ProductsConst.totalProducts.get(42));
+                products.add(ProductsConst.totalProducts.get(47));
                 break;
             case "men":
-                products.add(ProductsConst.totalProducts.get(7));
-                products.add(ProductsConst.totalProducts.get(8));
-                break;
-            case "women":
                 products.add(ProductsConst.totalProducts.get(9));
                 products.add(ProductsConst.totalProducts.get(10));
+                products.add(ProductsConst.totalProducts.get(12));
+                products.add(ProductsConst.totalProducts.get(39));
+                products.add(ProductsConst.totalProducts.get(41));
+                products.add(ProductsConst.totalProducts.get(48));
+                break;
+            case "women":
+                products.add(ProductsConst.totalProducts.get(13));
+                products.add(ProductsConst.totalProducts.get(44));
                 break;
             default:
+                products.add(ProductsConst.totalProducts.get(1));
+                products.add(ProductsConst.totalProducts.get(2));
+                products.add(ProductsConst.totalProducts.get(5));
+                products.add(ProductsConst.totalProducts.get(7));
                 products.add(ProductsConst.totalProducts.get(11));
-                products.add(ProductsConst.totalProducts.get(12));
+                products.add(ProductsConst.totalProducts.get(14));
+                products.add(ProductsConst.totalProducts.get(15));
+                products.add(ProductsConst.totalProducts.get(20));
+                products.add(ProductsConst.totalProducts.get(24));
+                products.add(ProductsConst.totalProducts.get(25));
+                products.add(ProductsConst.totalProducts.get(28));
+                products.add(ProductsConst.totalProducts.get(32));
+                products.add(ProductsConst.totalProducts.get(33));
+                products.add(ProductsConst.totalProducts.get(34));
+                products.add(ProductsConst.totalProducts.get(36));
+                products.add(ProductsConst.totalProducts.get(38));
+                products.add(ProductsConst.totalProducts.get(46));
                 break;
         }
         return products;

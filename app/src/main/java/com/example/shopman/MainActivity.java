@@ -24,8 +24,6 @@ import com.example.shopman.utilitis.AppConfig;
 import com.example.shopman.utilitis.MyPreferences;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,6 +35,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Cấu hình thanh trạng thái: màu trắng, biểu tượng tối
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        getWindow().setStatusBarColor(getResources().getColor(android.R.color.white));
+
         setContentView(R.layout.activity_main);
 
         apiManager = new ApiManager(this);
@@ -44,20 +47,23 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottomNavigation);
         profileImageView = findViewById(R.id.ivProfile);
 
+        // Lấy FCM token và gửi lên server
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 String fcmToken = task.getResult();
                 sendFcmTokenToServer(fcmToken);
             } else {
-                Toast.makeText(MainActivity.this, "Failed to get FCM token", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Không lấy được FCM token", Toast.LENGTH_SHORT).show();
             }
         });
 
+        // Xử lý sự kiện nhấn vào ảnh hồ sơ
         profileImageView.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
             startActivity(intent);
         });
 
+        // Thiết lập adapter cho ViewPager2
         FragmentStateAdapter pagerAdapter = new FragmentStateAdapter(this) {
             @Override
             public Fragment createFragment(int position) {
@@ -84,7 +90,9 @@ public class MainActivity extends AppCompatActivity {
         };
 
         viewPager.setAdapter(pagerAdapter);
+        viewPager.setUserInputEnabled(false); // Vô hiệu hóa cuộn ngang
 
+        // Xử lý sự kiện chọn mục trên BottomNavigationView
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_home) {
@@ -101,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
+        // Đồng bộ ViewPager2 với BottomNavigationView
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -131,12 +140,12 @@ public class MainActivity extends AppCompatActivity {
         apiManager.updateFcmToken(accessToken, fcmToken, new ApiResponseListener<Void>() {
             @Override
             public void onSuccess(Void response) {
-                Log.d("MainActivity", "FCM token updated successfully");
+                Log.d("MainActivity", "Cập nhật FCM token thành công");
             }
 
             @Override
             public void onError(String errorMessage) {
-                Log.e("MainActivity", "Failed to update FCM token: " + errorMessage);
+                Log.e("MainActivity", "Cập nhật FCM token thất bại: " + errorMessage);
             }
         });
     }
@@ -146,5 +155,4 @@ public class MainActivity extends AppCompatActivity {
         AppConfig.keywordSearch = keywordSearch;
         viewPager.setCurrentItem(3, false);
     }
-
 }

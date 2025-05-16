@@ -1,0 +1,4 @@
+<resources>
+    <attr name="toolbar_background" format="color" />
+    <attr name="toolbar_text_color" format="color" />
+</resources>

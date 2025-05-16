@@ -81,6 +81,15 @@
         <activity
             android:name=".auth.SignUpActivity"
             android:exported="false" />
+        <activity
+            android:name=".fragments.home.DealActivity"
+            android:exported="false" />
+        <activity
+            android:name=".fragments.home.SpecialOffersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".fragments.home.NewArrivalsActivity"
+            android:exported="false" />
 
     </application>
 

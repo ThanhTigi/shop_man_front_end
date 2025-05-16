@@ -8,7 +8,9 @@
     <style name="BottomNavigationViewTextInactive">
         <item name="android:textSize">12sp</item>
     </style>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorButtonNormal">@android:color/white</item>
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Màu cho chế độ sáng -->
+        <item name="toolbar_background">@color/toolbar_background</item>
+        <item name="toolbar_text_color">@color/toolbar_text_color</item>
     </style>
 </resources>

@@ -54,12 +54,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         String priceStr = product.getPrice().replace("$", "").trim();
         double price = Double.parseDouble(priceStr);
         double originalPrice = price / 0.67;
-        holder.productOriginalPrice.setText("$" + String.format("%.2f", originalPrice));
+        holder.productOriginalPrice.setText(String.format("%.2f", originalPrice) + "đ");
         holder.productOriginalPrice.setPaintFlags(holder.productOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
         holder.productDiscount.setText("upto 33% off");
         holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
-        holder.tvTotalOrder.setText("TOTAL ORDER (" + cartItem.getQuantity() + "): $" + String.format("%.2f", cartItem.getTotalPrice()));
+        holder.tvTotalOrder.setText("TOTAL ORDER (" + cartItem.getQuantity() + "): đ" + String.format("%.2f", cartItem.getTotalPrice()));
 
         holder.cbSelect.setOnCheckedChangeListener((buttonView, isChecked) -> {
             cartItem.setSelected(isChecked);
@@ -71,7 +71,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             if (quantity > 1) {
                 cartItem.setQuantity(quantity - 1);
                 holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
-                holder.tvTotalOrder.setText("TOTAL ORDER (" + cartItem.getQuantity() + "): $" + String.format("%.2f", cartItem.getTotalPrice()));
+                holder.tvTotalOrder.setText("TOTAL ORDER (" + cartItem.getQuantity() + "): đ" + String.format("%.2f", cartItem.getTotalPrice()));
                 listener.onQuantityChanged();
             }
         });
@@ -80,7 +80,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             int quantity = cartItem.getQuantity();
             cartItem.setQuantity(quantity + 1);
             holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
-            holder.tvTotalOrder.setText("TOTAL ORDER (" + cartItem.getQuantity() + "): $" + String.format("%.2f", cartItem.getTotalPrice()));
+            holder.tvTotalOrder.setText("TOTAL ORDER (" + cartItem.getQuantity() + "): đ" + String.format("%.2f", cartItem.getTotalPrice()));
             listener.onQuantityChanged();
         });
     }

@@ -50,7 +50,7 @@ public class ProfileActivity extends AppCompatActivity {
         UserMetadata userMetadata = UserMetadata.fromJson(MyPreferences.getString(ProfileActivity.this, "current_user_meta_data", ""));
         ApiManager apiManager = new ApiManager();
         accessToken = userMetadata.getTokens().getAccessToken();
-        apiManager.getUserProfile(accessToken, new ApiResponseListener<GetUserProfileResponse>() {
+        apiManager.getUserProfile(accessToken, new ApiResponseListener<>() {
             @Override
             public void onSuccess(GetUserProfileResponse response) {
                 UserProfileMetadata user = response.getUserProfileMetaData().getUserProfileMetaData();
@@ -62,7 +62,7 @@ public class ProfileActivity extends AppCompatActivity {
                     Address address = user.getAddress().get(0);
                     etPincode.setText(String.valueOf(address.getPincode()));
                     etAddress.setText(address.getAddress());
-                    etCity.setText(address.getCity() );
+                    etCity.setText(address.getCity());
                     etCountry.setText(address.getCountry());
                 } else {
                     etPincode.setText("");

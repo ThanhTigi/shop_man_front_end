@@ -58,9 +58,9 @@ public class PaymentActivity extends AppCompatActivity {
         double shippingFee = 30.0;
         double totalWithShipping = orderTotal + shippingFee;
 
-        tvOrderAmount.setText("đ" + String.format("%.2f", orderTotal));
-        tvShippingFee.setText("đ" + String.format("%.2f", shippingFee));
-        tvTotalAmount.setText("đ" + String.format("%.2f", totalWithShipping));
+        tvOrderAmount.setText(String.format("%.2f", orderTotal) + "đ");
+        tvShippingFee.setText(String.format("%.2f", shippingFee) + "đ");
+        tvTotalAmount.setText(String.format("%.2f", totalWithShipping) + "đ");
 
         llVisa.setOnClickListener(v -> showCardInfoDialog(0, "VISA", llVisa, R.id.tvVisaInfo, R.id.tvVisaHolderName, R.id.tvVisaCardNumber, R.id.tvVisaExpiryDate));
         llPaypal.setOnClickListener(v -> showCardInfoDialog(1, "PayPal", llPaypal, R.id.tvPaypalInfo, R.id.tvPaypalHolderName, R.id.tvPaypalCardNumber, R.id.tvPaypalExpiryDate));

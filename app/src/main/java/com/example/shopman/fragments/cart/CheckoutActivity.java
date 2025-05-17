@@ -69,7 +69,7 @@ public class CheckoutActivity extends AppCompatActivity {
         couponList.add(new Coupon("WINTER200", "15 Dec 2025", 20, 20.0)); // 20% off
         couponList.add(new Coupon("FESTIVE1000", "1 Jan 2026", 5, 80.0)); // 80% off
 
-        tvOrderAmount.setText("đ" + String.format("%.2f", orderTotal));
+        tvOrderAmount.setText(String.format("%.2f", orderTotal) + "đ");
         tvDeliveryFee.setText("FREE");
         updateOrderTotal();
 
@@ -115,9 +115,9 @@ public class CheckoutActivity extends AppCompatActivity {
 
     private void updateOrderTotal() {
         double finalTotal = orderTotal - discount;
-        tvOriginalAmount.setText("đ" + String.format("%.2f", orderTotal));
-        tvDiscountAmount.setText("-đ" + String.format("%.2f", discount));
-        tvOrderTotal.setText("đ" + String.format("%.2f", finalTotal));
-        tvFinalTotal.setText("đ" + String.format("%.2f", finalTotal));
+        tvOriginalAmount.setText(String.format("%.2f", orderTotal) + "đ");
+        tvDiscountAmount.setText(String.format("%.2f", discount) + "đ");
+        tvOrderTotal.setText(String.format("%.2f", finalTotal) + "đ");
+        tvFinalTotal.setText(String.format("%.2f", finalTotal) + "đ");
     }
 }

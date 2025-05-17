@@ -70,18 +70,6 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
         cartRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         cartRecyclerView.setAdapter(cartAdapter);
 
-//        cbSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
-//            if (!isChecked)
-//            {
-//                return;
-//            }
-//            for (CartItem item : cartItems) {
-//                item.setSelected(isChecked);
-//            }
-//            cartAdapter.notifyDataSetChanged();
-//            updateTotalAmount();
-//        });
-
         cbSelectAll.setOnClickListener(v ->
         {
             boolean isChecked = cbSelectAll.isChecked();
@@ -199,8 +187,8 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
             }
         }
 
-        CartProducts cartProducts = new CartProducts(cartItems);
-        MyPreferences.setString(getContext(),"cart_products",cartProducts.toJson());
+//        CartProducts cartProducts = new CartProducts(cartItems);
+//        MyPreferences.setString(getContext(),"cart_products",cartProducts.toJson());
 
         tvTotalAmount.setText("đ" + String.format("%.2f", total));
     }

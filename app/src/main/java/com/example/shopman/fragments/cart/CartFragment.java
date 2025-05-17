@@ -187,8 +187,8 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartItemChan
             }
         }
 
-//        CartProducts cartProducts = new CartProducts(cartItems);
-//        MyPreferences.setString(getContext(),"cart_products",cartProducts.toJson());
+        CartProducts cartProducts = new CartProducts(cartItems);
+        MyPreferences.setString(getContext(),"cart_products",cartProducts.toJson());
 
         tvTotalAmount.setText("đ" + String.format("%.2f", total));
     }

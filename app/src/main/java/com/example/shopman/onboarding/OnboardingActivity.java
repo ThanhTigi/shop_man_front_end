@@ -25,8 +25,7 @@ public class OnboardingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (MyPreferences.getBoolean(this,"new_user", false))
-        {
+        if (MyPreferences.getBoolean(this, "new_user", false)) {
             Intent intent = new Intent(OnboardingActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
@@ -79,13 +78,13 @@ public class OnboardingActivity extends AppCompatActivity {
         tvPrev.setOnClickListener(v -> viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true));
         tvNext.setOnClickListener(v -> viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true));
         tvGetStarted.setOnClickListener(v -> {
-            MyPreferences.setBoolean(this,"new_user",true);
+            MyPreferences.setBoolean(this, "new_user", true);
             Intent intent = new Intent(OnboardingActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
         });
         tvSkip.setOnClickListener(v -> {
-            MyPreferences.setBoolean(this,"new_user",true);
+            MyPreferences.setBoolean(this, "new_user", true);
             Intent intent = new Intent(OnboardingActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
@@ -95,12 +94,19 @@ public class OnboardingActivity extends AppCompatActivity {
     private void addDots(int currentPage) {
         numberOfPageTxt.setText((currentPage + 1) + "/3");
         llDots.removeAllViews();
-        dots = new TextView[3];  // Số lượng màn hình onboarding
+        dots = new TextView[3];
+
         for (int i = 0; i < dots.length; i++) {
             dots[i] = new TextView(this);
             dots[i].setText("•");
             dots[i].setTextSize(18);
             dots[i].setTextColor(currentPage == i ? getResources().getColor(android.R.color.black) : getResources().getColor(android.R.color.darker_gray));
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(8, 0, 8, 0);
+            dots[i].setLayoutParams(params);
             llDots.addView(dots[i]);
         }
     }

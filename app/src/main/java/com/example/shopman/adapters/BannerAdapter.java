@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.shopman.R;
 import com.example.shopman.models.Banner.Banner;
 
@@ -19,7 +20,6 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.BannerView
     private List<Banner> bannerList;
     private OnBannerClickListener onBannerClickListener;
 
-    // Interface để xử lý sự kiện nhấp vào banner
     public interface OnBannerClickListener {
         void onBannerClicked(Banner banner);
     }
@@ -38,19 +38,18 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.BannerView
 
     @Override
     public void onBindViewHolder(@NonNull BannerViewHolder holder, int position) {
-        Banner banner = bannerList.get(position % bannerList.size()); // Vòng lặp vô hạn cho ViewPager2
-        // Sử dụng Picasso để tải hình ảnh banner
-//        if (banner.getThumb() != null && !banner.getThumb().isEmpty()) {
-//            Picasso.get()
-//                    .load(banner.getThumb())
-//                    .placeholder(R.drawable.ic_placeholder)
-//                    .error(R.drawable.ic_error)
-//                    .into(holder.bannerImage);
-//        } else {
-//            holder.bannerImage.setImageResource(R.drawable.ic_placeholder);
-//        }
+        if (bannerList.isEmpty()) return;
+        Banner banner = bannerList.get(position % bannerList.size());
 
-        // Xử lý sự kiện nhấp vào banner
+        // Tải hình ảnh bằng Glide
+        Glide.with(holder.itemView.getContext())
+                .load(banner.getThumb())
+                .placeholder(R.drawable.ic_placeholder)
+                .error(R.drawable.ic_error)
+                .centerCrop()
+                .into(holder.bannerImage);
+
+        // Xử lý click
         holder.itemView.setOnClickListener(v -> {
             if (onBannerClickListener != null) {
                 onBannerClickListener.onBannerClicked(banner);
@@ -60,7 +59,7 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.BannerView
 
     @Override
     public int getItemCount() {
-        return bannerList.isEmpty() ? 0 : Integer.MAX_VALUE; // Vòng lặp vô hạn cho ViewPager2
+        return bannerList.isEmpty() ? 0 : Integer.MAX_VALUE;
     }
 
     public void updateBanners(List<Banner> newBanners) {

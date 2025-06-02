@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@android:color/white">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -17,12 +17,12 @@
             android:orientation="vertical"
             android:paddingBottom="16dp">
 
-            <!-- Phần Search giữ nguyên -->
+            <!-- Thanh tìm kiếm -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="10dp"
                 android:background="@drawable/search_bar_background"
                 android:elevation="4dp"
                 android:gravity="center_vertical"
@@ -41,7 +41,7 @@
                     android:hint="Search any Product..."
                     android:padding="12dp"
                     android:singleLine="true"
-                    android:textColor="#000000"
+                    android:textColor="@android:color/black"
                     android:textColorHint="#999999" />
 
                 <ImageView
@@ -49,11 +49,11 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="8dp"
-                    android:src="@drawable/ic_search"
-                    android:contentDescription="Search Button" />
+                    android:contentDescription="Search Button"
+                    android:src="@drawable/ic_search" />
             </LinearLayout>
 
-            <!-- Phần All Featured giữ nguyên -->
+            <!-- Danh mục (All Featured) -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -71,11 +71,11 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="All Featured"
-                        android:textColor="#000000"
+                        android:textColor="@android:color/black"
                         android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp" />
+                        android:textStyle="bold" />
 
                     <FrameLayout
                         android:layout_width="match_parent"
@@ -85,9 +85,9 @@
                             android:id="@+id/categoryRecyclerView"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="true"
                             android:orientation="horizontal"
-                            android:scrollbars="horizontal"
-                            android:nestedScrollingEnabled="true" />
+                            android:scrollbars="horizontal" />
 
                         <ProgressBar
                             android:id="@+id/categoryProgressBar"
@@ -99,23 +99,43 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Phần Banner (thay ImageView bằng ViewPager2) -->
+            <!-- Banner -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp">
 
-                <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/bannerViewPager"
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="150dp" />
+                    android:layout_height="150dp">
 
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/bannerViewPager"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <ProgressBar
+                        android:id="@+id/bannerProgressBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
+
+                    <me.relex.circleindicator.CircleIndicator3
+                        android:id="@+id/bannerIndicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="8dp"
+                        app:ci_drawable="@drawable/circle_indicator_selected"
+                        app:ci_drawable_unselected="@drawable/circle_indicator_unselected" />
+                </FrameLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Các phần còn lại giữ nguyên -->
+            <!-- Deal of the Day -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -134,15 +154,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/deal_background"
-                        android:padding="8dp"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:padding="8dp">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Deal of the Day"
-                            android:textColor="#FFFFFF"
+                            android:textColor="@android:color/white"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -151,30 +171,31 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="View all"
-                            android:textSize="14sp"
-                            android:textColor="#FFFFFF" />
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp" />
                     </LinearLayout>
 
                     <TextView
                         android:id="@+id/dealRemainingTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:text="00:00:00"
                         android:textColor="#666666"
-                        android:textSize="12sp"
-                        android:layout_marginTop="4dp" />
+                        android:textSize="12sp" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/dealRecyclerView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:nestedScrollingEnabled="true"
                         android:orientation="horizontal"
-                        android:scrollbars="horizontal"
-                        android:nestedScrollingEnabled="true" />
+                        android:scrollbars="horizontal" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Special Offers -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -194,7 +215,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:text="Special Offers"
-                        android:textColor="#000000"
+                        android:textColor="@android:color/black"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
@@ -203,17 +224,18 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:nestedScrollingEnabled="true"
                         android:orientation="horizontal"
-                        android:scrollbars="horizontal"
-                        android:nestedScrollingEnabled="true" />
+                        android:scrollbars="horizontal" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Special Offer Banner -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp">
 
@@ -222,11 +244,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
+                    android:contentDescription="Special Offer Banner"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/special_offer_image_1"
-                    android:contentDescription="Special Offer Banner" />
+                    android:src="@drawable/special_offer_image_1" />
             </androidx.cardview.widget.CardView>
 
+            <!-- Trending Products -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -245,15 +268,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/trending_background"
-                        android:padding="8dp"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:padding="8dp">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Trending Products"
-                            android:textColor="#FFFFFF"
+                            android:textColor="@android:color/white"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -262,30 +285,31 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="View all"
-                            android:textSize="14sp"
-                            android:textColor="#FFFFFF" />
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp" />
                     </LinearLayout>
 
                     <TextView
                         android:id="@+id/trendingRemainingTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:text="00:00:00"
                         android:textColor="#666666"
-                        android:textSize="12sp"
-                        android:layout_marginTop="4dp" />
+                        android:textSize="12sp" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/trendingRecyclerView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:nestedScrollingEnabled="true"
                         android:orientation="horizontal"
-                        android:scrollbars="horizontal"
-                        android:nestedScrollingEnabled="true" />
+                        android:scrollbars="horizontal" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- New Arrivals -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -304,9 +328,9 @@
                         android:id="@+id/bannerImageView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/new_arrivals_image"
+                        android:contentDescription="New Arrivals Banner"
                         android:scaleType="fitCenter"
-                        android:contentDescription="New Arrivals Banner" />
+                        android:src="@drawable/new_arrivals_image" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -319,7 +343,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="New Arrivals"
-                            android:textColor="#000000"
+                            android:textColor="@android:color/black"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -328,20 +352,21 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="View all"
-                            android:textSize="14sp"
-                            android:textColor="#0000FF" />
+                            android:textColor="#0000FF"
+                            android:textSize="14sp" />
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:text="Summer 25 Collections"
                         android:textColor="#666666"
-                        android:textSize="14sp"
-                        android:layout_marginTop="4dp" />
+                        android:textSize="14sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Sponsored -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -359,11 +384,11 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="Sponsored"
-                        android:textColor="#000000"
+                        android:textColor="@android:color/black"
                         android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp" />
+                        android:textStyle="bold" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -372,18 +397,18 @@
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:contentDescription="Sponsored Banner"
                             android:scaleType="fitCenter"
-                            android:src="@drawable/sponsored_image"
-                            android:contentDescription="Sponsored Banner" />
+                            android:src="@drawable/sponsored_image" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
                             android:text="UP TO 50% OFF"
+                            android:textColor="@android:color/white"
                             android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="#FFFFFF"
-                            android:layout_centerInParent="true" />
+                            android:textStyle="bold" />
                     </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

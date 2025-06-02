@@ -98,7 +98,7 @@ public interface ApiService {
             @Query("pageSize") Integer pageSize
     );
 
-    @GET("/api/v1/banners")
+    @GET("/api/v1/banner")
     Call<BannerResponse> getBanners();
 
 

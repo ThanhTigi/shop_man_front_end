@@ -24,6 +24,7 @@ import com.example.shopman.activities.CampaignActivity;
 import com.example.shopman.activities.CategoryProductsActivity;
 import com.example.shopman.activities.DealActivity;
 import com.example.shopman.activities.NewArrivalsActivity;
+import com.example.shopman.activities.ShopActivity;
 import com.example.shopman.adapters.BannerAdapter;
 import com.example.shopman.adapters.CategoryAdapter;
 import com.example.shopman.adapters.ProductAdapter;
@@ -35,12 +36,17 @@ import com.example.shopman.models.wishlist.WishlistProductDetail;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
 import com.example.shopman.utilitis.SpacesItemDecoration;
+import com.google.gson.Gson;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import me.relex.circleindicator.CircleIndicator3;
 
 public class HomeFragment extends Fragment {
 
@@ -54,20 +60,22 @@ public class HomeFragment extends Fragment {
     private ProgressBar categoryProgressBar;
     private RecyclerView dealRecyclerView;
     private ProductAdapter dealAdapter;
-    private List<WishlistProductDetail> dealList; // Sửa thành WishlistProductDetail
+    private List<WishlistProductDetail> dealList;
     private TextView dealViewAll;
     private TextView dealRemainingTime;
     private RecyclerView specialOffersRecyclerView;
     private ProductAdapter specialOffersAdapter;
-    private List<WishlistProductDetail> specialOffersList; // Sửa thành WishlistProductDetail
+    private List<WishlistProductDetail> specialOffersList;
     private RecyclerView trendingRecyclerView;
     private ProductAdapter trendingAdapter;
-    private List<WishlistProductDetail> trendingList; // Sửa thành WishlistProductDetail
+    private List<WishlistProductDetail> trendingList;
     private TextView trendingViewAll;
     private TextView trendingRemainingTime;
     private ImageView bannerImageView;
     private TextView newArrivalsViewAll;
     private ViewPager2 bannerViewPager;
+    private ProgressBar bannerProgressBar;
+    private CircleIndicator3 bannerIndicator;
     private BannerAdapter bannerAdapter;
     private List<Banner> bannerList;
     private CountDownTimer bannerAutoSlideTimer;
@@ -91,6 +99,7 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "onViewCreated called");
 
         // Khởi tạo views
+        Log.d(TAG, "Initializing views");
         etSearch = view.findViewById(R.id.etSearch);
         ImageView ivSearch = view.findViewById(R.id.ivSearch);
         categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
@@ -105,7 +114,8 @@ public class HomeFragment extends Fragment {
         bannerImageView = view.findViewById(R.id.bannerImageView);
         newArrivalsViewAll = view.findViewById(R.id.newArrivalsViewAll);
         bannerViewPager = view.findViewById(R.id.bannerViewPager);
-
+        bannerProgressBar = view.findViewById(R.id.bannerProgressBar);
+        bannerIndicator = view.findViewById(R.id.bannerIndicator);
         Log.d(TAG, "Views initialized");
 
         if (getContext() == null) {
@@ -113,9 +123,11 @@ public class HomeFragment extends Fragment {
             return;
         }
 
+        Log.d(TAG, "Initializing ApiManager");
         apiManager = new ApiManager(getContext());
 
         // Search listener
+        Log.d(TAG, "Setting search listener");
         ivSearch.setOnClickListener(v -> {
             Log.d(TAG, "ivSearch clicked");
             if (getActivity() instanceof MainActivity) {
@@ -127,6 +139,7 @@ public class HomeFragment extends Fragment {
         });
 
         // Khởi tạo danh mục
+        Log.d(TAG, "Initializing category adapter");
         categoryList = new ArrayList<>();
         categoryAdapter = new CategoryAdapter(categoryList, slug -> {
             String categoryName = categoryList.stream()
@@ -147,40 +160,46 @@ public class HomeFragment extends Fragment {
         categoryRecyclerView.setAdapter(categoryAdapter);
 
         // Khởi tạo banner
+        Log.d(TAG, "Initializing banner adapter");
         bannerList = new ArrayList<>();
         bannerAdapter = new BannerAdapter(bannerList, this::handleBannerClick);
         bannerViewPager.setAdapter(bannerAdapter);
         bannerViewPager.setOffscreenPageLimit(3);
+        bannerIndicator.setViewPager(bannerViewPager);
 
         // Khởi tạo Deal of the Day
-//        dealList = new ArrayList<>();
+        Log.d(TAG, "Initializing deal adapter");
+        dealList = new ArrayList<>();
 //        dealAdapter = new ProductAdapter(dealList);
-//        dealRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-//        dealRecyclerView.setAdapter(dealAdapter);
-//        dealViewAll.setOnClickListener(v -> {
-//            Intent intent = new Intent(getActivity(), DealActivity.class);
-//            startActivity(intent);
-//        });
+        dealRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
+        dealRecyclerView.setAdapter(dealAdapter);
+        dealViewAll.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), DealActivity.class);
+            startActivity(intent);
+        });
         startDealCountDownTimer();
 
         // Khởi tạo Special Offers
-//        specialOffersList = new ArrayList<>();
+        Log.d(TAG, "Initializing special offers adapter");
+        specialOffersList = new ArrayList<>();
 //        specialOffersAdapter = new ProductAdapter(specialOffersList);
-//        specialOffersRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-//        specialOffersRecyclerView.setAdapter(specialOffersAdapter);
+        specialOffersRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
+        specialOffersRecyclerView.setAdapter(specialOffersAdapter);
 
         // Khởi tạo Trending Products
-//        trendingList = new ArrayList<>();
+        Log.d(TAG, "Initializing trending adapter");
+        trendingList = new ArrayList<>();
 //        trendingAdapter = new ProductAdapter(trendingList);
-//        trendingRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-//        trendingRecyclerView.setAdapter(trendingAdapter);
-//        trendingViewAll.setOnClickListener(v -> {
-//            Intent intent = new Intent(getActivity(), TrendingProductActivity.class);
-//            startActivity(intent);
-//        });
+        trendingRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
+        trendingRecyclerView.setAdapter(trendingAdapter);
+        trendingViewAll.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), DealActivity.class);
+            startActivity(intent);
+        });
         startTrendingCountDownTimer();
 
         // New Arrivals
+        Log.d(TAG, "Setting new arrivals");
         bannerImageView.setImageResource(R.drawable.new_arrivals_image);
         newArrivalsViewAll.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), NewArrivalsActivity.class);
@@ -188,28 +207,42 @@ public class HomeFragment extends Fragment {
         });
 
         // Tải dữ liệu
+        Log.d(TAG, "Calling loadBanners");
         loadBanners();
+        Log.d(TAG, "Calling loadCategories");
         loadCategories();
-//        loadDeals();
-//        loadSpecialOffers();
-//        loadTrendingProducts();
-        startBannerAutoSlide();
     }
 
     private void loadBanners() {
+        Log.d(TAG, "Starting loadBanners");
+        if (bannerProgressBar == null) {
+            Log.e(TAG, "bannerProgressBar is null");
+            Toast.makeText(getContext(), "Lỗi giao diện: bannerProgressBar không tìm thấy", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        bannerProgressBar.setVisibility(View.VISIBLE);
         apiManager.getBanners(new ApiResponseListener<BannerResponse>() {
             @Override
             public void onSuccess(BannerResponse response) {
+                Log.d(TAG, "Banner response received: " + new Gson().toJson(response));
+                bannerProgressBar.setVisibility(View.GONE);
                 if (response != null && response.getMetadata() != null && response.getMetadata().getBanners() != null) {
                     bannerList.clear();
                     for (Banner banner : response.getMetadata().getBanners()) {
+                        Log.d(TAG, "Processing banner: id=" + banner.getId() + ", status=" + banner.getStatus());
                         if ("active".equals(banner.getStatus())) {
                             bannerList.add(banner);
                         }
                     }
+                    Log.d(TAG, "Filtered bannerList size: " + bannerList.size());
                     bannerAdapter.notifyDataSetChanged();
+                    bannerIndicator.createIndicators(bannerList.size(), 0);
                     bannerViewPager.setVisibility(bannerList.isEmpty() ? View.GONE : View.VISIBLE);
+                    if (!bannerList.isEmpty()) {
+                        startBannerAutoSlide();
+                    }
                 } else {
+                    Log.w(TAG, "No banners available");
                     Toast.makeText(getContext(), "Không thể tải banner", Toast.LENGTH_SHORT).show();
                     bannerViewPager.setVisibility(View.GONE);
                 }
@@ -217,26 +250,25 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onError(String errorMessage) {
+                bannerProgressBar.setVisibility(View.GONE);
                 Log.e(TAG, "Failed to load banners: " + errorMessage);
                 Toast.makeText(getContext(), "Lỗi tải banner", Toast.LENGTH_SHORT).show();
                 bannerViewPager.setVisibility(View.GONE);
             }
         });
     }
-
     private void handleBannerClick(Banner banner) {
         String linkType = banner.getLinkType();
         String linkTarget = banner.getLinkTarget();
+        String slug = extractSlugFromLink(linkTarget);
         if ("campaign".equals(linkType)) {
-            String campaignSlug = extractSlugFromLink(linkTarget);
             Intent intent = new Intent(getContext(), CampaignActivity.class);
-            intent.putExtra("campaignSlug", campaignSlug);
+            intent.putExtra("campaignSlug", slug);
             startActivity(intent);
         } else if ("shop".equals(linkType)) {
-            String shopSlug = extractSlugFromLink(linkTarget);
-//            Intent intent = new Intent(getContext(), ShopActivity.class);
-//            intent.putExtra("shopSlug", shopSlug);
-//            startActivity(intent);
+            Intent intent = new Intent(getContext(), ShopActivity.class);
+            intent.putExtra("shopSlug", slug);
+            startActivity(intent);
         } else {
             Toast.makeText(getContext(), "Loại liên kết không hỗ trợ", Toast.LENGTH_SHORT).show();
         }
@@ -272,116 +304,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-//    private void loadDeals() {
-//        apiManager.getDealOfTheDayProducts(1, PAGE_SIZE, new ApiResponseListener<DealResponse>() {
-//            @Override
-//            public void onSuccess(DealResponse response) {
-//                if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
-//                    List<DealProduct> dealProducts = response.getMetadata().getMetadata().getProducts();
-//                    dealList.clear();
-//                    for (DealProduct dp : dealProducts) {
-//                        WishlistProductDetail product = new WishlistProductDetail();
-//                        product.setId(String.valueOf(dp.getId()));
-//                        product.setName(dp.getName());
-//                        product.setDesc(dp.getDesc());
-//                        product.setDescPlain(dp.getDescPlain());
-//                        product.setPrice(dp.getPrice());
-//                        product.setThumb(dp.getThumb());
-//                        product.setRating(dp.getRating());
-//                        product.setDiscountPercentage(dp.getDiscountPercentage());
-//                        product.setSlug(dp.getSlug());
-//                        product.setCategoryId(dp.getCategoryId());
-//                        product.setShopId(dp.getShopId());
-//                        product.setSaleCount(dp.getSaleCount());
-//                        product.setCreatedAt(dp.getCreatedAt());
-//                        dealList.add(product);
-//                    }
-//                    dealAdapter.notifyDataSetChanged();
-//                } else {
-//                    Toast.makeText(getContext(), "Không tìm thấy deal", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onError(String errorMessage) {
-//                Log.e(TAG, "Failed to load deals: " + errorMessage);
-//                Toast.makeText(getContext(), "Lỗi tải deal", Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//    }
-
-//    private void loadSpecialOffers() {
-//        // Tạm thời sử dụng cùng API với Deal of the Day, bạn có thể thay bằng API khác
-//        apiManager.getDealOfTheDayProducts(1, PAGE_SIZE, new ApiResponseListener<DealResponse>() {
-//            @Override
-//            public void onSuccess(DealResponse response) {
-//                if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
-//                    List<DealProduct> dealProducts = response.getMetadata().getMetadata().getProducts();
-//                    specialOffersList.clear();
-//                    for (DealProduct dp : dealProducts) {
-//                        WishlistProductDetail product = new WishlistProductDetail();
-//                        product.setId(String.valueOf(dp.getId()));
-//                        product.setName(dp.getName());
-//                        product.setDesc(dp.getDesc());
-//                        product.setDescPlain(dp.getDescPlain());
-//                        product.setPrice(dp.getPrice());
-//                        product.setThumb(dp.getThumb());
-//                        product.setRating(dp.getRating());
-//                        product.setDiscountPercentage(dp.getDiscountPercentage());
-//                        product.setSlug(dp.getSlug());
-//                        product.setCategoryId(dp.getCategoryId());
-//                        product.setShopId(dp.getShopId());
-//                        product.setSaleCount(dp.getSaleCount());
-//                        product.setCreatedAt(dp.getCreatedAt());
-//                        specialOffersList.add(product);
-//                    }
-//                    specialOffersAdapter.notifyDataSetChanged();
-//                }
-//            }
-//
-//            @Override
-//            public void onError(String errorMessage) {
-//                Log.e(TAG, "Failed to load special offers: " + errorMessage);
-//            }
-//        });
-//    }
-
-//    private void loadTrendingProducts() {
-//        // Tạm thời sử dụng cùng API với Deal of the Day, bạn có thể thay bằng API khác
-//        apiManager.getDealOfTheDayProducts(1, PAGE_SIZE, new ApiResponseListener<DealResponse>() {
-//            @Override
-//            public void onSuccess(DealResponse response) {
-//                if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
-//                    List<DealProduct> dealProducts = response.getMetadata().getMetadata().getProducts();
-//                    trendingList.clear();
-//                    for (DealProduct dp : dealProducts) {
-//                        WishlistProductDetail product = new WishlistProductDetail();
-//                        product.setId(String.valueOf(dp.getId()));
-//                        product.setName(dp.getName());
-//                        product.setDesc(dp.getDesc());
-//                        product.setDescPlain(dp.getDescPlain());
-//                        product.setPrice(dp.getPrice());
-//                        product.setThumb(dp.getThumb());
-//                        product.setRating(dp.getRating());
-//                        product.setDiscountPercentage(dp.getDiscountPercentage());
-//                        product.setSlug(dp.getSlug());
-//                        product.setCategoryId(dp.getCategoryId());
-//                        product.setShopId(dp.getShopId());
-//                        product.setSaleCount(dp.getSaleCount());
-//                        product.setCreatedAt(dp.getCreatedAt());
-//                        trendingList.add(product);
-//                    }
-//                    trendingAdapter.notifyDataSetChanged();
-//                }
-//            }
-//
-//            @Override
-//            public void onError(String errorMessage) {
-//                Log.e(TAG, "Failed to load trending products: " + errorMessage);
-//            }
-//        });
-//    }
-
     private void loadFallbackCategories() {
         categoryList.clear();
         categoryList.add(new Category("Beauty", "https://example.com/beauty.png", "beauty"));
@@ -396,7 +318,7 @@ public class HomeFragment extends Fragment {
         if (bannerAutoSlideTimer != null) {
             bannerAutoSlideTimer.cancel();
         }
-        bannerAutoSlideTimer = new CountDownTimer(Long.MAX_VALUE, 5000) {
+        bannerAutoSlideTimer = new CountDownTimer(3600000, 5000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 if (bannerList.size() > 0) {
@@ -408,6 +330,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFinish() {
+                startBannerAutoSlide();
             }
         }.start();
     }

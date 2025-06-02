@@ -1,39 +1,83 @@
 package com.example.shopman.models.ProductDetails;
 
-import com.example.shopman.models.SpuToSku;
+import com.example.shopman.models.Product;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 import java.util.Map;
 
 public class ProductDetail {
+    @SerializedName("id")
     private int id;
+
+    @SerializedName("name")
     private String name;
+
+    @SerializedName("desc")
     private String desc;
+
+    @SerializedName("desc_plain")
     private String desc_plain;
-    private String price; // Chuỗi vì API trả về chuỗi
+
+    @SerializedName("price")
+    private String price;
+
+    @SerializedName("discount_percentage")
     private int discount_percentage;
+
+    @SerializedName("thumb")
     private String thumb;
-    private Map<String, Object> attrs; // Hoặc tạo class Attrs riêng
+
+    @SerializedName("attrs")
+    private Map<String, Object> attrs;
+
+    @SerializedName("status")
     private String status;
+
+    @SerializedName("slug")
     private String slug;
+
+    @SerializedName("CategoryId")
     private int CategoryId;
+
+    @SerializedName("CategoryPath")
     private List<Integer> CategoryPath;
+
+    @SerializedName("sort")
     private int sort;
+
+    @SerializedName("ShopId")
     private int ShopId;
+
+    @SerializedName("rating")
     private float rating;
+
+    @SerializedName("sale_count")
     private int sale_count;
+
+    @SerializedName("has_variations")
     private boolean has_variations;
+
+    @SerializedName("createdAt")
     private String createdAt;
+
+    @SerializedName("updatedAt")
     private String updatedAt;
+
+    @SerializedName("deletedAt")
     private String deletedAt;
+
+    @SerializedName("SpuToSkus")
     private List<SpuToSku> SpuToSkus;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public Product toProduct() {
+        long priceValue;
+        try {
+            priceValue = Long.parseLong(price);
+        } catch (NumberFormatException e) {
+            priceValue = 0L;
+        }
+        return new Product(String.valueOf(id), name, priceValue, thumb, rating, discount_percentage, slug, sale_count, desc);
     }
 
     public int getId() {
@@ -44,6 +88,14 @@ public class ProductDetail {
         this.id = id;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getDesc() {
         return desc;
     }
@@ -52,20 +104,20 @@ public class ProductDetail {
         this.desc = desc;
     }
 
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
     public String getDesc_plain() {
         return desc_plain;
     }
 
     public void setDesc_plain(String desc_plain) {
         this.desc_plain = desc_plain;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
     }
 
     public int getDiscount_percentage() {
@@ -195,5 +247,5 @@ public class ProductDetail {
     public void setSpuToSkus(List<SpuToSku> spuToSkus) {
         SpuToSkus = spuToSkus;
     }
-// Getters and setters
+// Getters and setters (giữ nguyên)
 }

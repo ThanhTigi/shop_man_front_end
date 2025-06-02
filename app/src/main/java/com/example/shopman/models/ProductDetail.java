@@ -1,8 +1,9 @@
 package com.example.shopman.models;
 
+import com.example.shopman.models.ProductDetails.SpuToSku;
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
-import java.util.jar.Attributes;
+import java.util.Map;
 
 public class ProductDetail {
     @SerializedName("id")
@@ -27,7 +28,7 @@ public class ProductDetail {
     private String thumb;
 
     @SerializedName("attrs")
-    private Attributes attrs;
+    private Map<String, Object> attrs; // Sửa thành Map<String, Object>
 
     @SerializedName("status")
     private String status;
@@ -105,7 +106,7 @@ public class ProductDetail {
         return thumb;
     }
 
-    public Attributes getAttrs() {
+    public Map<String, Object> getAttrs() {
         return attrs;
     }
 

@@ -17,9 +17,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.shopman.Product;
-import com.example.shopman.ProductAdapter;
 import com.example.shopman.R;
+import com.example.shopman.adapters.ProductAdapter;
+import com.example.shopman.models.Product;
 import com.example.shopman.models.searchproducts.SearchProduct;
 import com.example.shopman.models.searchproducts.SearchProductsResponse;
 import com.example.shopman.remote.ApiManager;
@@ -49,14 +49,12 @@ public class SearchFragment extends Fragment {
     private ApiManager apiManager;
 
     public SearchFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
-        // Khởi tạo views
         etSearch = view.findViewById(R.id.etSearch);
         ivSearch = view.findViewById(R.id.ivSearch);
         rvProducts = view.findViewById(R.id.rvProducts);
@@ -65,37 +63,33 @@ public class SearchFragment extends Fragment {
         loadMoreProgress = view.findViewById(R.id.loadMoreProgress);
         emptyView = view.findViewById(R.id.emptyView);
 
-        // Kiểm tra null cho các view
         if (etSearch == null || ivSearch == null || rvProducts == null || itemCount == null ||
                 progressBar == null || loadMoreProgress == null || emptyView == null) {
             Log.e(TAG, "One or more views are null, check fragment_search.xml");
             throw new IllegalStateException("Required views not found in fragment_search.xml");
         }
 
-        // Khởi tạo adapter cho suggestions
         etSearch.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, suggestions));
         etSearch.setThreshold(1);
 
-        // Khởi tạo RecyclerView với GridLayoutManager (2 cột)
         GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 2);
         rvProducts.setLayoutManager(layoutManager);
-        searchAdapter = new ProductAdapter(productList);
+        searchAdapter = new ProductAdapter(requireContext(), productList, "search");
         rvProducts.setAdapter(searchAdapter);
 
         apiManager = new ApiManager(requireContext());
 
-        // Xử lý sự kiện nhấn nút tìm kiếm
         ivSearch.setOnClickListener(v -> {
             String query = etSearch.getText().toString().trim();
-            searchProduct(query, true); // Gọi tìm kiếm ngay cả khi query rỗng
+            Log.d(TAG, "Search button clicked with query: " + (query.isEmpty() ? "empty" : query));
+            searchProduct(query, true);
         });
 
-        // Xử lý phân trang
         rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if (dy > 0) { // Chỉ load khi cuộn xuống
+                if (dy > 0) {
                     int visibleItemCount = layoutManager.getChildCount();
                     int totalItemCount = layoutManager.getItemCount();
                     int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
@@ -107,17 +101,34 @@ public class SearchFragment extends Fragment {
             }
         });
 
-        // Nhận từ khóa từ HomeFragment
+        // Xử lý click sản phẩm
+        searchAdapter.setOnProductClickListener(product -> {
+            // Giữ nguyên logic chuyển sang ProductDetailsActivity
+            // Bạn có thể dùng product.getSlug() để chuyển
+            Log.d(TAG, "Product clicked: " + product.getName());
+            // Thêm Intent nếu cần, ví dụ:
+            // Intent intent = new Intent(requireContext(), ProductDetailsActivity.class);
+            // intent.putExtra("slug", product.getSlug());
+            // startActivity(intent);
+        });
+
         Bundle args = getArguments();
+        String initialQuery = "";
         if (args != null && args.containsKey("query")) {
-            String query = args.getString("query");
-            if (query != null && !query.isEmpty()) {
-                etSearch.setText(query);
-                searchProduct(query, true);
-            }
+            initialQuery = args.getString("query", "");
+            etSearch.setText(initialQuery);
         }
 
+        Log.d(TAG, "Initial search with query: " + (initialQuery.isEmpty() ? "empty" : initialQuery));
+        searchProduct(initialQuery, true);
+
         return view;
+    }
+
+    public void performSearch(String query) {
+        Log.d(TAG, "performSearch called with query: " + (query.isEmpty() ? "empty" : query));
+        etSearch.setText(query);
+        searchProduct(query, true);
     }
 
     private void searchProduct(String query, boolean isNewSearch) {
@@ -152,18 +163,22 @@ public class SearchFragment extends Fragment {
                     Log.d(TAG, "Search response: " + new Gson().toJson(response));
                     try {
                         if (response == null || response.getMetadata() == null || response.getMetadata().getMetadata() == null) {
-                            showError("Invalid response data");
+                            showError(query.isEmpty() ? "Không thể tải sản phẩm" : "Dữ liệu không hợp lệ");
                             showEmpty(true);
                             return;
                         }
 
-                        List<SearchProduct> searchProducts = response.getMetadata().getMetadata().getData();
+                        List<Product> products = new ArrayList<>();
+                        for (SearchProduct searchProduct : response.getMetadata().getMetadata().getData()) {
+                            products.add(searchProduct.toProduct());
+                        }
+
                         lastSortValues = response.getMetadata().getMetadata().getLastSortValues();
                         int total = response.getMetadata().getMetadata().getTotal();
                         List<String> newSuggestions = response.getMetadata().getMetadata().getSuggest();
 
-                        if (searchProducts == null || searchProducts.isEmpty()) {
-                            showError("No products found");
+                        if (products.isEmpty()) {
+                            showError(query.isEmpty() ? "Không có sản phẩm nào để hiển thị" : "Không tìm thấy sản phẩm");
                             showEmpty(true);
                             isLastPage = true;
                             return;
@@ -175,7 +190,6 @@ public class SearchFragment extends Fragment {
                             etSearch.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, suggestions));
                         }
 
-                        List<Product> products = mapSearchProductsToProducts(searchProducts);
                         productList.addAll(products);
                         searchAdapter.notifyItemRangeInserted(productList.size() - products.size(), products.size());
                         itemCount.setText(total + " Items");
@@ -192,7 +206,7 @@ public class SearchFragment extends Fragment {
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Error processing search response: " + e.getMessage(), e);
-                        showError("Error processing search results");
+                        showError("Lỗi xử lý kết quả tìm kiếm");
                         showEmpty(true);
                     }
                 }
@@ -203,10 +217,10 @@ public class SearchFragment extends Fragment {
                     hideLoading();
                     hideLoadMore();
                     Log.e(TAG, "Search error: " + errorMessage);
-                    showError(errorMessage);
+                    showError(query.isEmpty() ? "Không thể tải sản phẩm, vui lòng thử lại" : errorMessage);
                     showEmpty(true);
                     if (errorMessage.contains("Session expired")) {
-                        Toast.makeText(requireContext(), "Please log in again", Toast.LENGTH_LONG).show();
+                        Toast.makeText(requireContext(), "Vui lòng đăng nhập lại", Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -215,7 +229,7 @@ public class SearchFragment extends Fragment {
             Log.e(TAG, "Error in searchProduct: " + e.getMessage(), e);
             hideLoading();
             hideLoadMore();
-            showError("Search failed: " + e.getMessage());
+            showError("Tìm kiếm thất bại: " + e.getMessage());
             showEmpty(true);
         }
     }
@@ -225,31 +239,6 @@ public class SearchFragment extends Fragment {
             loadMoreProgress.setVisibility(View.VISIBLE);
             searchProduct(currentQuery, false);
         }
-    }
-
-    private List<Product> mapSearchProductsToProducts(List<SearchProduct> searchProducts) {
-        List<Product> products = new ArrayList<>();
-        for (SearchProduct sp : searchProducts) {
-            Product product = new Product();
-            product.setId(sp.getId());
-            product.setName(sp.getName());
-            product.setDesc(sp.getDesc());
-            product.setDesc_plain(sp.getDesc_plain());
-            product.setPrice(sp.getPrice());
-            product.setThumb(sp.getThumb());
-            product.setRating(sp.getRating());
-            product.setDiscount_percentage(sp.getDiscount_percentage());
-            product.setSlug(sp.getSlug());
-            product.setCategoryId(sp.getCategoryId());
-            product.setShopId(sp.getShopId());
-            product.setSale_count(sp.getSale_count());
-            product.setCategoryPath(null);
-            product.setAttrs(null);
-            product.setSpuToSkus(null);
-            product.setHas_variations(false);
-            products.add(product);
-        }
-        return products;
     }
 
     private void showLoading(boolean isNewSearch) {
@@ -275,7 +264,6 @@ public class SearchFragment extends Fragment {
     }
 
     private void hideError() {
-        // Không cần ẩn Toast
     }
 
     private void showEmpty(boolean show) {

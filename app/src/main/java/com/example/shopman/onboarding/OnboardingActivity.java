@@ -11,7 +11,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.example.shopman.utilitis.MyPreferences;
 import com.example.shopman.R;
-import com.example.shopman.auth.LoginActivity;
+import com.example.shopman.activities.LoginActivity;
 
 public class OnboardingActivity extends AppCompatActivity {
 

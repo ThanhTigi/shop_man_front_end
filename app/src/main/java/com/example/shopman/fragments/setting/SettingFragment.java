@@ -13,7 +13,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.example.shopman.R;
-import com.example.shopman.auth.LoginActivity;
+import com.example.shopman.activities.LoginActivity;
+import com.example.shopman.activities.ProfileActivity;
 import com.example.shopman.utilitis.MyPreferences;
 
 public class SettingFragment extends Fragment {

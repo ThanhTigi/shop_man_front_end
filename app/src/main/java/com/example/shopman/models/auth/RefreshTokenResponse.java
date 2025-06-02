@@ -35,8 +35,4 @@ public class RefreshTokenResponse {
     public Metadata getMetadata() {
         return metadata;
     }
-
-
-
-
 }

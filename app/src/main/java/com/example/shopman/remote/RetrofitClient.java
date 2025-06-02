@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.example.shopman.models.auth.InnerMetadata;
 import com.example.shopman.models.auth.RefreshTokenResponse;
 import com.example.shopman.utilitis.MyPreferences;
 
@@ -21,7 +22,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
     private static final String TAG = "RetrofitClient";
-    private static final String BASE_URL = "https://shopman.onrender.com"; // Thay bằng URL của bạn
+    private static final String BASE_URL = "https://shopman.onrender.com/"; // Thay bằng URL của bạn
     private static final int MAX_RETRIES = 3;
     private static Retrofit retrofit;
     private static Context appContext;
@@ -69,7 +70,7 @@ public class RetrofitClient {
 
             String url = originalRequest.url().toString();
             try {
-                if (url.contains("/api/v1/auth/refresh-token") || url.contains("/api/v1/auth/logout")) {
+                if (url.contains("/api/v1/auth/handle-refreshtoken") || url.contains("/api/v1/auth/logout")) {
                     String refreshToken = MyPreferences.getString(appContext, "refresh_token", null);
                     if (!TextUtils.isEmpty(refreshToken)) {
                         requestBuilder.header("x-rtoken-id", refreshToken);
@@ -101,9 +102,12 @@ public class RetrofitClient {
             okhttp3.Response response = chain.proceed(originalRequest);
             Log.d(TAG, "intercept: HTTP " + response.code() + " for " + originalRequest.url());
 
-            if (response.code() == 401) { // Chỉ kiểm tra 401
+            if (response.code() == 401) {
+                response.close(); // Đóng response cũ trước khi gọi request mới
+
                 synchronized (RetrofitClient.class) {
                     if (isRefreshing) {
+                        // Nếu đang refresh thì chờ token mới
                         return waitForNewToken(chain, originalRequest);
                     }
 
@@ -117,7 +121,8 @@ public class RetrofitClient {
                                 throw new IOException("No refresh token available");
                             }
 
-                            ApiService apiService = getClient().create(ApiService.class);
+                            // Gọi API để làm mới token
+                            ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
                             Call<RefreshTokenResponse> refreshCall = apiService.refreshToken(refreshToken);
                             Response<RefreshTokenResponse> refreshResponse = refreshCall.execute();
 
@@ -125,18 +130,16 @@ public class RetrofitClient {
                                 String newAccessToken = refreshResponse.body().getMetadata().getMetadata().getAccessToken();
                                 String newRefreshToken = refreshResponse.body().getMetadata().getMetadata().getRefreshToken();
 
-                                try {
-                                    MyPreferences.setString(appContext, "access_token", newAccessToken);
-                                    MyPreferences.setString(appContext, "refresh_token", newRefreshToken);
-                                    Log.d(TAG, "Successfully refreshed tokens");
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Failed to save new tokens: " + e.getMessage());
-                                    throw new IOException("Failed to save new tokens");
-                                }
+                                // Lưu token mới
+                                MyPreferences.setString(appContext, "access_token", newAccessToken);
+                                MyPreferences.setString(appContext, "refresh_token", newRefreshToken);
+                                Log.d(TAG, "Successfully refreshed tokens");
 
+                                // Tạo request mới với access token mới
                                 Request newRequest = originalRequest.newBuilder()
                                         .header("Authorization", "Bearer " + newAccessToken)
                                         .build();
+
                                 isRefreshing = false;
                                 return chain.proceed(newRequest);
                             } else {
@@ -144,23 +147,22 @@ public class RetrofitClient {
                                 Thread.sleep(500);
                                 Log.w(TAG, "Refresh token attempt " + retryCount + " failed: HTTP " + refreshResponse.code());
                             }
+
                         } catch (Exception e) {
                             retryCount++;
                             Log.e(TAG, "Error refreshing token: " + e.getMessage());
                         }
                     }
 
+                    // Nếu retry MAX lần không thành công, xóa token và logout
                     isRefreshing = false;
-                    try {
-                        MyPreferences.clear(appContext);
-                        notifyLogout();
-                        Log.d(TAG, "Cleared preferences due to failed token refresh");
-                    } catch (Exception e) {
-                        Log.e(TAG, "Failed to clear preferences: " + e.getMessage());
-                    }
+                    MyPreferences.clear(appContext);
+                    notifyLogout();
+                    Log.d(TAG, "Cleared preferences due to failed token refresh");
                     throw new IOException("Failed to refresh token after " + MAX_RETRIES + " attempts");
                 }
             }
+
             return response;
         }
 
@@ -194,4 +196,5 @@ public class RetrofitClient {
             }
         }
     }
+
 }

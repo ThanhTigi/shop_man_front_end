@@ -16,11 +16,11 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.example.shopman.auth.LoginActivity;
+import com.example.shopman.activities.LoginActivity;
 import com.example.shopman.fragments.cart.CartFragment;
 import com.example.shopman.fragments.home.HomeFragment;
 import com.example.shopman.fragments.search.SearchFragment;
-import com.example.shopman.fragments.setting.ProfileActivity;
+import com.example.shopman.activities.ProfileActivity;
 import com.example.shopman.fragments.setting.SettingFragment;
 import com.example.shopman.fragments.wishlist.WishlistFragment;
 import com.example.shopman.remote.ApiManager;

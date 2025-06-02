@@ -1,59 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bannerImage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/banner_background">
-
-    <!-- Left Side: Text and Button -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="50-40% OFF"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New in (product)"
-            android:textSize="16sp"
-            android:textColor="#FFFFFF"
-            android:layout_marginTop="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ALL colours"
-            android:textSize="16sp"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/shopNowButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Shop Now →"
-            android:background="@android:color/transparent"
-            android:textColor="#FFFFFF"
-            android:padding="8dp"
-            android:layout_marginTop="16dp"
-            android:drawableEnd="@android:drawable/ic_media_play" />
-
-    </LinearLayout>
-
-    <!-- Right Side: Image -->
-    <ImageView
-        android:id="@+id/bannerImage"
-        android:layout_width="150dp"
-        android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
-        android:scaleType="fitCenter"
-        android:src="@drawable/banner_image" />
-
-</RelativeLayout>
+    android:scaleType="centerCrop"
+    android:contentDescription="Banner Image" />

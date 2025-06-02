@@ -1,6 +1,6 @@
 package com.example.shopman;
 
-import com.example.shopman.models.SpuToSku;
+import com.example.shopman.models.ProductDetails.SpuToSku;
 
 import java.io.Serializable;
 import java.util.List;

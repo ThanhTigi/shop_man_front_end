@@ -1,55 +1,106 @@
 package com.example.shopman.models.searchproducts;
 
+import com.example.shopman.models.Discount;
+import com.example.shopman.models.Product;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
+import java.util.Map;
 
 public class SearchProduct {
-    private int CategoryId;
-    private String createdAt;
-    private int sale_count;
-    private String desc_plain;
-    private String thumb;
-    private String price;
-    private float rating;
-    private String name;
-    private int discount_percentage;
-
-    public int getCategoryId() {
-        return CategoryId;
-    }
-
-    public void setCategoryId(int categoryId) {
-        CategoryId = categoryId;
-    }
-
-    private String slug;
-    private int ShopId;
-    private String desc;
+    @SerializedName("id")
     private String id;
+
+    @SerializedName("name")
+    private String name;
+
+    @SerializedName("thumb")
+    private String thumb;
+
+    @SerializedName("price")
+    private String price;
+
+    @SerializedName("rating")
+    private float rating;
+
+    @SerializedName("desc")
+    private String desc;
+
+    @SerializedName("ShopId")
+    private int shopId;
+
+    @SerializedName("slug")
+    private String slug;
+
+    @SerializedName("sale_count")
+    private int saleCount;
+
+    @SerializedName("discount_percentage")
+    private int discountPercentage;
+
+    @SerializedName("CategoryId")
+    private int categoryId;
+
+    @SerializedName("createdAt")
+    private String createdAt;
+
+    @SerializedName("desc_plain")
+    private String descPlain;
+
+    @SerializedName("score")
     private float score;
-    private List<Object> sortValues; // Có thể dùng List<String> nếu server trả về cố định [score, id]
 
-    public String getCreatedAt() {
-        return createdAt;
+    @SerializedName("attrs")
+    private Map<String, Object> attrs;
+
+    @SerializedName("status")
+    private String status;
+
+    @SerializedName("CategoryPath")
+    private List<Integer> categoryPath;
+
+    @SerializedName("sort")
+    private int sort;
+
+    @SerializedName("has_variations")
+    private boolean hasVariations;
+
+    @SerializedName("updatedAt")
+    private String updatedAt;
+
+    @SerializedName("deletedAt")
+    private String deletedAt;
+
+    @SerializedName("discounts")
+    private List<Discount> discounts;
+
+    // Ánh xạ sang Product
+    public Product toProduct() {
+        long priceValue;
+        try {
+            priceValue = Long.parseLong(price);
+        } catch (NumberFormatException e) {
+            priceValue = 0L;
+        }
+        Product product = new Product(id, name, priceValue, thumb, rating, discountPercentage, slug, saleCount, desc);
+        product.setDiscounts(discounts);
+        return product;
     }
 
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
+    public String getId() {
+        return id;
     }
 
-    public int getSale_count() {
-        return sale_count;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public void setSale_count(int sale_count) {
-        this.sale_count = sale_count;
+    public String getName() {
+        return name;
     }
 
-    public String getDesc_plain() {
-        return desc_plain;
-    }
-
-    public void setDesc_plain(String desc_plain) {
-        this.desc_plain = desc_plain;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getThumb() {
@@ -76,20 +127,20 @@ public class SearchProduct {
         this.rating = rating;
     }
 
-    public String getName() {
-        return name;
+    public String getDesc() {
+        return desc;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
-    public int getDiscount_percentage() {
-        return discount_percentage;
+    public int getShopId() {
+        return shopId;
     }
 
-    public void setDiscount_percentage(int discount_percentage) {
-        this.discount_percentage = discount_percentage;
+    public void setShopId(int shopId) {
+        this.shopId = shopId;
     }
 
     public String getSlug() {
@@ -100,28 +151,44 @@ public class SearchProduct {
         this.slug = slug;
     }
 
-    public int getShopId() {
-        return ShopId;
+    public int getSaleCount() {
+        return saleCount;
     }
 
-    public void setShopId(int shopId) {
-        ShopId = shopId;
+    public void setSaleCount(int saleCount) {
+        this.saleCount = saleCount;
     }
 
-    public String getDesc() {
-        return desc;
+    public int getDiscountPercentage() {
+        return discountPercentage;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public void setDiscountPercentage(int discountPercentage) {
+        this.discountPercentage = discountPercentage;
     }
 
-    public String getId() {
-        return id;
+    public int getCategoryId() {
+        return categoryId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getDescPlain() {
+        return descPlain;
+    }
+
+    public void setDescPlain(String descPlain) {
+        this.descPlain = descPlain;
     }
 
     public float getScore() {
@@ -132,13 +199,68 @@ public class SearchProduct {
         this.score = score;
     }
 
-    public List<Object> getSortValues() {
-        return sortValues;
+    public Map<String, Object> getAttrs() {
+        return attrs;
     }
 
-    public void setSortValues(List<Object> sortValues) {
-        this.sortValues = sortValues;
+    public void setAttrs(Map<String, Object> attrs) {
+        this.attrs = attrs;
     }
 
-    // Getters and setters
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public List<Integer> getCategoryPath() {
+        return categoryPath;
+    }
+
+    public void setCategoryPath(List<Integer> categoryPath) {
+        this.categoryPath = categoryPath;
+    }
+
+    public int getSort() {
+        return sort;
+    }
+
+    public void setSort(int sort) {
+        this.sort = sort;
+    }
+
+    public boolean isHasVariations() {
+        return hasVariations;
+    }
+
+    public void setHasVariations(boolean hasVariations) {
+        this.hasVariations = hasVariations;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(String deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public List<Discount> getDiscounts() {
+        return discounts;
+    }
+
+    public void setDiscounts(List<Discount> discounts) {
+        this.discounts = discounts;
+    }
+// Getters and setters (giữ nguyên)
 }

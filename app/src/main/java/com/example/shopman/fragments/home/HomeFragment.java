@@ -20,11 +20,11 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.shopman.MainActivity;
 import com.example.shopman.R;
+import com.example.shopman.ShopActivity;
 import com.example.shopman.activities.CampaignActivity;
 import com.example.shopman.activities.CategoryProductsActivity;
 import com.example.shopman.activities.DealActivity;
 import com.example.shopman.activities.NewArrivalsActivity;
-import com.example.shopman.activities.ShopActivity;
 import com.example.shopman.adapters.BannerAdapter;
 import com.example.shopman.adapters.CategoryAdapter;
 import com.example.shopman.adapters.ProductAdapter;
@@ -38,10 +38,8 @@ import com.example.shopman.remote.ApiResponseListener;
 import com.example.shopman.utilitis.SpacesItemDecoration;
 import com.google.gson.Gson;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -120,6 +118,7 @@ public class HomeFragment extends Fragment {
 
         if (getContext() == null) {
             Log.e(TAG, "Context is null, fragment not attached to activity");
+            Toast.makeText(requireContext(), "Lỗi: Fragment không gắn với Activity", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -132,8 +131,10 @@ public class HomeFragment extends Fragment {
             Log.d(TAG, "ivSearch clicked");
             if (getActivity() instanceof MainActivity) {
                 String query = etSearch.getText().toString().trim();
+                Log.d(TAG, "Search query: " + query);
                 ((MainActivity) getActivity()).switchToSearchWithData(query);
             } else {
+                Log.e(TAG, "Activity is not MainActivity");
                 Toast.makeText(getContext(), "Không thể thực hiện tìm kiếm", Toast.LENGTH_SHORT).show();
             }
         });
@@ -170,7 +171,7 @@ public class HomeFragment extends Fragment {
         // Khởi tạo Deal of the Day
         Log.d(TAG, "Initializing deal adapter");
         dealList = new ArrayList<>();
-//        dealAdapter = new ProductAdapter(dealList);
+//        dealAdapter = new ProductAdapter(getContext(), dealList, "deal");
         dealRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         dealRecyclerView.setAdapter(dealAdapter);
         dealViewAll.setOnClickListener(v -> {
@@ -182,14 +183,14 @@ public class HomeFragment extends Fragment {
         // Khởi tạo Special Offers
         Log.d(TAG, "Initializing special offers adapter");
         specialOffersList = new ArrayList<>();
-//        specialOffersAdapter = new ProductAdapter(specialOffersList);
+//        specialOffersAdapter = new ProductAdapter(getContext(), specialOffersList, "special_offers");
         specialOffersRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         specialOffersRecyclerView.setAdapter(specialOffersAdapter);
 
         // Khởi tạo Trending Products
         Log.d(TAG, "Initializing trending adapter");
         trendingList = new ArrayList<>();
-//        trendingAdapter = new ProductAdapter(trendingList);
+//        trendingAdapter = new ProductAdapter(getContext(), trendingList, "trending");
         trendingRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         trendingRecyclerView.setAdapter(trendingAdapter);
         trendingViewAll.setOnClickListener(v -> {
@@ -252,15 +253,17 @@ public class HomeFragment extends Fragment {
             public void onError(String errorMessage) {
                 bannerProgressBar.setVisibility(View.GONE);
                 Log.e(TAG, "Failed to load banners: " + errorMessage);
-                Toast.makeText(getContext(), "Lỗi tải banner", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Lỗi tải banner: " + errorMessage, Toast.LENGTH_SHORT).show();
                 bannerViewPager.setVisibility(View.GONE);
             }
         });
     }
+
     private void handleBannerClick(Banner banner) {
         String linkType = banner.getLinkType();
         String linkTarget = banner.getLinkTarget();
         String slug = extractSlugFromLink(linkTarget);
+        Log.d(TAG, "Banner clicked: linkType=" + linkType + ", slug=" + slug);
         if ("campaign".equals(linkType)) {
             Intent intent = new Intent(getContext(), CampaignActivity.class);
             intent.putExtra("campaignSlug", slug);
@@ -291,27 +294,18 @@ public class HomeFragment extends Fragment {
                     categoryList.addAll(response.getMetadata().getMetadata());
                     categoryAdapter.notifyDataSetChanged();
                 } else {
-                    loadFallbackCategories();
+                    Log.w(TAG, "No categories available");
+                    Toast.makeText(getContext(), "Không có danh mục", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onError(String errorMessage) {
                 categoryProgressBar.setVisibility(View.GONE);
-                Toast.makeText(getContext(), "Lỗi tải danh mục", Toast.LENGTH_SHORT).show();
-                loadFallbackCategories();
+                Log.e(TAG, "Failed to load categories: " + errorMessage);
+                Toast.makeText(getContext(), "Lỗi tải danh mục: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void loadFallbackCategories() {
-        categoryList.clear();
-        categoryList.add(new Category("Beauty", "https://example.com/beauty.png", "beauty"));
-        categoryList.add(new Category("Fashion", "https://example.com/fashion.png", "fashion"));
-        categoryList.add(new Category("Kids", "https://example.com/kids.png", "kids"));
-        categoryList.add(new Category("Men", "https://example.com/mens.png", "mens"));
-        categoryList.add(new Category("Women", "https://example.com/womens.png", "womens"));
-        categoryAdapter.notifyDataSetChanged();
     }
 
     private void startBannerAutoSlide() {
@@ -321,7 +315,7 @@ public class HomeFragment extends Fragment {
         bannerAutoSlideTimer = new CountDownTimer(3600000, 5000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                if (bannerList.size() > 0) {
+                if (bannerList.size() > 0 && isAdded()) {
                     int currentItem = bannerViewPager.getCurrentItem();
                     int nextItem = (currentItem + 1) % bannerList.size();
                     bannerViewPager.setCurrentItem(nextItem, true);
@@ -330,7 +324,9 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFinish() {
-                startBannerAutoSlide();
+                if (isAdded()) {
+                    startBannerAutoSlide();
+                }
             }
         }.start();
     }
@@ -346,17 +342,21 @@ public class HomeFragment extends Fragment {
         dealCountDownTimer = new CountDownTimer(millisUntilFinished, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                long seconds = millisUntilFinished / 1000;
-                long minutes = seconds / 60;
-                long hours = minutes / 60;
-                seconds %= 60;
-                minutes %= 60;
-                dealRemainingTime.setText(String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds));
+                if (isAdded()) {
+                    long seconds = millisUntilFinished / 1000;
+                    long minutes = seconds / 60;
+                    long hours = minutes / 60;
+                    seconds %= 60;
+                    minutes %= 60;
+                    dealRemainingTime.setText(String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds));
+                }
             }
 
             @Override
             public void onFinish() {
-                dealRemainingTime.setText("00:00:00");
+                if (isAdded()) {
+                    dealRemainingTime.setText("00:00:00");
+                }
             }
         }.start();
     }
@@ -372,17 +372,21 @@ public class HomeFragment extends Fragment {
         trendingCountDownTimer = new CountDownTimer(millisUntilFinished, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                long seconds = millisUntilFinished / 1000;
-                long minutes = seconds / 60;
-                long hours = minutes / 60;
-                seconds %= 60;
-                minutes %= 60;
-                trendingRemainingTime.setText(String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds));
+                if (isAdded()) {
+                    long seconds = millisUntilFinished / 1000;
+                    long minutes = seconds / 60;
+                    long hours = minutes / 60;
+                    seconds %= 60;
+                    minutes %= 60;
+                    trendingRemainingTime.setText(String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds));
+                }
             }
 
             @Override
             public void onFinish() {
-                trendingRemainingTime.setText("00:00:00");
+                if (isAdded()) {
+                    trendingRemainingTime.setText("00:00:00");
+                }
             }
         }.start();
     }
@@ -393,5 +397,6 @@ public class HomeFragment extends Fragment {
         if (dealCountDownTimer != null) dealCountDownTimer.cancel();
         if (trendingCountDownTimer != null) trendingCountDownTimer.cancel();
         if (bannerAutoSlideTimer != null) bannerAutoSlideTimer.cancel();
+        Log.d(TAG, "onDestroyView called");
     }
 }

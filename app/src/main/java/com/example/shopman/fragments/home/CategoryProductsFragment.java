@@ -1,5 +1,6 @@
 package com.example.shopman.fragments.home;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,10 +19,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.shopman.R;
+import com.example.shopman.activities.ProductDetailsActivity;
 import com.example.shopman.adapters.ProductAdapter;
 import com.example.shopman.models.Product;
-import com.example.shopman.models.category.CategoryProductResponse;
 import com.example.shopman.models.searchproducts.SearchProduct;
+import com.example.shopman.models.searchproducts.SearchProductsResponse;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
 import com.google.gson.Gson;
@@ -49,13 +51,10 @@ public class CategoryProductsFragment extends Fragment {
     private ImageView categoryImage;
     private TextView categoryNameView;
     private ApiManager apiManager;
-    private List<Object> lastSortValues;
+    private String lastSortValues; // Đổi sang String
     private boolean isLoading = false;
     private boolean isLastPage = false;
     private int totalProducts = 0;
-
-    public CategoryProductsFragment() {
-    }
 
     public static CategoryProductsFragment newInstance(String slug, String categoryName, String categoryImageUrl) {
         CategoryProductsFragment fragment = new CategoryProductsFragment();
@@ -112,9 +111,9 @@ public class CategoryProductsFragment extends Fragment {
             categoryImage.setImageResource(R.drawable.ic_placeholder);
         }
 
-        apiManager = new ApiManager(getContext());
+        apiManager = new ApiManager(requireContext());
         productList = new ArrayList<>();
-        productAdapter = new ProductAdapter(requireContext(), productList, "category");
+        productAdapter = new ProductAdapter(requireContext(), productList, "");
         productsRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         productsRecyclerView.setAdapter(productAdapter);
 
@@ -130,15 +129,14 @@ public class CategoryProductsFragment extends Fragment {
             });
         }
 
-        loadProducts(true);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
         productAdapter.setOnProductClickListener(product -> {
-            Toast.makeText(requireContext(), "Clicked: " + product.getName(), Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Product clicked: " + product.getName());
+            Intent intent = new Intent(requireContext(), ProductDetailsActivity.class);
+            intent.putExtra("product_slug", product.getSlug());
+            startActivity(intent);
         });
+
+        loadProducts(true);
     }
 
     private void loadProducts(boolean isNewSearch) {
@@ -157,10 +155,9 @@ public class CategoryProductsFragment extends Fragment {
             loadMoreProgress.setVisibility(View.VISIBLE);
         }
 
-        String lastSortValuesJson = lastSortValues != null ? new Gson().toJson(lastSortValues) : null;
-        apiManager.getCategoryProducts(slug, lastSortValuesJson, PAGE_SIZE, new ApiResponseListener<CategoryProductResponse>() {
+        apiManager.getCategoryProducts(slug, lastSortValues, PAGE_SIZE, new ApiResponseListener<SearchProductsResponse>() {
             @Override
-            public void onSuccess(CategoryProductResponse response) {
+            public void onSuccess(SearchProductsResponse response) {
                 isLoading = false;
                 progressBar.setVisibility(View.GONE);
                 loadMoreProgress.setVisibility(View.GONE);
@@ -174,7 +171,7 @@ public class CategoryProductsFragment extends Fragment {
 
                 List<SearchProduct> categoryProducts = response.getMetadata().getMetadata().getData();
                 totalProducts = response.getMetadata().getMetadata().getTotal();
-                lastSortValues = response.getMetadata().getMetadata().getLastSortValues();
+                lastSortValues = new Gson().toJson(response.getMetadata().getMetadata().getLastSortValues());
 
                 if (categoryProducts.isEmpty()) {
                     showError("Không tìm thấy sản phẩm");
@@ -184,12 +181,12 @@ public class CategoryProductsFragment extends Fragment {
                 }
 
                 List<Product> products = new ArrayList<>();
-                for (SearchProduct cp : categoryProducts) {
-                    products.add(cp.toProduct());
+                for (SearchProduct sp : categoryProducts) {
+                    products.add(sp.toProduct());
                 }
 
                 productList.addAll(products);
-                productAdapter.addProducts(products);
+                productAdapter.notifyItemRangeInserted(productList.size() - products.size(), products.size());
                 itemCount.setText(totalProducts + " Items");
 
                 if (products.size() < PAGE_SIZE) {
@@ -205,11 +202,8 @@ public class CategoryProductsFragment extends Fragment {
                 progressBar.setVisibility(View.GONE);
                 loadMoreProgress.setVisibility(View.GONE);
                 Log.e(TAG, "Failed to load products: " + errorMessage);
-                showError("Lỗi tải sản phẩm: " + errorMessage);
+                showError(errorMessage);
                 showEmpty(true);
-                if (errorMessage.contains("Session expired")) {
-                    Toast.makeText(getContext(), "Vui lòng đăng nhập lại", Toast.LENGTH_LONG).show();
-                }
             }
         });
     }

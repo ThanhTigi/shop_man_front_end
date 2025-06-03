@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,13 +29,15 @@ import com.example.shopman.models.ProductDetails.ProductDetail;
 import com.example.shopman.models.ProductDetails.ProductDetailResponse;
 import com.example.shopman.models.ProductDetails.Sku;
 import com.example.shopman.models.ProductDetails.SpuToSku;
-import com.example.shopman.models.category.CategoryProductResponse;
+import com.example.shopman.models.searchproducts.SearchProduct;
+import com.example.shopman.models.searchproducts.SearchProductsResponse;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
 import com.example.shopman.utilitis.MyPreferences;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.gson.Gson;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -44,7 +47,6 @@ import java.util.Locale;
 import java.util.Map;
 
 public class ProductDetailsActivity extends AppCompatActivity {
-
     private static final String TAG = "ProductDetailsActivity";
     private static final int PAGE_SIZE = 10;
 
@@ -55,6 +57,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private ImageButton btnGoToCart, btnBuyNow, btnWishlist;
     private Button btnFollow;
     private RecyclerView rvRelatedProducts;
+    private ProgressBar progressBar;
     private ApiManager apiManager;
     private ProductAdapter relatedProductAdapter;
     private Map<String, String> selectedAttributes = new HashMap<>();
@@ -63,11 +66,11 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private List<SpuToSku> skus;
     private boolean isLoadingMore = false;
     private boolean isInWishlist = false;
-    private int currentPage = 1;
-    private int totalPages = 1;
+    private String lastSortValues;
+    private boolean isLastPage = false;
     private String productThumb;
     private String productId;
-    private String categoryId;
+    private String categorySlug; // Đổi từ categoryId sang slug
     private ProductDetail productDetail;
 
     @Override
@@ -101,6 +104,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
         btnFollow = findViewById(R.id.btnFollow);
         btnWishlist = findViewById(R.id.btnWishlist);
         rvRelatedProducts = findViewById(R.id.rvRelatedProducts);
+        progressBar = findViewById(R.id.progressBar);
 
         // Khởi tạo ApiManager
         apiManager = new ApiManager(this);
@@ -113,10 +117,10 @@ public class ProductDetailsActivity extends AppCompatActivity {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if (dy > 0 && !isLoadingMore && currentPage <= totalPages) {
+                if (dy > 0 && !isLoadingMore && !isLastPage) {
                     GridLayoutManager layoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
                     if (layoutManager != null && layoutManager.findLastVisibleItemPosition() >= relatedProducts.size() - 2) {
-//                        loadMoreRelatedProducts();
+                        loadMoreRelatedProducts();
                     }
                 }
             }
@@ -146,6 +150,122 @@ public class ProductDetailsActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    private void loadProductDetail(String slug) {
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+        apiManager.getProductDetail(slug, new ApiResponseListener<ProductDetailResponse>() {
+            @Override
+            public void onSuccess(ProductDetailResponse response) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                Log.d(TAG, "onSuccess: "+response);
+                if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
+
+                    productDetail = response.getMetadata().getMetadata();
+                    skus = productDetail.getSpuToSkus();
+                    productThumb = productDetail.getThumb();
+                    productId = String.valueOf(productDetail.getId());
+                    // Giả sử ProductDetail có getCategorySlug(), nếu không, lấy từ Intent
+                    categorySlug = getIntent().getStringExtra("category_slug");
+                    if (categorySlug == null) {
+                        Log.w(TAG, "Category slug not provided, using default or fallback");
+                        // Fallback nếu cần, ví dụ: categorySlug = "default-category";
+                    }
+                    Log.d(TAG, "SKUs loaded: " + (skus != null ? skus.size() : 0));
+                    displayProduct(productDetail);
+                    if (categorySlug != null) {
+                        loadRelatedProducts(categorySlug);
+                    } else {
+                        Log.e(TAG, "Category slug is null");
+                        Toast.makeText(ProductDetailsActivity.this, "Không thể tải sản phẩm liên quan", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(ProductDetailsActivity.this, "Phản hồi không hợp lệ", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Invalid response");
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                Toast.makeText(ProductDetailsActivity.this, "Lỗi tải chi tiết sản phẩm: " + errorMessage, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "API Error: " + errorMessage);
+                finish();
+            }
+        });
+    }
+
+    private void loadRelatedProducts(String categorySlug) {
+        isLoadingMore = true;
+        apiManager.getCategoryProducts(categorySlug, null, PAGE_SIZE, new ApiResponseListener<SearchProductsResponse>() {
+            @Override
+            public void onSuccess(SearchProductsResponse response) {
+                isLoadingMore = false;
+                if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
+                    List<SearchProduct> products = response.getMetadata().getMetadata().getData();
+                    lastSortValues = new Gson().toJson(response.getMetadata().getMetadata().getLastSortValues());
+                    int total = response.getMetadata().getMetadata().getTotal();
+                    if (products != null && !products.isEmpty()) {
+                        for (SearchProduct sp : products) {
+                            relatedProducts.add(sp.toProduct());
+                        }
+                        relatedProductAdapter.notifyItemRangeInserted(relatedProducts.size() - products.size(), products.size());
+                        if (products.size() < PAGE_SIZE || relatedProducts.size() >= total) {
+                            isLastPage = true;
+                        }
+                    } else {
+                        Toast.makeText(ProductDetailsActivity.this, "Không có sản phẩm liên quan", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(ProductDetailsActivity.this, "Không thể tải sản phẩm liên quan", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                isLoadingMore = false;
+                Toast.makeText(ProductDetailsActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Load related products error: " + errorMessage);
+            }
+        });
+    }
+
+    private void loadMoreRelatedProducts() {
+        if (!isLoadingMore && !isLastPage && categorySlug != null) {
+            isLoadingMore = true;
+            apiManager.getCategoryProducts(categorySlug, lastSortValues, PAGE_SIZE, new ApiResponseListener<SearchProductsResponse>() {
+                @Override
+                public void onSuccess(SearchProductsResponse response) {
+                    isLoadingMore = false;
+                    if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
+                        List<SearchProduct> products = response.getMetadata().getMetadata().getData();
+                        lastSortValues = new Gson().toJson(response.getMetadata().getMetadata().getLastSortValues());
+                        int total = response.getMetadata().getMetadata().getTotal();
+                        if (products != null && !products.isEmpty()) {
+                            for (SearchProduct sp : products) {
+                                relatedProducts.add(sp.toProduct());
+                            }
+                            relatedProductAdapter.notifyItemRangeInserted(relatedProducts.size() - products.size(), products.size());
+                            if (products.size() < PAGE_SIZE || relatedProducts.size() >= total) {
+                                isLastPage = true;
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    isLoadingMore = false;
+                    Log.e(TAG, "Load more related products error: " + errorMessage);
+                }
+            });
+        }
     }
 
     private void toggleWishlist() {
@@ -289,13 +409,13 @@ public class ProductDetailsActivity extends AppCompatActivity {
             }
 
             if (isBuyNow) {
-//                // Chuyển đến CheckoutActivity
-//                Intent checkoutIntent = new Intent(this, CheckoutActivity.class);
-//                checkoutIntent.putExtra("product_id", productId);
-//                checkoutIntent.putExtra("sku_no", selectedSkuNo);
-//                checkoutIntent.putExtra("quantity", quantity[0]);
-//                startActivity(checkoutIntent);
-//                bottomSheetDialog.dismiss();
+                // TODO: Chuyển đến CheckoutActivity
+                // Intent checkoutIntent = new Intent(this, CheckoutActivity.class);
+                // checkoutIntent.putExtra("product_id", productId);
+                // checkoutIntent.putExtra("sku_no", selectedSkuNo);
+                // checkoutIntent.putExtra("quantity", quantity[0]);
+                // startActivity(checkoutIntent);
+                bottomSheetDialog.dismiss();
             } else {
                 apiManager.addToCart(accessToken, productId, selectedSkuNo, quantity[0], new ApiResponseListener<com.example.shopman.models.cart.CartAddResponse>() {
                     @Override
@@ -335,38 +455,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
             }
         }
         return 1;
-    }
-
-    private void loadProductDetail(String slug) {
-        apiManager.getProductDetail(slug, new ApiResponseListener<ProductDetailResponse>() {
-            @Override
-            public void onSuccess(ProductDetailResponse response) {
-                if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
-                    productDetail = response.getMetadata().getMetadata();
-                    skus = productDetail.getSpuToSkus();
-                    productThumb = productDetail.getThumb();
-                    productId = String.valueOf(productDetail.getId());
-                    categoryId = String.valueOf(productDetail.getCategoryId());
-                    Log.d(TAG, "SKUs loaded: " + (skus != null ? skus.size() : 0));
-                    displayProduct(productDetail);
-                    if (categoryId != null) {
-//                        loadRelatedProducts(categoryId);
-                    } else {
-                        Log.e(TAG, "Category ID is null");
-                        Toast.makeText(ProductDetailsActivity.this, "Không thể tải sản phẩm liên quan", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(ProductDetailsActivity.this, "Phản hồi không hợp lệ", Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Invalid response");
-                }
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                Toast.makeText(ProductDetailsActivity.this, "Lỗi tải chi tiết sản phẩm: " + errorMessage, Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "API Error: " + errorMessage);
-            }
-        });
     }
 
     private void displayProduct(ProductDetail productDetail) {
@@ -471,43 +559,4 @@ public class ProductDetailsActivity extends AppCompatActivity {
         if (str == null || str.isEmpty()) return str;
         return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
     }
-
-//    private void loadRelatedProducts(String categoryId) {
-//        isLoadingMore = true;
-//        findViewById(R.id.loadMoreProgress).setVisibility(View.VISIBLE);
-//        apiManager.getCategoryProducts(categoryId, currentPage, PAGE_SIZE, new ApiResponseListener<CategoryProductResponse>() {
-//            @Override
-//            public void onSuccess(CategoryProductResponse response) {
-//                isLoadingMore = false;
-//                findViewById(R.id.loadMoreProgress).setVisibility(View.GONE);
-//                if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
-//                    List<Product> newProducts = response.getMetadata().getMetadata().getProducts();
-//                    totalPages = response.getMetadata().getMetadata().getTotalPages();
-//                    if (newProducts != null && !newProducts.isEmpty()) {
-//                        relatedProducts.addAll(newProducts);
-//                        relatedProductAdapter.notifyItemRangeInserted(relatedProducts.size() - newProducts.size(), newProducts.size());
-//                        currentPage++;
-//                    } else {
-//                        Toast.makeText(ProductDetailsActivity.this, "Không còn sản phẩm liên quan", Toast.LENGTH_SHORT).show();
-//                    }
-//                } else {
-//                    Toast.makeText(ProductDetailsActivity.this, "Không thể tải sản phẩm liên quan", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onError(String errorMessage) {
-//                isLoadingMore = false;
-//                findViewById(R.id.loadMoreProgress).setVisibility(View.GONE);
-//                Toast.makeText(ProductDetailsActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
-//                Log.e(TAG, "Load related products error: " + errorMessage);
-//            }
-//        });
-//    }
-
-//    private void loadMoreRelatedProducts() {
-//        if (!isLoadingMore && currentPage <= totalPages && categoryId != null) {
-//            loadRelatedProducts(categoryId);
-//        }
-//    }
 }

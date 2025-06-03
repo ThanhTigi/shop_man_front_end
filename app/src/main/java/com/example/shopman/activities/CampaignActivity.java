@@ -1,22 +1,21 @@
 package com.example.shopman.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.shopman.adapters.ProductAdapter;
 import com.example.shopman.R;
-import com.example.shopman.models.CampaignResponse;
+import com.example.shopman.adapters.DiscountAdapter;
+import com.example.shopman.adapters.ProductAdapter;
+import com.example.shopman.models.Campaign.CampaignProductsResponse;
+import com.example.shopman.models.Campaign.CampaignResponse;
 import com.example.shopman.models.Product;
-import com.example.shopman.models.ProductResponse;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
 
@@ -24,136 +23,103 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CampaignActivity extends AppCompatActivity {
-
-    private static final String TAG = "CampaignActivity";
-    private static final int PAGE_SIZE = 10;
-
-    private TextView tvCampaignTitle;
-    private TextView tvCampaignDescription;
-    private RecyclerView productRecyclerView;
+    private ApiManager apiManager;
+    private String campaignSlug;
+    private RecyclerView productsRecyclerView;
     private ProductAdapter productAdapter;
     private List<Product> productList;
     private ProgressBar progressBar;
-    private int currentPage = 1; // Bắt đầu từ trang 1
-    private int totalPages = 1; // Mặc định 1 để tránh tải thêm khi chưa có dữ liệu
-    private boolean isLoading = false;
-    private String campaignSlug;
-    private ApiManager apiManager;
+    private TextView campaignTitle, campaignDescription;
+    private RecyclerView discountsRecyclerView;
+    private DiscountAdapter discountAdapter;
+    private List<CampaignResponse.Discount> discountList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_campaign);
 
-        // Khởi tạo views
-        tvCampaignTitle = findViewById(R.id.tvCampaignTitle);
-        tvCampaignDescription = findViewById(R.id.tvCampaignDescription);
-        productRecyclerView = findViewById(R.id.productRecyclerView);
-        progressBar = findViewById(R.id.progressBar);
-
         // Lấy campaignSlug từ Intent
         campaignSlug = getIntent().getStringExtra("campaignSlug");
-        if (campaignSlug == null || campaignSlug.isEmpty()) {
-            Toast.makeText(this, "Không tìm thấy thông tin campaign", Toast.LENGTH_SHORT).show();
+        if (campaignSlug == null) {
+            Toast.makeText(this, "Không tìm thấy campaign", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // Khởi tạo ApiManager
         apiManager = new ApiManager(this);
-
-        // Khởi tạo danh sách sản phẩm và adapter
         productList = new ArrayList<>();
-        productAdapter = new ProductAdapter(this, productList, "campaign"); // Sửa constructor
+        discountList = new ArrayList<>();
 
-        // Cài đặt RecyclerView
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        productRecyclerView.setLayoutManager(layoutManager);
-        productRecyclerView.setAdapter(productAdapter);
+        // Khởi tạo views
+        campaignTitle = findViewById(R.id.campaignTitle);
+        campaignDescription = findViewById(R.id.campaignDescription);
+        productsRecyclerView = findViewById(R.id.productsRecyclerView);
+        discountsRecyclerView = findViewById(R.id.discountsRecyclerView);
+        progressBar = findViewById(R.id.progressBar);
 
-        // Thêm sự kiện cuộn để hỗ trợ infinite scroll
-        productRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                if (dy > 0 && !isLoading && currentPage <= totalPages) { // Chỉ tải khi cuộn xuống
-                    int visibleItemCount = layoutManager.getChildCount();
-                    int totalItemCount = layoutManager.getItemCount();
-                    int firstVisibleItem = layoutManager.findFirstVisibleItemPosition();
+        // Khởi tạo ProductAdapter với displayType = "campaign"
+        productAdapter = new ProductAdapter(this, productList, "campaign");
+        productsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        productsRecyclerView.setAdapter(productAdapter);
 
-                    if ((visibleItemCount + firstVisibleItem) >= totalItemCount - 2) {
-                        loadMoreProducts();
-                    }
-                }
-            }
-        });
+        // Khởi tạo DiscountAdapter
+        discountAdapter = new DiscountAdapter(new ArrayList<>(discountList));
+        discountsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        discountsRecyclerView.setAdapter(discountAdapter);
 
-        // Tải dữ liệu ban đầu
+        // Load dữ liệu
         loadCampaignDetails();
-        loadProducts();
+        loadCampaignProducts(1, 10);
     }
 
     private void loadCampaignDetails() {
+        progressBar.setVisibility(View.VISIBLE);
         apiManager.getCampaignDetails(campaignSlug, new ApiResponseListener<CampaignResponse>() {
             @Override
             public void onSuccess(CampaignResponse response) {
-                if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
+                progressBar.setVisibility(View.GONE);
+                if (response != null && response.getMetadata() != null &&
+                        response.getMetadata().getMetadata() != null) {
                     CampaignResponse.Campaign campaign = response.getMetadata().getMetadata().getCampaign();
-                    tvCampaignTitle.setText(campaign.getTitle() != null ? campaign.getTitle() : "Chiến dịch");
-                    tvCampaignDescription.setText(campaign.getDescription() != null ? campaign.getDescription() : "");
+                    campaignTitle.setText(campaign.getTitle());
+                    campaignDescription.setText(campaign.getDescription());
+                    discountList.clear();
+                    discountList.addAll(response.getMetadata().getMetadata().getDiscount());
+                    discountAdapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(CampaignActivity.this, "Không thể tải chi tiết campaign", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CampaignActivity.this, "Dữ liệu campaign không hợp lệ", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onError(String errorMessage) {
-                Log.e(TAG, "Failed to load campaign details: " + errorMessage);
-                Toast.makeText(CampaignActivity.this, "Lỗi tải chi tiết campaign", Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(CampaignActivity.this, "Lỗi tải chi tiết campaign: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void loadProducts() {
-        if (isLoading) return; // Tránh gọi trùng lặp
-        isLoading = true;
+    private void loadCampaignProducts(int page, int limit) {
         progressBar.setVisibility(View.VISIBLE);
-        apiManager.getCampaignProducts(campaignSlug, currentPage, PAGE_SIZE, new ApiResponseListener<ProductResponse>() {
+        apiManager.getCampaignProducts(campaignSlug, page, limit, new ApiResponseListener<CampaignProductsResponse>() {
             @Override
-            public void onSuccess(ProductResponse response) {
-                isLoading = false;
+            public void onSuccess(CampaignProductsResponse response) {
                 progressBar.setVisibility(View.GONE);
-                if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
-                    List<Product> newProducts = response.getMetadata().getMetadata().getProducts();
-                    if (newProducts != null) {
-                        if (currentPage == 1) {
-                            productList.clear();
-                        }
-                        productList.addAll(newProducts);
-                        productAdapter.notifyDataSetChanged();
-                        totalPages = response.getMetadata().getMetadata().getTotalPages();
-                        currentPage++;
-                    } else {
-                        Toast.makeText(CampaignActivity.this, "Không có sản phẩm nào", Toast.LENGTH_SHORT).show();
-                    }
+                if (response != null && response.getMetadata() != null &&
+                        response.getMetadata().getMetadata() != null) {
+                    productList.addAll(response.getMetadata().getMetadata().getProducts());
+                    productAdapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(CampaignActivity.this, "Không thể tải sản phẩm", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CampaignActivity.this, "Dữ liệu sản phẩm không hợp lệ", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onError(String errorMessage) {
-                isLoading = false;
                 progressBar.setVisibility(View.GONE);
-                Log.e(TAG, "Failed to load products: " + errorMessage);
                 Toast.makeText(CampaignActivity.this, "Lỗi tải sản phẩm: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void loadMoreProducts() {
-        if (currentPage <= totalPages && !isLoading) {
-            loadProducts();
-        }
     }
 }

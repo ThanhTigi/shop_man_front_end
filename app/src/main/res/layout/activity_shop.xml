@@ -5,22 +5,60 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/shopTitle"
+    <ProgressBar
+        android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black" />
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
-    <!-- Placeholder cho nội dung shop -->
+    <ImageView
+        android:id="@+id/shopLogo"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center" />
+
     <TextView
-        android:id="@+id/shopDescription"
-        android:layout_width="wrap_content"
+        android:id="@+id/shopName"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Loading shop details..."
-        android:textColor="#666666"
-        android:textSize="14sp" />
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center" />
 
+    <TextView
+        android:id="@+id/shopDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Ưu đãi"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/discountsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Sản phẩm"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/productsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp" />
 </LinearLayout>

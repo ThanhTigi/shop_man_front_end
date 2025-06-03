@@ -89,6 +89,34 @@ public class ShopResponse {
             return name;
         }
 
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public void setSlug(String slug) {
+            this.slug = slug;
+        }
+
+        public void setLogo(String logo) {
+            this.logo = logo;
+        }
+
+        public void setShopLocation(String shopLocation) {
+            this.shopLocation = shopLocation;
+        }
+
+        public void setRating(String rating) {
+            this.rating = rating;
+        }
+
         public String getDescription() {
             return description;
         }

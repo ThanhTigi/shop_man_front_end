@@ -6,4 +6,8 @@
     </style>
 
     <style name="Theme.ShopMan" parent="Base.Theme.ShopMan" />
+    <style name="DiscountBorder">
+        <item name="android:background">@drawable/border</item>
+    </style>
+
 </resources>

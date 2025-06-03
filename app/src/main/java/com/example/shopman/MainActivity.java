@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -15,6 +16,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.example.shopman.activities.LoginActivity;
 import com.example.shopman.fragments.cart.CartFragment;
@@ -39,13 +43,22 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private ApiManager apiManager;
     private BroadcastReceiver logoutReceiver;
+    private boolean isChangingActivity = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Cấu hình thanh trạng thái: màu trắng, biểu tượng tối
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        // Kiểm tra token trước khi khởi tạo UI
+        if (!checkTokens()) {
+            redirectToLogin("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
+            return;
+        }
+
+        // Cấu hình System UI
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+        WindowInsetsControllerCompat insetsController = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+        insetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
         getWindow().setStatusBarColor(getResources().getColor(android.R.color.white));
 
         setContentView(R.layout.activity_main);
@@ -63,19 +76,25 @@ public class MainActivity extends AppCompatActivity {
 
         // Lấy FCM token và gửi lên server
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if (task.isSuccessful() && task.getResult() != null) {
+            if (!isFinishing() && task.isSuccessful() && task.getResult() != null) {
                 String fcmToken = task.getResult();
+                Log.d(TAG, "FCM token retrieved: " + fcmToken);
                 sendFcmTokenToServer(fcmToken);
             } else {
                 Log.e(TAG, "Failed to get FCM token: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"));
-                Toast.makeText(MainActivity.this, "Không lấy được FCM token", Toast.LENGTH_SHORT).show();
+                if (!isFinishing()) {
+                    Toast.makeText(MainActivity.this, "Không lấy được FCM token", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         // Xử lý sự kiện nhấn vào ảnh hồ sơ
         profileImageView.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-            startActivity(intent);
+            if (!isChangingActivity) {
+                Log.d(TAG, "Navigating to ProfileActivity");
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            }
         });
 
         // Thiết lập adapter cho ViewPager2
@@ -109,17 +128,19 @@ public class MainActivity extends AppCompatActivity {
 
         // Xử lý sự kiện chọn mục trên BottomNavigationView
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            if (isChangingActivity) return false;
             int itemId = item.getItemId();
+            Log.d(TAG, "BottomNavigation selected: " + itemId);
             if (itemId == R.id.nav_home) {
-                viewPager.setCurrentItem(0);
+                viewPager.setCurrentItem(0, false);
             } else if (itemId == R.id.nav_wishlist) {
-                viewPager.setCurrentItem(1);
+                viewPager.setCurrentItem(1, false);
             } else if (itemId == R.id.nav_cart) {
-                viewPager.setCurrentItem(2);
+                viewPager.setCurrentItem(2, false);
             } else if (itemId == R.id.nav_search) {
-                viewPager.setCurrentItem(3);
+                viewPager.setCurrentItem(3, false);
             } else if (itemId == R.id.nav_settings) {
-                viewPager.setCurrentItem(4);
+                viewPager.setCurrentItem(4, false);
             }
             return true;
         });
@@ -128,7 +149,9 @@ public class MainActivity extends AppCompatActivity {
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
+                if (isChangingActivity) return;
                 super.onPageSelected(position);
+                Log.d(TAG, "ViewPager page selected: " + position);
                 switch (position) {
                     case 0:
                         bottomNavigationView.setSelectedItemId(R.id.nav_home);
@@ -150,27 +173,51 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private boolean checkTokens() {
+        String accessToken = MyPreferences.getString(this, "access_token", null);
+        String refreshToken = MyPreferences.getString(this, "refresh_token", null);
+        boolean isValid = !TextUtils.isEmpty(accessToken) && !TextUtils.isEmpty(refreshToken);
+        Log.d(TAG, "Token check: access_token=" + accessToken + ", refresh_token=" + refreshToken + ", valid=" + isValid);
+        return isValid;
+    }
+
+    private void redirectToLogin(String message) {
+        if (!isFinishing() && !isChangingActivity) {
+            isChangingActivity = true;
+            Log.d(TAG, "Redirecting to LoginActivity: " + message);
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }
+    }
+
     private void registerLogoutReceiver() {
         logoutReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Log.d(TAG, "Received logout broadcast");
-                Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
-                loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(loginIntent);
-                finish();
+                redirectToLogin("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
             }
         };
         IntentFilter filter = new IntentFilter("com.example.shopman.ACTION_LOGOUT");
-        registerReceiver(logoutReceiver, filter);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(logoutReceiver, filter, RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(logoutReceiver, filter);
+        }
+        Log.d(TAG, "Registered logout receiver with RECEIVER_NOT_EXPORTED");
     }
 
     private void sendFcmTokenToServer(String fcmToken) {
-        String accessToken = MyPreferences.getString(this, "access_token", null);
-        if (TextUtils.isEmpty(accessToken)) {
-            Log.w(TAG, "No access token available for FCM token update");
+        if (!checkTokens()) {
+            Log.w(TAG, "Invalid tokens, skipping FCM token update");
+            redirectToLogin("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
             return;
         }
+        String accessToken = MyPreferences.getString(this, "access_token", null);
+        Log.d(TAG, "Sending FCM token to server: " + fcmToken);
         apiManager.updateFcmToken(accessToken, fcmToken, new ApiResponseListener<Void>() {
             @Override
             public void onSuccess(Void response) {
@@ -180,15 +227,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onError(String errorMessage) {
                 Log.e(TAG, "Failed to update FCM token: " + errorMessage);
-                Toast.makeText(MainActivity.this, "Không thể cập nhật FCM token", Toast.LENGTH_SHORT).show();
+                if (!isFinishing()) {
+                    Toast.makeText(MainActivity.this, "Không thể cập nhật FCM token: " + errorMessage, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
     public void switchToSearchWithData(String keywordSearch) {
-        AppConfig.isSearch = true;
-        AppConfig.keywordSearch = keywordSearch;
-        viewPager.setCurrentItem(3, false);
+        if (!isChangingActivity) {
+            Log.d(TAG, "Switching to SearchFragment with keyword: " + keywordSearch);
+            AppConfig.isSearch = true;
+            AppConfig.keywordSearch = keywordSearch;
+            viewPager.setCurrentItem(3, false);
+        }
     }
 
     @Override
@@ -197,6 +249,8 @@ public class MainActivity extends AppCompatActivity {
         if (logoutReceiver != null) {
             unregisterReceiver(logoutReceiver);
             logoutReceiver = null;
+            Log.d(TAG, "Unregistered logout receiver");
         }
+        isChangingActivity = true; // Ngăn tương tác sau khi hủy
     }
 }

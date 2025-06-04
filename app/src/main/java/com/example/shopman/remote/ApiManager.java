@@ -13,12 +13,13 @@ import com.example.shopman.models.ErrorResponse;
 import com.example.shopman.models.FcmTokenRequest;
 import com.example.shopman.models.NewArrivals.NewArrivalsResponse;
 import com.example.shopman.models.ProductDetails.ProductDetailResponse;
+import com.example.shopman.models.Shop.FollowShopResponse;
+import com.example.shopman.models.Shop.ShopInfoResponse;
 import com.example.shopman.models.Shop.ShopProductsResponse;
 import com.example.shopman.models.ShopResponse;
 import com.example.shopman.models.TopTrendingProducts.TrendingProductResponse;
 import com.example.shopman.models.cart.CartAddRequest;
 import com.example.shopman.models.cart.CartResponse;
-import com.example.shopman.models.category.CategoryProductResponse;
 import com.example.shopman.models.category.CategoryResponse;
 import com.example.shopman.models.changepassword.request.ChangePasswordRequest;
 import com.example.shopman.models.changepassword.request.ForgotPasswordRequest;
@@ -35,8 +36,9 @@ import com.example.shopman.models.signup.SignUpResponse;
 import com.example.shopman.models.cart.CartAddResponse;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileRequest;
-import com.example.shopman.models.wishlist.WishlistRequest;
-import com.example.shopman.models.wishlist.WishlistResponse;
+import com.example.shopman.models.wishlist.Add.WishlistRequest;
+import com.example.shopman.models.wishlist.Add.WishlistResponse;
+import com.example.shopman.models.wishlist.Remove.WishlistRemoveResponse;
 import com.example.shopman.utilitis.MyPreferences;
 import com.google.gson.Gson;
 
@@ -347,6 +349,7 @@ public class ApiManager {
                     listener.onError("Failed to update FCM token: " + errorMessage);
                 }
             }
+
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 Log.e(TAG, "Update FCM Token Error: " + t.getMessage());
@@ -391,7 +394,7 @@ public class ApiManager {
         call.enqueue(new Callback<ProductDetailResponse>() {
             @Override
             public void onResponse(Call<ProductDetailResponse> call, Response<ProductDetailResponse> response) {
-                Log.d(TAG, "onResponse: "+response);
+                Log.d(TAG, "onResponse: " + response);
                 Log.d(TAG, "Get Product Detail Response: " + (response.body() != null ? new Gson().toJson(response.body()) : "null"));
                 if (response.isSuccessful() && response.body() != null) {
                     listener.onSuccess(response.body());
@@ -609,6 +612,7 @@ public class ApiManager {
             }
         });
     }
+
     public void getCampaignDetails(String slug, ApiResponseListener<CampaignResponse> listener) {
         Log.d(TAG, "Calling getCampaignDetails: /campaign/" + slug);
         Call<CampaignResponse> call = apiService.getCampaignDetails(slug);
@@ -666,6 +670,7 @@ public class ApiManager {
             }
         });
     }
+
     public void getShopDetails(String slug, ApiResponseListener<ShopResponse> listener) {
         Log.d(TAG, "Calling getShopDetails: /shop/" + slug);
         Call<ShopResponse> call = apiService.getShopDetails(slug);
@@ -783,6 +788,111 @@ public class ApiManager {
             public void onFailure(Call<NewArrivalsResponse> call, Throwable t) {
                 Log.e(TAG, "Get New Arrivals Error: " + t.getMessage());
                 listener.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+    public void removeFromWishlist(String accessToken, int productId, ApiResponseListener<WishlistRemoveResponse> listener) {
+        String authHeader = "Bearer " + accessToken;
+        Call<WishlistRemoveResponse> call = apiService.removeFromWishlist(authHeader, productId);
+        call.enqueue(new Callback<WishlistRemoveResponse>() {
+            @Override
+            public void onResponse(Call<WishlistRemoveResponse> call, Response<WishlistRemoveResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMsg = "Lỗi server: " + response.code();
+                    Log.e(TAG, errorMsg);
+                    listener.onError(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WishlistRemoveResponse> call, Throwable t) {
+                String errorMsg = "Lỗi kết nối: " + t.getMessage();
+                Log.e(TAG, errorMsg, t);
+                listener.onError(errorMsg);
+            }
+        });
+    }
+    public void getShopInfo(String shopId, ApiResponseListener<ShopInfoResponse> listener) {
+        String accessToken = MyPreferences.getString(context, "access_token", null);
+        String authHeader = accessToken != null ? "Bearer " + accessToken : "";
+        Call<ShopInfoResponse> call = apiService.getShopInfo(authHeader, shopId);
+        call.enqueue(new Callback<ShopInfoResponse>() {
+            @Override
+            public void onResponse(Call<ShopInfoResponse> call, Response<ShopInfoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMsg = "Lỗi server: " + response.code();
+                    Log.e(TAG, errorMsg);
+                    listener.onError(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ShopInfoResponse> call, Throwable t) {
+                String errorMsg = "Lỗi kết nối: " + t.getMessage();
+                Log.e(TAG, errorMsg, t);
+                listener.onError(errorMsg);
+            }
+        });
+    }
+
+    public void followShop(String shopId, ApiResponseListener<FollowShopResponse> listener) {
+        String accessToken = MyPreferences.getString(context, "access_token", null);
+        if (accessToken == null) {
+            listener.onError("Vui lòng đăng nhập");
+            return;
+        }
+        String authHeader = "Bearer " + accessToken;
+        Call<FollowShopResponse> call = apiService.followShop(authHeader, shopId);
+        call.enqueue(new Callback<FollowShopResponse>() {
+            @Override
+            public void onResponse(Call<FollowShopResponse> call, Response<FollowShopResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMsg = "Lỗi server: " + response.code();
+                    Log.e(TAG, errorMsg);
+                    listener.onError(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<FollowShopResponse> call, Throwable t) {
+                String errorMsg = "Lỗi kết nối: " + t.getMessage();
+                Log.e(TAG, errorMsg, t);
+                listener.onError(errorMsg);
+            }
+        });
+    }
+
+    public void unfollowShop(String shopId, ApiResponseListener<FollowShopResponse> listener) {
+        String accessToken = MyPreferences.getString(context, "access_token", null);
+        if (accessToken == null) {
+            listener.onError("Vui lòng đăng nhập");
+            return;
+        }
+        String authHeader = "Bearer " + accessToken;
+        Call<FollowShopResponse> call = apiService.unfollowShop(authHeader, shopId);
+        call.enqueue(new Callback<FollowShopResponse>() {
+            @Override
+            public void onResponse(Call<FollowShopResponse> call, Response<FollowShopResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMsg = "Lỗi server: " + response.code();
+                    Log.e(TAG, errorMsg);
+                    listener.onError(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<FollowShopResponse> call, Throwable t) {
+                String errorMsg = "Lỗi kết nối: " + t.getMessage();
+                Log.e(TAG, errorMsg, t);
+                listener.onError(errorMsg);
             }
         });
     }

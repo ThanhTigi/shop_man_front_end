@@ -29,8 +29,12 @@ import com.example.shopman.models.ProductDetails.ProductDetail;
 import com.example.shopman.models.ProductDetails.ProductDetailResponse;
 import com.example.shopman.models.ProductDetails.Sku;
 import com.example.shopman.models.ProductDetails.SpuToSku;
+import com.example.shopman.models.Shop.FollowShopResponse;
+import com.example.shopman.models.Shop.ShopInfoResponse;
 import com.example.shopman.models.searchproducts.SearchProduct;
 import com.example.shopman.models.searchproducts.SearchProductsResponse;
+import com.example.shopman.models.wishlist.Add.WishlistResponse;
+import com.example.shopman.models.wishlist.Remove.WishlistRemoveResponse;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
 import com.example.shopman.utilitis.MyPreferences;
@@ -57,7 +61,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private ImageButton btnGoToCart, btnBuyNow, btnWishlist;
     private Button btnFollow;
     private RecyclerView rvRelatedProducts;
-    private ProgressBar progressBar;
+    private ProgressBar loadMoreProgress;
     private ApiManager apiManager;
     private ProductAdapter relatedProductAdapter;
     private Map<String, String> selectedAttributes = new HashMap<>();
@@ -66,25 +70,21 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private List<SpuToSku> skus;
     private boolean isLoadingMore = false;
     private boolean isInWishlist = false;
+    private boolean isShopFollowed = false;
     private String lastSortValues;
     private boolean isLastPage = false;
     private String productThumb;
     private String productId;
-    private String categorySlug; // Đổi từ categoryId sang slug
+    private String shopId;
+    private String categorySlug;
     private ProductDetail productDetail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_details);
-
-        // Khởi tạo toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Chi tiết sản phẩm");
-        }
+        Log.d(TAG, "Drawable button_follow_red ID: " + R.drawable.button_follow_red);
+        Log.d(TAG, "Drawable button_follow_grey ID: " + R.drawable.button_follow_grey);
 
         // Khởi tạo views
         ivProduct = findViewById(R.id.ivProduct);
@@ -104,7 +104,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
         btnFollow = findViewById(R.id.btnFollow);
         btnWishlist = findViewById(R.id.btnWishlist);
         rvRelatedProducts = findViewById(R.id.rvRelatedProducts);
-        progressBar = findViewById(R.id.progressBar);
+        loadMoreProgress = findViewById(R.id.loadMoreProgress);
 
         // Khởi tạo ApiManager
         apiManager = new ApiManager(this);
@@ -129,11 +129,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
         // Sự kiện click
         btnGoToCart.setOnClickListener(v -> showSkuSelectionBottomSheet(false));
         btnBuyNow.setOnClickListener(v -> showSkuSelectionBottomSheet(true));
-        btnFollow.setOnClickListener(v -> {
-            btnFollow.setText("Đang theo dõi");
-            btnFollow.setEnabled(false);
-            Toast.makeText(this, "Đã theo dõi cửa hàng", Toast.LENGTH_SHORT).show();
-        });
+        btnFollow.setOnClickListener(v -> toggleFollowShop());
         btnWishlist.setOnClickListener(v -> toggleWishlist());
 
         // Lấy slug từ Intent
@@ -145,7 +141,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
             finish();
         }
     }
-
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
@@ -153,30 +148,28 @@ public class ProductDetailsActivity extends AppCompatActivity {
     }
 
     private void loadProductDetail(String slug) {
-        if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        }
+        loadMoreProgress.setVisibility(View.VISIBLE);
         apiManager.getProductDetail(slug, new ApiResponseListener<ProductDetailResponse>() {
             @Override
             public void onSuccess(ProductDetailResponse response) {
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
-                Log.d(TAG, "onSuccess: "+response);
+                loadMoreProgress.setVisibility(View.GONE);
+                Log.d(TAG, "Product detail response: " + new Gson().toJson(response));
                 if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
-
                     productDetail = response.getMetadata().getMetadata();
                     skus = productDetail.getSpuToSkus();
                     productThumb = productDetail.getThumb();
                     productId = String.valueOf(productDetail.getId());
-                    // Giả sử ProductDetail có getCategorySlug(), nếu không, lấy từ Intent
+                    shopId = String.valueOf(productDetail.getShopId());
+                    isInWishlist = productDetail.isInWishlist();
+                    btnWishlist.setImageResource(isInWishlist ? R.drawable.ic_full_heart : R.drawable.ic_heart_1);
                     categorySlug = getIntent().getStringExtra("category_slug");
                     if (categorySlug == null) {
                         Log.w(TAG, "Category slug not provided, using default or fallback");
-                        // Fallback nếu cần, ví dụ: categorySlug = "default-category";
+                        categorySlug = String.valueOf(productDetail.getCategoryId());
                     }
                     Log.d(TAG, "SKUs loaded: " + (skus != null ? skus.size() : 0));
                     displayProduct(productDetail);
+                    loadShopInfo(shopId); // Gọi API shop info
                     if (categorySlug != null) {
                         loadRelatedProducts(categorySlug);
                     } else {
@@ -191,22 +184,67 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onError(String errorMessage) {
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
+                loadMoreProgress.setVisibility(View.GONE);
                 Toast.makeText(ProductDetailsActivity.this, "Lỗi tải chi tiết sản phẩm: " + errorMessage, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "API Error: " + errorMessage);
+                if (errorMessage.contains("Session expired")) {
+                    Toast.makeText(ProductDetailsActivity.this, "Vui lòng đăng nhập lại", Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(ProductDetailsActivity.this, LoginActivity.class));
+                    finish();
+                }
                 finish();
             }
         });
     }
+    private void toggleFollowShop() {
+        String accessToken = MyPreferences.getString(this, "access_token", null);
+        if (accessToken == null) {
+            Toast.makeText(this, "Vui lòng đăng nhập để theo dõi shop", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, LoginActivity.class));
+            return;
+        }
+
+        if (isShopFollowed) {
+            apiManager.unfollowShop(shopId, new ApiResponseListener<FollowShopResponse>() {
+                @Override
+                public void onSuccess(FollowShopResponse response) {
+                    isShopFollowed = false;
+                    updateFollowButton();
+                    Toast.makeText(ProductDetailsActivity.this, "Đã hủy theo dõi shop", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    Toast.makeText(ProductDetailsActivity.this, "Lỗi hủy theo dõi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Unfollow shop error: " + errorMessage);
+                }
+            });
+        } else {
+            apiManager.followShop(shopId, new ApiResponseListener<FollowShopResponse>() {
+                @Override
+                public void onSuccess(FollowShopResponse response) {
+                    isShopFollowed = true;
+                    updateFollowButton();
+                    Toast.makeText(ProductDetailsActivity.this, "Đã theo dõi shop", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    Toast.makeText(ProductDetailsActivity.this, "Lỗi theo dõi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Follow shop error: " + errorMessage);
+                }
+            });
+        }
+    }
 
     private void loadRelatedProducts(String categorySlug) {
         isLoadingMore = true;
+        loadMoreProgress.setVisibility(View.VISIBLE);
         apiManager.getCategoryProducts(categorySlug, null, PAGE_SIZE, new ApiResponseListener<SearchProductsResponse>() {
             @Override
             public void onSuccess(SearchProductsResponse response) {
                 isLoadingMore = false;
+                loadMoreProgress.setVisibility(View.GONE);
                 if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
                     List<SearchProduct> products = response.getMetadata().getMetadata().getData();
                     lastSortValues = new Gson().toJson(response.getMetadata().getMetadata().getLastSortValues());
@@ -230,6 +268,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
             @Override
             public void onError(String errorMessage) {
                 isLoadingMore = false;
+                loadMoreProgress.setVisibility(View.GONE);
                 Toast.makeText(ProductDetailsActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "Load related products error: " + errorMessage);
             }
@@ -239,10 +278,12 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private void loadMoreRelatedProducts() {
         if (!isLoadingMore && !isLastPage && categorySlug != null) {
             isLoadingMore = true;
+            loadMoreProgress.setVisibility(View.VISIBLE);
             apiManager.getCategoryProducts(categorySlug, lastSortValues, PAGE_SIZE, new ApiResponseListener<SearchProductsResponse>() {
                 @Override
                 public void onSuccess(SearchProductsResponse response) {
                     isLoadingMore = false;
+                    loadMoreProgress.setVisibility(View.GONE);
                     if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
                         List<SearchProduct> products = response.getMetadata().getMetadata().getData();
                         lastSortValues = new Gson().toJson(response.getMetadata().getMetadata().getLastSortValues());
@@ -262,6 +303,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
                 @Override
                 public void onError(String errorMessage) {
                     isLoadingMore = false;
+                    loadMoreProgress.setVisibility(View.GONE);
                     Log.e(TAG, "Load more related products error: " + errorMessage);
                 }
             });
@@ -289,20 +331,40 @@ public class ProductDetailsActivity extends AppCompatActivity {
             return;
         }
 
-        apiManager.addToWishlist(accessToken, productIdInt, new ApiResponseListener<com.example.shopman.models.wishlist.WishlistResponse>() {
-            @Override
-            public void onSuccess(com.example.shopman.models.wishlist.WishlistResponse response) {
-                isInWishlist = !isInWishlist;
-                btnWishlist.setImageResource(isInWishlist ? R.drawable.ic_full_heart : R.drawable.ic_heart_1);
-                Toast.makeText(ProductDetailsActivity.this, isInWishlist ? "Đã thêm vào danh sách yêu thích" : "Đã xóa khỏi danh sách yêu thích", Toast.LENGTH_SHORT).show();
-            }
+        // Kiểm tra trạng thái hiện tại để gọi API phù hợp
+        if (isInWishlist) {
+            // Xóa khỏi wishlist
+            apiManager.removeFromWishlist(accessToken, productIdInt, new ApiResponseListener<WishlistRemoveResponse>() {
+                @Override
+                public void onSuccess(WishlistRemoveResponse response) {
+                    isInWishlist = false;
+                    btnWishlist.setImageResource(R.drawable.ic_heart_1);
+                    Toast.makeText(ProductDetailsActivity.this, "Đã xóa khỏi danh sách yêu thích", Toast.LENGTH_SHORT).show();
+                }
 
-            @Override
-            public void onError(String errorMessage) {
-                Toast.makeText(ProductDetailsActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Wishlist error: " + errorMessage);
-            }
-        });
+                @Override
+                public void onError(String errorMessage) {
+                    Toast.makeText(ProductDetailsActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Remove from wishlist error: " + errorMessage);
+                }
+            });
+        } else {
+            // Thêm vào wishlist
+            apiManager.addToWishlist(accessToken, productIdInt, new ApiResponseListener<WishlistResponse>() {
+                @Override
+                public void onSuccess(WishlistResponse response) {
+                    isInWishlist = true;
+                    btnWishlist.setImageResource(R.drawable.ic_full_heart);
+                    Toast.makeText(ProductDetailsActivity.this, "Đã thêm vào danh sách yêu thích", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    Toast.makeText(ProductDetailsActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Add to wishlist error: " + errorMessage);
+                }
+            });
+        }
     }
 
     private void showSkuSelectionBottomSheet(boolean isBuyNow) {
@@ -485,7 +547,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
                 .error(R.drawable.ic_error)
                 .into(ivProduct);
 
-        // Tải logo cửa hàng (giả sử placeholder)
+        // Tải logo cửa hàng
         ivShopLogo.setImageResource(R.drawable.ic_placeholder);
 
         // Hiển thị thuộc tính sản phẩm
@@ -558,5 +620,41 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private String capitalize(String str) {
         if (str == null || str.isEmpty()) return str;
         return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
+    }
+    private void loadShopInfo(String shopId) {
+        Log.d(TAG, "Loading shop info for shopId: " + shopId);
+        apiManager.getShopInfo(shopId, new ApiResponseListener<ShopInfoResponse>() {
+            @Override
+            public void onSuccess(ShopInfoResponse response) {
+                ShopInfoResponse.ShopMetadata metadata = response.getMetadata().getMetadata();
+                isShopFollowed = metadata.isFollowing();
+                Log.d(TAG, "Shop info loaded, isShopFollowed: " + isShopFollowed);
+                tvShopName.setText(metadata.getShop().getName());
+                Glide.with(ProductDetailsActivity.this)
+                        .load(metadata.getShop().getLogo())
+                        .placeholder(R.drawable.ic_placeholder)
+                        .error(R.drawable.ic_error)
+                        .into(ivShopLogo);
+                updateFollowButton();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Log.e(TAG, "Error loading shop info: " + errorMessage);
+                tvShopName.setText("Shop ID: " + shopId);
+                ivShopLogo.setImageResource(R.drawable.ic_placeholder);
+                btnFollow.setVisibility(View.GONE);
+                Toast.makeText(ProductDetailsActivity.this, "Lỗi tải thông tin shop: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateFollowButton() {
+        Log.d(TAG, "Updating follow button, isShopFollowed: " + isShopFollowed);
+        btnFollow.setText(isShopFollowed ? "Unfollow" : "Follow");
+        int resourceId = isShopFollowed ? R.drawable.button_follow_grey : R.drawable.button_follow_red;
+        Log.d(TAG, "Setting background resource ID: " + resourceId);
+        btnFollow.setBackgroundResource(resourceId);
+        Log.d(TAG, "Background set to: " + (isShopFollowed ? "grey" : "red"));
     }
 }

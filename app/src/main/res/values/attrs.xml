@@ -1,4 +1,7 @@
 <resources>
     <attr name="toolbar_background" format="color" />
     <attr name="toolbar_text_color" format="color" />
+    <declare-styleable name="FollowButton">
+        <attr name="is_followed" format="boolean" />
+    </declare-styleable>
 </resources>

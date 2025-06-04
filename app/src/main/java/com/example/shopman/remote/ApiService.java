@@ -7,6 +7,8 @@ import com.example.shopman.models.DealofTheDay.DealProductResponse;
 import com.example.shopman.models.FcmTokenRequest;
 import com.example.shopman.models.NewArrivals.NewArrivalsResponse;
 import com.example.shopman.models.ProductDetails.ProductDetailResponse;
+import com.example.shopman.models.Shop.FollowShopResponse;
+import com.example.shopman.models.Shop.ShopInfoResponse;
 import com.example.shopman.models.Shop.ShopProductsResponse;
 import com.example.shopman.models.ShopResponse;
 import com.example.shopman.models.TopTrendingProducts.TrendingProductResponse;
@@ -14,7 +16,6 @@ import com.example.shopman.models.auth.RefreshTokenResponse;
 import com.example.shopman.models.cart.CartAddRequest;
 import com.example.shopman.models.cart.CartAddResponse;
 import com.example.shopman.models.cart.CartResponse;
-import com.example.shopman.models.category.CategoryProductResponse;
 import com.example.shopman.models.category.CategoryResponse;
 import com.example.shopman.models.changepassword.request.ChangePasswordRequest;
 import com.example.shopman.models.changepassword.request.ForgotPasswordRequest;
@@ -30,13 +31,15 @@ import com.example.shopman.models.signup.SignUpRequest;
 import com.example.shopman.models.signup.SignUpResponse;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
 import com.example.shopman.models.profile.updateuserprofile.UpdateProfileRequest;
-import com.example.shopman.models.wishlist.WishlistRequest;
-import com.example.shopman.models.wishlist.WishlistResponse;
+import com.example.shopman.models.wishlist.Add.WishlistRequest;
+import com.example.shopman.models.wishlist.Add.WishlistResponse;
+import com.example.shopman.models.wishlist.Remove.WishlistRemoveResponse;
 
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
@@ -71,6 +74,12 @@ public interface ApiService {
 
     @PUT("/api/v1/user/profile/update")
     Call<GetUserProfileResponse> updateUserProfile(@Header("Authorization") String authorization, @Body UpdateProfileRequest request);
+
+    @DELETE("/api/v1/wishlist/{productId}")
+    Call<WishlistRemoveResponse> removeFromWishlist(
+            @Header("Authorization") String authorization,
+            @Path("productId") int productId
+    );
 
     @GET("/api/v1/product/search")
     Call<SearchProductsResponse> searchProducts(
@@ -149,5 +158,22 @@ public interface ApiService {
     Call<NewArrivalsResponse> getNewArrivals(
             @Query("page") int page,
             @Query("pageSize") Integer pageSize
+    );
+    @GET("/api/v1/shop/info/{shopId}")
+    Call<ShopInfoResponse> getShopInfo(
+            @Header("Authorization") String authorization,
+            @Path("shopId") String shopId
+    );
+
+    @POST("/api/v1/shop/{shopId}/follow")
+    Call<FollowShopResponse> followShop(
+            @Header("Authorization") String authorization,
+            @Path("shopId") String shopId
+    );
+
+    @DELETE("/api/v1/shop/{shopId}/follow")
+    Call<FollowShopResponse> unfollowShop(
+            @Header("Authorization") String authorization,
+            @Path("shopId") String shopId
     );
 }

@@ -1,4 +1,4 @@
-package com.example.shopman.models.wishlist;
+package com.example.shopman.models.wishlist.Add;
 
 import com.example.shopman.models.searchproducts.SearchProduct;
 

@@ -10,5 +10,5 @@
     <color name="green">#26AA9A</color>
     <color name="chip_background">#E0E0E0</color>
     <color name="chip_stroke">#B0B0B0</color>
-    <color name="pink">#FF4081</color> <!-- Thêm màu hồng -->
+    <color name="pink">#f83758</color> <!-- Thêm màu hồng -->
 </resources>

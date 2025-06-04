@@ -1,4 +1,4 @@
-package com.example.shopman.models.wishlist;
+package com.example.shopman.models.wishlist.Add;
 
 import java.util.List;
 

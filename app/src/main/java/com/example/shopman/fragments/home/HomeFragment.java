@@ -32,7 +32,7 @@ import com.example.shopman.models.Banner.Banner;
 import com.example.shopman.models.Banner.BannerResponse;
 import com.example.shopman.models.Category;
 import com.example.shopman.models.category.CategoryResponse;
-import com.example.shopman.models.wishlist.WishlistProductDetail;
+import com.example.shopman.models.wishlist.Add.WishlistProductDetail;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
 import com.example.shopman.utilitis.SpacesItemDecoration;

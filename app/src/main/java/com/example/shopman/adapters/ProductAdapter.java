@@ -83,7 +83,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             productDiscount = itemView.findViewById(R.id.productDiscount);
             productSaleCount = itemView.findViewById(R.id.productSaleCount);
             productRating = itemView.findViewById(R.id.productRating);
-//            cardView = itemView.findViewById(R.id.); // Nếu cần truy cập CardView
 
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
@@ -91,6 +90,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                 }
             });
         }
+
         void bind(Product product) {
             // Hình ảnh sản phẩm
             Glide.with(context)
@@ -132,8 +132,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             }
 
             // Đánh giá
-            productRating.setRating(product.getRating());
-            productRating.setVisibility("cart".equals(displayType) ? View.GONE : View.VISIBLE);
+            float rating = product.getRating();
+            if (rating >= 0 && rating <= 5) {
+                productRating.setRating(rating);
+                productRating.setVisibility("cart".equals(displayType) ? View.GONE : View.VISIBLE);
+            } else {
+                productRating.setVisibility(View.GONE);
+            }
 
             // Số lượng bán
             productSaleCount.setText(String.format("Sold: %d", product.getSaleCount()));

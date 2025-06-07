@@ -4,4 +4,26 @@
     <string name="login_text"><u>Login</u></string>
     <string name="google_client_id">YOUR_GOOGLE_CLIENT_ID</string>
     <string name="banner_image">Banner Image</string>
+    <string name="placeholder_product_name">Korean Cotton Short Sleeve T-Shirt</string>
+    <string name="placeholder_product_subtitle">Women\'s Short-Sleeve T-Shirt (All Colors)</string>
+    <string name="placeholder_reviews">15 reviews</string>
+    <string name="placeholder_price">đ1,145,000</string>
+    <string name="placeholder_original_price">đ2,290,000</string>
+    <string name="placeholder_discount">50% Off</string>
+    <string name="placeholder_description">Women’s short-sleeve T-shirt made from 100% cotton, featuring a trendy Korean design for summer wear.</string>
+    <string name="placeholder_shop_name">Shop Name (ShopId: 16)</string>
+    <string name="additional_options">Additional Options</string>
+    <string name="nearest_store">Nearest Store</string>
+    <string name="vip">VIP</string>
+    <string name="return_policy">Return Policy</string>
+    <string name="follow">Follow</string>
+    <string name="comments">Comments</string>
+    <string name="related_products">Related Products</string>
+    <string name="product_image">Product Image</string>
+    <string name="shop_logo">Shop Logo</string>
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="buy_now">Buy Now</string>
+    <string name="add_to_wishlist">Add to Wishlist</string>
+    <string name="write_comment">Write your comment...</string>
+    <string name="send">Send</string>
 </resources>

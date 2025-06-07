@@ -8,6 +8,9 @@ import android.util.Log;
 import com.example.shopman.models.Banner.BannerResponse;
 import com.example.shopman.models.Campaign.CampaignProductsResponse;
 import com.example.shopman.models.Campaign.CampaignResponse;
+import com.example.shopman.models.Comments.Comment;
+import com.example.shopman.models.Comments.CommentResponse;
+import com.example.shopman.models.Comments.RepliesResponse;
 import com.example.shopman.models.DealofTheDay.DealProductResponse;
 import com.example.shopman.models.ErrorResponse;
 import com.example.shopman.models.FcmTokenRequest;
@@ -890,6 +893,178 @@ public class ApiManager {
 
             @Override
             public void onFailure(Call<FollowShopResponse> call, Throwable t) {
+                String errorMsg = "Lỗi kết nối: " + t.getMessage();
+                Log.e(TAG, errorMsg, t);
+                listener.onError(errorMsg);
+            }
+        });
+    }
+    public void getRelatedProducts(
+            int categoryId,
+            List<Object> lastSortValues,
+            int pageSize,
+            ApiResponseListener<SearchProductsResponse> listener
+    ) {
+        String lastSortValuesJson = lastSortValues != null ? new Gson().toJson(lastSortValues) : null;
+        Log.d(TAG, "Requesting related products for categoryId: " + categoryId +
+                ", lastSortValues: " + lastSortValuesJson);
+
+        Call<SearchProductsResponse> call = apiService.getRelatedProducts(
+                categoryId,
+                lastSortValuesJson,
+                pageSize
+        );
+
+        call.enqueue(new Callback<SearchProductsResponse>() {
+            @Override
+            public void onResponse(Call<SearchProductsResponse> call, Response<SearchProductsResponse> response) {
+                Log.d(TAG, "onResponse: "+response);
+                if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "Related products response: " + new Gson().toJson(response.body()));
+                    listener.onSuccess(response.body());
+                } else {
+                    Log.e(TAG, "Failed to load related products: " + response.message());
+                    listener.onError("Failed to load related products: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SearchProductsResponse> call, Throwable t) {
+                Log.e(TAG, "Failed to load related products: " + t.getMessage());
+                listener.onError("Failed to load related products: " + t.getMessage());
+            }
+        });
+    }
+    public void getProductComments(int productId, int page, int size, ApiResponseListener<CommentResponse> listener) {
+        Call<CommentResponse> call = apiService.getProductComments(productId, page, size);
+        call.enqueue(new Callback<CommentResponse>() {
+            @Override
+            public void onResponse(Call<CommentResponse> call, Response<CommentResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMsg = "Lỗi server: " + response.code();
+                    Log.e(TAG, errorMsg);
+                    listener.onError(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CommentResponse> call, Throwable t) {
+                String errorMsg = "Lỗi kết nối: " + t.getMessage();
+                Log.e(TAG, errorMsg, t);
+                listener.onError(errorMsg);
+            }
+        });
+    }
+
+    // POST /product/{id}/comments
+    public void postComment(int productId, String content, Integer rating, Integer parentId, ApiResponseListener<Comment> listener) {
+        String accessToken = MyPreferences.getString(context, "access_token", null);
+        if (accessToken == null) {
+            listener.onError("Vui lòng đăng nhập");
+            return;
+        }
+        String authHeader = "Bearer " + accessToken;
+        Call<Comment> call = apiService.postComment(authHeader, productId, content, rating, parentId);
+        call.enqueue(new Callback<Comment>() {
+            @Override
+            public void onResponse(Call<Comment> call, Response<Comment> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMsg = "Lỗi server: " + response.code();
+                    Log.e(TAG, errorMsg);
+                    listener.onError(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Comment> call, Throwable t) {
+                String errorMsg = "Lỗi kết nối: " + t.getMessage();
+                Log.e(TAG, errorMsg, t);
+                listener.onError(errorMsg);
+            }
+        });
+    }
+
+    // GET /comment/{id}/replies
+    public void getCommentReplies(int commentId, ApiResponseListener<RepliesResponse> listener) {
+        Call<RepliesResponse> call = apiService.getCommentReplies(commentId);
+        call.enqueue(new Callback<RepliesResponse>() {
+            @Override
+            public void onResponse(Call<RepliesResponse> call, Response<RepliesResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMsg = "Lỗi server: " + response.code();
+                    Log.e(TAG, errorMsg);
+                    listener.onError(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RepliesResponse> call, Throwable t) {
+                String errorMsg = "Lỗi kết nối: " + t.getMessage();
+                Log.e(TAG, errorMsg, t);
+                listener.onError(errorMsg);
+            }
+        });
+    }
+
+    // PUT /comment/{id}
+    public void updateComment(int commentId, String content, ApiResponseListener<Integer> listener) {
+        String accessToken = MyPreferences.getString(context, "access_token", null);
+        if (accessToken == null) {
+            listener.onError("Vui lòng đăng nhập");
+            return;
+        }
+        String authHeader = "Bearer " + accessToken;
+        Call<Integer> call = apiService.updateComment(authHeader, commentId, content);
+        call.enqueue(new Callback<Integer>() {
+            @Override
+            public void onResponse(Call<Integer> call, Response<Integer> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMsg = "Lỗi server: " + response.code();
+                    Log.e(TAG, errorMsg);
+                    listener.onError(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Integer> call, Throwable t) {
+                String errorMsg = "Lỗi kết nối: " + t.getMessage();
+                Log.e(TAG, errorMsg, t);
+                listener.onError(errorMsg);
+            }
+        });
+    }
+
+    // DELETE /comment/{id}
+    public void deleteComment(int commentId, ApiResponseListener<Integer> listener) {
+        String accessToken = MyPreferences.getString(context, "access_token", null);
+        if (accessToken == null) {
+            listener.onError("Vui lòng đăng nhập");
+            return;
+        }
+        String authHeader = "Bearer " + accessToken;
+        Call<Integer> call = apiService.deleteComment(authHeader, commentId);
+        call.enqueue(new Callback<Integer>() {
+            @Override
+            public void onResponse(Call<Integer> call, Response<Integer> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMsg = "Lỗi server: " + response.code();
+                    Log.e(TAG, errorMsg);
+                    listener.onError(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Integer> call, Throwable t) {
                 String errorMsg = "Lỗi kết nối: " + t.getMessage();
                 Log.e(TAG, errorMsg, t);
                 listener.onError(errorMsg);

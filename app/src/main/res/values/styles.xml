@@ -9,8 +9,10 @@
         <item name="android:textSize">12sp</item>
     </style>
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Màu cho chế độ sáng -->
         <item name="toolbar_background">@color/toolbar_background</item>
         <item name="toolbar_text_color">@color/toolbar_text_color</item>
+        <item name="colorPrimary">@color/white</item> <!-- Status bar -->
+        <item name="colorAccent">@android:color/transparent</item> <!-- Tắt tint cho Button -->
+        <item name="android:statusBarColor">@color/status_bar_background</item>
     </style>
 </resources>

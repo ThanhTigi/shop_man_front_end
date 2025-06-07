@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_selected="true">
-        <shape android:shape="rectangle">
-            <solid android:color="#B0BEC5" /> <!-- Xám khi đã follow -->
-            <corners android:radius="8dp" />
-        </shape>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/grey" />
+                    <corners android:radius="8dp" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
     <item android:state_selected="false">
-        <shape android:shape="rectangle">
-            <solid android:color="#F83758" /> <!-- Đỏ khi chưa follow -->
-            <corners android:radius="8dp" />
-        </shape>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/red" />
+                    <corners android:radius="8dp" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
 </selector>

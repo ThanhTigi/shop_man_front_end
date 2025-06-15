@@ -6,13 +6,45 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Custom back button -->
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="@string/back"
+            android:padding="16dp"
+            android:layout_marginStart="8dp"
+            android:scaleType="fitCenter"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- Title -->
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/product_details_title"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:gravity="center"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp" />
+    </androidx.appcompat.widget.Toolbar>
+
     <!-- Nội dung chính trong NestedScrollView -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toTopOf="@id/bottomBar">
 
         <LinearLayout
@@ -87,12 +119,12 @@
             </LinearLayout>
 
             <!-- Price and Discount -->
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginBottom="16dp">
+
                 <TextView
                     android:id="@+id/tvPrice"
                     android:layout_width="wrap_content"
@@ -101,6 +133,7 @@
                     android:textColor="@color/black"
                     android:textSize="20sp"
                     android:textStyle="bold" />
+
                 <TextView
                     android:id="@+id/tvOriginalPrice"
                     android:layout_width="wrap_content"
@@ -271,51 +304,25 @@
                         android:textColor="@color/black"
                         android:layout_marginBottom="8dp" />
 
-                    <!-- RecyclerView cho danh sách comment -->
+                    <!-- Comments RecyclerView -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/commentsRecyclerView"
                         android:layout_width="match_parent"
+                        android:minHeight="200dp"
                         android:layout_height="wrap_content"
                         android:nestedScrollingEnabled="false"
                         android:layout_marginBottom="8dp" />
 
-                    <!-- ProgressBar khi tải comment -->
-                    <ProgressBar
-                        android:id="@+id/commentsProgressBar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:visibility="gone" />
-
-                    <!-- Input để thêm comment -->
-                    <LinearLayout
+                    <!-- Button to open CommentActivity -->
+                    <Button
+                        android:id="@+id/btnViewAllComments"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="@android:drawable/edit_text"
-                        android:padding="8dp"
-                        android:layout_marginTop="8dp">
-
-                        <EditText
-                            android:id="@+id/etCommentInput"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/write_comment"
-                            android:background="@null"
-                            android:padding="8dp"
-                            android:textSize="14sp" />
-
-                        <Button
-                            android:id="@+id/btnPostComment"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/send"
-                            android:backgroundTint="@color/blue"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:layout_marginStart="8dp" />
-                    </LinearLayout>
+                        android:text="@string/view_all_comments"
+                        android:backgroundTint="@color/red"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:padding="8dp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -327,6 +334,7 @@
                 app:cardElevation="4dp">
 
                 <LinearLayout
+                    android:id="@+id/llRelatedProductsContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"

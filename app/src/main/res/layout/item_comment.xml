@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:padding="8dp">
 
+    <!-- Main comment layout -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/llMainComment"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <!-- Ảnh đại diện người dùng -->
         <ImageView
@@ -17,7 +23,7 @@
             android:layout_height="40dp"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_placeholder"
-            android:layout_gravity="center_vertical"/>
+            android:layout_gravity="center_vertical" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -32,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <!-- Rating (nếu có) -->
             <RatingBar
@@ -40,16 +46,29 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:numStars="5"
-                android:stepSize="1"
+                android:stepSize="0.5"
                 android:isIndicator="true"
-                android:visibility="gone"/>
+                android:visibility="gone"
+                android:layout_marginTop="2dp"
+                style="@style/Widget.AppCompat.RatingBar.Small"
+                android:progressTint="#FFD700" />
 
             <!-- Nội dung comment -->
             <TextView
                 android:id="@+id/tvCommentContent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"/>
+                android:textSize="14sp" />
+
+            <!-- Media container (ảnh/video) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvMedia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxHeight="120dp"
+                android:layout_marginTop="4dp"
+                android:visibility="gone"
+                android:nestedScrollingEnabled="false" />
 
             <!-- Thời gian -->
             <TextView
@@ -57,63 +76,73 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
-                android:textColor="@android:color/darker_gray"/>
+                android:textColor="@color/grey" />
 
-            <!-- Nút reply, chỉnh sửa, xóa -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tvReply"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Trả lời"
-                    android:textSize="12sp"
-                    android:textColor="@android:color/holo_blue_dark"
-                    android:layout_marginEnd="8dp"/>
-
-                <TextView
-                    android:id="@+id/tvEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Chỉnh sửa"
-                    android:textSize="12sp"
-                    android:textColor="@android:color/holo_blue_dark"
-                    android:layout_marginEnd="8dp"
-                    android:visibility="gone"/>
-
-                <TextView
-                    android:id="@+id/tvDelete"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Xóa"
-                    android:textSize="12sp"
-                    android:textColor="@android:color/holo_red_dark"
-                    android:visibility="gone"/>
-            </LinearLayout>
-
-            <!-- Nút xem thêm replies -->
+            <!-- Chỉ báo có reply -->
             <TextView
-                android:id="@+id/tvViewReplies"
+                android:id="@+id/tvReplyIndicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Xem thêm trả lời"
+                android:text="Xem trả lời"
                 android:textSize="12sp"
-                android:textColor="@android:color/holo_blue_dark"
-                android:visibility="gone"/>
+                android:textColor="@color/blue"
+                android:visibility="gone"
+                android:padding="4dp"
+                android:drawableEnd="@drawable/ic_arrow_down" />
+
+            <!-- Nút trả lời -->
+            <TextView
+                android:id="@+id/tvReply"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trả lời"
+                android:textSize="12sp"
+                android:textColor="@color/blue"
+                android:layout_marginEnd="8dp" />
 
         </LinearLayout>
+
+        <!-- Nút dấu ba chấm -->
+        <ImageButton
+            android:id="@+id/ibMoreOptions"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_more_vert"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:padding="12dp"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:contentDescription="@string/more_options" />
+
     </LinearLayout>
 
-    <!-- RecyclerView cho replies (nếu có) -->
+    <!-- Container cho replies -->
+    <LinearLayout
+        android:id="@+id/llRepliesContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="48dp"
+        app:layout_constraintTop_toBottomOf="@id/llMainComment"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
+
+    <!-- Đường kẻ dọc cho replies -->
+    <View
+        android:id="@+id/replyLine"
+        android:layout_width="2dp"
+        android:layout_height="match_parent"
+        android:background="@color/grey"
+        android:layout_marginStart="20dp"
+        android:visibility="gone" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvReplies"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
         android:nestedScrollingEnabled="false"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

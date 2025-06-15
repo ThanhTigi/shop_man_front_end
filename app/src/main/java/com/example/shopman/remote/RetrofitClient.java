@@ -23,7 +23,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
     private static final String TAG = "RetrofitClient";
-    private static final String BASE_URL = "https://shopman.onrender.com";
+    private static final String BASE_URL = "https://shopman.onrender.com/";
     private static final int MAX_RETRIES = 3;
     private static final long RETRY_DELAY_MS = 500;
     private static final long CONNECT_TIMEOUT = 10; // seconds

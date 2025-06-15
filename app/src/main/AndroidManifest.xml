@@ -79,6 +79,12 @@
         <activity
             android:name=".activities.SignUpActivity"
             android:exported="false" />
+        <activity
+            android:name=".activities.FullScreenImageActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity
+            android:name=".activities.CommentActivity"
+            android:exported="false" />
 <!--        <activity-->
 <!--            android:name=".activities.DealActivity"-->
 <!--            android:exported="false" />-->

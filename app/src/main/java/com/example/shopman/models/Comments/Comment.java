@@ -1,11 +1,14 @@
 package com.example.shopman.models.Comments;
 
+import android.util.Log;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Comment {
+
     @SerializedName("id")
     private int id;
 
@@ -24,6 +27,9 @@ public class Comment {
     @SerializedName("content")
     private String content;
 
+    @SerializedName("image_urls")
+    private List<String> imageUrls; // Để null nếu API trả về null
+
     @SerializedName("left")
     private int left;
 
@@ -39,11 +45,19 @@ public class Comment {
     @SerializedName("user")
     private User user;
 
-    private List<Comment> replies; // Danh sách reply
+    @SerializedName("isEditable")
+    private boolean isEditable;
 
-    // Constructor
+    @SerializedName("isDeletable")
+    private boolean isDeletable;
+
+    private List<Comment> replies; // Danh sách reply
+    private String nextReplyCursor; // Cursor cho phân trang replies
+
+    // Constructor mặc định, không khởi tạo imageUrls
     public Comment() {
         this.replies = new ArrayList<>();
+        Log.d("CommentModel", "Comment initialized, ID: " + id + ", imageUrls: " + (imageUrls != null ? imageUrls.toString() : "null"));
     }
 
     // Getters and Setters
@@ -95,6 +109,14 @@ public class Comment {
         this.content = content;
     }
 
+    public List<String> getImageUrls() {
+        return imageUrls != null ? imageUrls : new ArrayList<>();
+    }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
+    }
+
     public int getLeft() {
         return left;
     }
@@ -135,12 +157,36 @@ public class Comment {
         this.user = user;
     }
 
+    public boolean isEditable() {
+        return isEditable;
+    }
+
+    public void setEditable(boolean editable) {
+        this.isEditable = editable;
+    }
+
+    public boolean isDeletable() {
+        return isDeletable;
+    }
+
+    public void setDeletable(boolean deletable) {
+        this.isDeletable = deletable;
+    }
+
     public List<Comment> getReplies() {
-        return replies;
+        return replies != null ? replies : new ArrayList<>(); // Trả về danh sách rỗng nếu null
     }
 
     public void setReplies(List<Comment> replies) {
         this.replies = replies;
+    }
+
+    public String getNextReplyCursor() {
+        return nextReplyCursor;
+    }
+
+    public void setNextReplyCursor(String nextReplyCursor) {
+        this.nextReplyCursor = nextReplyCursor;
     }
 
     public static class User {

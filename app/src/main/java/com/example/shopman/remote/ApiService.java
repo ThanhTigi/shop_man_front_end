@@ -4,8 +4,11 @@ import com.example.shopman.models.Banner.BannerResponse;
 import com.example.shopman.models.Campaign.CampaignProductsResponse;
 import com.example.shopman.models.Campaign.CampaignResponse;
 import com.example.shopman.models.Comments.Comment;
+import com.example.shopman.models.Comments.CommentCreateResponse;
 import com.example.shopman.models.Comments.CommentResponse;
+import com.example.shopman.models.Comments.PostCommentRequest;
 import com.example.shopman.models.Comments.RepliesResponse;
+import com.example.shopman.models.Comments.UpdateCommentRequest;
 import com.example.shopman.models.DealofTheDay.DealProductResponse;
 import com.example.shopman.models.FcmTokenRequest;
 import com.example.shopman.models.NewArrivals.NewArrivalsResponse;
@@ -185,21 +188,36 @@ public interface ApiService {
             @Query("lastSortValues") String lastSortValues,
             @Query("pageSize") int pageSize
     );
-    @GET("product/{id}/comments")
-    Call<CommentResponse> getProductComments(@Path("id") int productId, @Query("page") int page, @Query("size") int size);
+    @POST("/api/v1/product/{id}/comments")
+    Call<CommentCreateResponse> postComment(
+            @Header("Authorization") String authHeader,
+            @Path("id") int productId,
+            @Body PostCommentRequest request
+    );
+    @GET("/api/v1/product/{id}/comments")
+    Call<CommentResponse> getProductComments(
+            @Header("Authorization") String authorization,
+            @Path("id") int productId,
+            @Query("limit") int limit,
+            @Query("cursor") String cursor
+    );
 
-    @POST("product/{id}/comments")
-    Call<Comment> postComment(@Header("Authorization") String authHeader, @Path("id") int productId,
-                              @Query("content") String content, @Query("rating") Integer rating,
-                              @Query("ParentId") Integer parentId);
+    @GET("/api/v1/comment/{id}/replies")
+    Call<RepliesResponse> getCommentReplies(
+            @Header("Authorization") String authorization,
+            @Path("id") int commentId
+    );
 
-    @GET("comment/{id}/replies")
-    Call<RepliesResponse> getCommentReplies(@Path("id") int commentId);
+    @PUT("/api/v1/comment/{id}")
+    Call<CommentCreateResponse> updateComment(
+            @Header("Authorization") String authorization,
+            @Path("id") int commentId,
+            @Body UpdateCommentRequest request
+    );
 
-    @PUT("comment/{id}")
-    Call<Integer> updateComment(@Header("Authorization") String authHeader, @Path("id") int commentId,
-                                @Query("content") String content);
-
-    @DELETE("comment/{id}")
-    Call<Integer> deleteComment(@Header("Authorization") String authHeader, @Path("id") int commentId);
+    @DELETE("/api/v1/comment/{id}")
+    Call<Integer> deleteComment(
+            @Header("Authorization") String authorization,
+            @Path("id") int commentId
+    );
 }

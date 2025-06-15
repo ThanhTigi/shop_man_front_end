@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/owner_options" android:checkableBehavior="none">
+        <item
+            android:id="@+id/action_edit"
+            android:title="Chỉnh sửa" />
+        <item
+            android:id="@+id/action_delete"
+            android:title="Xóa" />
+    </group>
+    <group android:id="@+id/other_options" android:checkableBehavior="none">
+        <item
+            android:id="@+id/action_report"
+            android:title="Báo cáo" />
+    </group>
+</menu>

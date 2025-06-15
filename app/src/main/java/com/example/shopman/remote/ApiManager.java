@@ -9,8 +9,11 @@ import com.example.shopman.models.Banner.BannerResponse;
 import com.example.shopman.models.Campaign.CampaignProductsResponse;
 import com.example.shopman.models.Campaign.CampaignResponse;
 import com.example.shopman.models.Comments.Comment;
+import com.example.shopman.models.Comments.CommentCreateResponse;
 import com.example.shopman.models.Comments.CommentResponse;
+import com.example.shopman.models.Comments.PostCommentRequest;
 import com.example.shopman.models.Comments.RepliesResponse;
+import com.example.shopman.models.Comments.UpdateCommentRequest;
 import com.example.shopman.models.DealofTheDay.DealProductResponse;
 import com.example.shopman.models.ErrorResponse;
 import com.example.shopman.models.FcmTokenRequest;
@@ -393,16 +396,20 @@ public class ApiManager {
     public void getProductDetail(String slug, ApiResponseListener<ProductDetailResponse> listener) {
         Log.d(TAG, "Get Product Detail Request: slug=" + slug);
         Call<ProductDetailResponse> call = apiService.getProductDetail(slug);
-
         call.enqueue(new Callback<ProductDetailResponse>() {
             @Override
             public void onResponse(Call<ProductDetailResponse> call, Response<ProductDetailResponse> response) {
-                Log.d(TAG, "onResponse: " + response);
-                Log.d(TAG, "Get Product Detail Response: " + (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                Log.d(TAG, "onResponse: HTTP " + response.code() + ", raw: " + response);
+                if (response.body() != null) {
+                    Log.d(TAG, "Get Product Detail Response: " + new Gson().toJson(response.body()));
+                } else {
+                    Log.w(TAG, "Response body is null, code: " + response.code());
+                }
                 if (response.isSuccessful() && response.body() != null) {
                     listener.onSuccess(response.body());
                 } else {
                     String errorMessage = getErrorMessage(response);
+                    Log.e(TAG, "Error fetching product detail: " + errorMessage);
                     if (response.code() == 401) {
                         errorMessage = "Session expired. Please log in again.";
                         Intent intent = new Intent("com.example.shopman.ACTION_LOGOUT");
@@ -414,7 +421,7 @@ public class ApiManager {
 
             @Override
             public void onFailure(Call<ProductDetailResponse> call, Throwable t) {
-                Log.e(TAG, "Get Product Detail Error: " + t.getMessage());
+                Log.e(TAG, "Get Product Detail Error: " + t.getMessage(), t);
                 listener.onError("Network Error: " + t.getMessage());
             }
         });
@@ -935,15 +942,117 @@ public class ApiManager {
             }
         });
     }
-    public void getProductComments(int productId, int page, int size, ApiResponseListener<CommentResponse> listener) {
-        Call<CommentResponse> call = apiService.getProductComments(productId, page, size);
+
+    public void updateComment(int commentId, String content, Integer rating, List<String> imageUrls, ApiResponseListener<Comment> listener) {
+        String accessToken = MyPreferences.getString(context, "access_token", null);
+        if (accessToken == null) {
+            listener.onError("Vui lòng đăng nhập");
+            return;
+        }
+        String authHeader = "Bearer " + accessToken;
+        UpdateCommentRequest request = new UpdateCommentRequest(content, rating, imageUrls);
+        Call<CommentCreateResponse> call = apiService.updateComment(authHeader, commentId, request);
+        call.enqueue(new Callback<CommentCreateResponse>() {
+            @Override
+            public void onResponse(Call<CommentCreateResponse> call, Response<CommentCreateResponse> response) {
+                Log.d(TAG, "Update Comment Response: HTTP " + response.code() + ", body=" +
+                        (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
+                    Comment updatedComment = response.body().getMetadata().getMetadata();
+                    if (updatedComment != null) {
+                        listener.onSuccess(updatedComment);
+                    } else {
+                        listener.onError("Không tìm thấy comment trong phản hồi");
+                    }
+                } else {
+                    String errorMsg = getErrorMessage(response);
+                    if (response.code() == 401) {
+                        errorMsg = "Session expired. Please log in again.";
+                        Intent intent = new Intent("com.example.shopman.ACTION_LOGOUT");
+                        context.sendBroadcast(intent);
+                    }
+                    listener.onError(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CommentCreateResponse> call, Throwable t) {
+                String errorMsg = "Lỗi kết nối: " + t.getMessage();
+                Log.e(TAG, errorMsg, t);
+                listener.onError(errorMsg);
+            }
+        });
+    }
+
+    public void postComment(int productId, String content, Integer rating, Integer parentId, List<String> imageUrls, ApiResponseListener<Comment> listener) {
+        String accessToken = MyPreferences.getString(context, "access_token", null);
+        if (accessToken == null) {
+            listener.onError("Vui lòng đăng nhập");
+            return;
+        }
+        String authHeader = "Bearer " + accessToken;
+        PostCommentRequest request = new PostCommentRequest(content, rating, parentId, imageUrls);
+        Call<CommentCreateResponse> call = apiService.postComment(authHeader, productId, request);
+        call.enqueue(new Callback<CommentCreateResponse>() {
+            @Override
+            public void onResponse(Call<CommentCreateResponse> call, Response<CommentCreateResponse> response) {
+                Log.d(TAG, "Post Comment Response: HTTP " + response.code() + ", body=" +
+                        (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
+                    Comment newComment = response.body().getMetadata().getMetadata();
+                    if (newComment != null) {
+                        listener.onSuccess(newComment);
+                    } else {
+                        listener.onError("Không tìm thấy comment trong phản hồi");
+                    }
+                } else {
+                    String errorMsg = getErrorMessage(response);
+                    if (response.code() == 401) {
+                        errorMsg = "Session expired. Please log in again.";
+                        Intent intent = new Intent("com.example.shopman.ACTION_LOGOUT");
+                        context.sendBroadcast(intent);
+                    }
+                    listener.onError(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CommentCreateResponse> call, Throwable t) {
+                String errorMsg = "Lỗi kết nối: " + t.getMessage();
+                Log.e(TAG, errorMsg, t);
+                listener.onError(errorMsg);
+            }
+        });
+    }
+
+
+
+    public void getProductComments(int productId, int limit, String nextCursor, ApiResponseListener<CommentResponse> listener) {
+        String accessToken = MyPreferences.getString(context, "access_token", null);
+        String authHeader = TextUtils.isEmpty(accessToken) ? "" : "Bearer " + accessToken;
+        Call<CommentResponse> call = apiService.getProductComments(authHeader, productId, limit, nextCursor);
         call.enqueue(new Callback<CommentResponse>() {
             @Override
             public void onResponse(Call<CommentResponse> call, Response<CommentResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
+                if (response.isSuccessful()) {
+                    CommentResponse body = response.body();
+                    if (body != null) {
+                        listener.onSuccess(body);
+                    } else {
+                        listener.onError("Phản hồi trống từ server");
+                    }
                 } else {
                     String errorMsg = "Lỗi server: " + response.code();
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMsg += " - " + response.errorBody().string();
+                        } else {
+                            errorMsg += " - Không có chi tiết";
+                        }
+                    } catch (IOException e) {
+                        errorMsg += " - Không thể đọc chi tiết lỗi";
+                        Log.e(TAG, "Lỗi đọc errorBody", e);
+                    }
                     Log.e(TAG, errorMsg);
                     listener.onError(errorMsg);
                 }
@@ -958,39 +1067,8 @@ public class ApiManager {
         });
     }
 
-    // POST /product/{id}/comments
-    public void postComment(int productId, String content, Integer rating, Integer parentId, ApiResponseListener<Comment> listener) {
-        String accessToken = MyPreferences.getString(context, "access_token", null);
-        if (accessToken == null) {
-            listener.onError("Vui lòng đăng nhập");
-            return;
-        }
-        String authHeader = "Bearer " + accessToken;
-        Call<Comment> call = apiService.postComment(authHeader, productId, content, rating, parentId);
-        call.enqueue(new Callback<Comment>() {
-            @Override
-            public void onResponse(Call<Comment> call, Response<Comment> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
-                } else {
-                    String errorMsg = "Lỗi server: " + response.code();
-                    Log.e(TAG, errorMsg);
-                    listener.onError(errorMsg);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Comment> call, Throwable t) {
-                String errorMsg = "Lỗi kết nối: " + t.getMessage();
-                Log.e(TAG, errorMsg, t);
-                listener.onError(errorMsg);
-            }
-        });
-    }
-
-    // GET /comment/{id}/replies
     public void getCommentReplies(int commentId, ApiResponseListener<RepliesResponse> listener) {
-        Call<RepliesResponse> call = apiService.getCommentReplies(commentId);
+        Call<RepliesResponse> call = apiService.getCommentReplies("", commentId); // Để header rỗng, Interceptor sẽ xử lý
         call.enqueue(new Callback<RepliesResponse>() {
             @Override
             public void onResponse(Call<RepliesResponse> call, Response<RepliesResponse> response) {
@@ -1002,7 +1080,6 @@ public class ApiManager {
                     listener.onError(errorMsg);
                 }
             }
-
             @Override
             public void onFailure(Call<RepliesResponse> call, Throwable t) {
                 String errorMsg = "Lỗi kết nối: " + t.getMessage();
@@ -1012,46 +1089,9 @@ public class ApiManager {
         });
     }
 
-    // PUT /comment/{id}
-    public void updateComment(int commentId, String content, ApiResponseListener<Integer> listener) {
-        String accessToken = MyPreferences.getString(context, "access_token", null);
-        if (accessToken == null) {
-            listener.onError("Vui lòng đăng nhập");
-            return;
-        }
-        String authHeader = "Bearer " + accessToken;
-        Call<Integer> call = apiService.updateComment(authHeader, commentId, content);
-        call.enqueue(new Callback<Integer>() {
-            @Override
-            public void onResponse(Call<Integer> call, Response<Integer> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
-                } else {
-                    String errorMsg = "Lỗi server: " + response.code();
-                    Log.e(TAG, errorMsg);
-                    listener.onError(errorMsg);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Integer> call, Throwable t) {
-                String errorMsg = "Lỗi kết nối: " + t.getMessage();
-                Log.e(TAG, errorMsg, t);
-                listener.onError(errorMsg);
-            }
-        });
-    }
-
-    // DELETE /comment/{id}
-    public void deleteComment(int commentId, ApiResponseListener<Integer> listener) {
-        String accessToken = MyPreferences.getString(context, "access_token", null);
-        if (accessToken == null) {
-            listener.onError("Vui lòng đăng nhập");
-            return;
-        }
-        String authHeader = "Bearer " + accessToken;
-        Call<Integer> call = apiService.deleteComment(authHeader, commentId);
-        call.enqueue(new Callback<Integer>() {
+   public void deleteComment(int commentId, ApiResponseListener<Integer> listener) {
+        Call<Integer> call = apiService.deleteComment("", commentId); // Interceptor sẽ xử lý token
+        call.enqueue(new retrofit2.Callback<Integer>() {
             @Override
             public void onResponse(Call<Integer> call, Response<Integer> response) {
                 if (response.isSuccessful() && response.body() != null) {

@@ -33,7 +33,7 @@ public class RepliesResponse {
 
     public static class Metadata {
         private String message;
-        private List<Comment> metadata;
+        private RepliesMetadata metadata;
 
         public String getMessage() {
             return message;
@@ -43,12 +43,42 @@ public class RepliesResponse {
             this.message = message;
         }
 
-        public List<Comment> getMetadata() {
+        public RepliesMetadata getMetadata() {
             return metadata;
         }
 
-        public void setMetadata(List<Comment> metadata) {
+        public void setMetadata(RepliesMetadata metadata) {
             this.metadata = metadata;
+        }
+    }
+
+    public static class RepliesMetadata {
+        private int totalItems;
+        private List<Comment> comments;
+        private String nextCursor;
+
+        public int getTotalItems() {
+            return totalItems;
+        }
+
+        public void setTotalItems(int totalItems) {
+            this.totalItems = totalItems;
+        }
+
+        public List<Comment> getComments() {
+            return comments;
+        }
+
+        public void setComments(List<Comment> comments) {
+            this.comments = comments;
+        }
+
+        public String getNextCursor() {
+            return nextCursor;
+        }
+
+        public void setNextCursor(String nextCursor) {
+            this.nextCursor = nextCursor;
         }
     }
 }

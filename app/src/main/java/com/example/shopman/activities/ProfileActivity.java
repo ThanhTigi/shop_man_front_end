@@ -30,6 +30,7 @@ import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.example.shopman.R;
+import com.example.shopman.models.Comments.Comment;
 import com.example.shopman.models.profile.getuserprofile.Address;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
 import com.example.shopman.models.profile.getuserprofile.UserProfileMetadata;
@@ -157,6 +158,14 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
+        // Kiểm tra phiên bản Android và bỏ qua upload nếu >= 31 mà không hỗ trợ cờ PendingIntent
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Log.w(TAG, "Upload ảnh bị vô hiệu hóa trên Android 12+ do yêu cầu FLAG_IMMUTABLE/FLAG_MUTABLE không được hỗ trợ bởi SDK hiện tại.");
+            Toast.makeText(this, "Upload ảnh không khả dụng trên thiết bị này. Vui lòng thử lại sau.", Toast.LENGTH_SHORT).show();
+            showLoading(false);
+            return;
+        }
+
         try {
             MediaManager.get();
         } catch (IllegalStateException e) {
@@ -212,7 +221,6 @@ public class ProfileActivity extends AppCompatActivity {
                 })
                 .dispatch();
     }
-
     private boolean isNetworkAvailable() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -229,6 +237,7 @@ public class ProfileActivity extends AppCompatActivity {
         };
         IntentFilter filter = new IntentFilter("com.example.shopman.ACTION_LOGOUT");
         registerReceiver(logoutReceiver, filter);
+
     }
 
     private void fetchUserProfile() {

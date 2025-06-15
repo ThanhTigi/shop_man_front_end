@@ -1,13 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme for day mode -->
     <style name="Base.Theme.ShopMan" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Customize your light theme here -->
+        <item name="colorPrimary">@color/my_light_primary</item> <!-- Thêm nếu cần -->
     </style>
 
     <style name="Theme.ShopMan" parent="Base.Theme.ShopMan" />
-    <style name="DiscountBorder">
-        <item name="android:background">@drawable/border</item>
-    </style>
-
 </resources>

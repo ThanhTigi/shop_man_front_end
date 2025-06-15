@@ -26,4 +26,15 @@
     <string name="add_to_wishlist">Add to Wishlist</string>
     <string name="write_comment">Write your comment...</string>
     <string name="send">Send</string>
+    <string name="product_details">Product detail</string>
+    <string name="back_button">Back button</string>
+    <string name="media_image">Comment media image</string>
+    <string name="view_comments">View comments</string>
+    <string name="view_all_comments">View all comments</string>
+    <string name="back">Back</string>
+    <string name="product_details_title">Product detail</string>
+
+
+
+        <string name="more_options">More options</string>
 </resources>

@@ -662,16 +662,44 @@ public class CommentActivity extends AppCompatActivity {
             public void onSuccess(Comment updatedComment) {
                 runOnUiThread(() -> {
                     commentsProgressBar.setVisibility(View.GONE);
-                    int index = comments.indexOf(comment);
-                    if (index != -1) {
-                        comments.set(index, updatedComment);
-                        commentAdapter.updateComment(updatedComment);
-                        commentsRecyclerView.smoothScrollToPosition(index); // Scroll đến vị trí cũ
+                    // Kiểm tra xem comment có phải là reply không
+                    Integer parentId = updatedComment.getParentId(); // Giả sử Comment model có getParentId()
+                    if (parentId != null) {
+                        // Đây là reply, tìm comment gốc
+                        for (int i = 0; i < comments.size(); i++) {
+                            Comment parentComment = comments.get(i);
+                            if (parentComment.getId() == parentId) {
+                                // Cập nhật reply trong danh sách replies của comment gốc
+                                List<Comment> replies = parentComment.getReplies();
+                                if (replies != null) {
+                                    for (int j = 0; j < replies.size(); j++) {
+                                        if (replies.get(j).getId() == updatedComment.getId()) {
+                                            replies.set(j, updatedComment);
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    replies = new ArrayList<>();
+                                    replies.add(updatedComment);
+                                    parentComment.setReplies(replies);
+                                }
+                                commentAdapter.notifyItemChanged(i); // Render lại comment gốc
+                                commentsRecyclerView.smoothScrollToPosition(i); // Scroll đến comment gốc
+                                break;
+                            }
+                        }
                     } else {
-                        // Nếu không tìm thấy, thêm vào cuối thay vì đầu
-                        comments.add(updatedComment);
-                        commentAdapter.addComment(updatedComment);
-                        commentsRecyclerView.smoothScrollToPosition(comments.size() - 1);
+                        // Đây là comment gốc
+                        int index = comments.indexOf(comment);
+                        if (index != -1) {
+                            comments.set(index, updatedComment);
+                            commentAdapter.updateComment(updatedComment);
+                            commentsRecyclerView.smoothScrollToPosition(index);
+                        } else {
+                            comments.add(updatedComment);
+                            commentAdapter.addComment(updatedComment);
+                            commentsRecyclerView.smoothScrollToPosition(comments.size() - 1);
+                        }
                     }
                     Toast.makeText(CommentActivity.this, "Cập nhật bình luận thành công", Toast.LENGTH_SHORT).show();
                 });
@@ -687,7 +715,6 @@ public class CommentActivity extends AppCompatActivity {
             }
         });
     }
-
     private void deleteComment(Comment comment) {
         commentsProgressBar.setVisibility(View.VISIBLE);
         apiManager.deleteComment(comment.getId(), new ApiResponseListener<Integer>() {

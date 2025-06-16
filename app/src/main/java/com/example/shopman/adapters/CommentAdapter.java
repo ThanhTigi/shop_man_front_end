@@ -50,9 +50,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 
     public CommentAdapter(Context context, List<Comment> comments, OnCommentActionListener listener) {
         this.context = context;
-        this.comments = comments != null ? new ArrayList<>(comments) : new ArrayList<>();
+        this.comments = new ArrayList<>(comments != null ? comments : new ArrayList<>());
         this.listener = listener;
-        Log.d(TAG, "Constructor: Initial comments size=" + this.comments.size());
+        Log.d(TAG, "Initialized with comments size: " + this.comments.size());
     }
 
     public void setMaxComments(int max) {
@@ -70,14 +70,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = comments.get(position);
-        Log.d(TAG, "onBindViewHolder: position=" + position + ", content=" + (comment.getContent() != null ? comment.getContent() : "null"));
-        holder.bindComment(comment, 0); // Level 0 cho comment gốc
+        Log.d(TAG, "Binding comment at position " + position + ": " + (comment.getContent() != null ? comment.getContent() : "null"));
+        holder.bindComment(comment, 0); // Level 0 for root comments
     }
 
     @Override
     public int getItemCount() {
         int count = Math.min(comments.size(), maxComments);
-        Log.d(TAG, "getItemCount: comments size=" + comments.size() + ", count=" + count);
+        Log.d(TAG, "Item count: " + count + " (from " + comments.size() + " total)");
         return count;
     }
 
@@ -85,7 +85,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         if (comment != null) {
             comments.add(0, comment);
             notifyItemInserted(0);
-            Log.d(TAG, "addComment: Added comment with id=" + comment.getId() + ", new size=" + comments.size());
+            Log.d(TAG, "Added comment with id: " + comment.getId());
         }
     }
 
@@ -95,7 +95,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                 if (comments.get(i).getId() == updatedComment.getId()) {
                     comments.set(i, updatedComment);
                     notifyItemChanged(i);
-                    Log.d(TAG, "updateComment: Updated comment with id=" + updatedComment.getId() + " at position " + i);
+                    Log.d(TAG, "Updated comment with id: " + updatedComment.getId() + " at position " + i);
                     break;
                 }
             }
@@ -107,7 +107,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
             Log.e(TAG, "updateComments: newComments is null");
             return;
         }
-        // Lọc trùng lặp dựa trên ID
         Set<Integer> seenIds = new HashSet<>();
         List<Comment> filteredComments = new ArrayList<>();
         for (Comment c : newComments) {
@@ -120,7 +119,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         comments.clear();
         comments.addAll(filteredComments);
         diffResult.dispatchUpdatesTo(this);
-        Log.d(TAG, "updateComments: Updated comments size=" + comments.size());
+        Log.d(TAG, "Updated comments list size: " + comments.size());
     }
 
     private static class CommentDiffCallback extends DiffUtil.Callback {
@@ -128,9 +127,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         private final List<Comment> newList;
 
         CommentDiffCallback(List<Comment> oldList, List<Comment> newList) {
-            this.oldList = oldList != null ? new ArrayList<>(oldList) : new ArrayList<>();
-            this.newList = newList != null ? new ArrayList<>(newList) : new ArrayList<>();
-            Log.d("CommentDiffCallback", "Constructor: oldList size=" + oldList.size() + ", newList size=" + newList.size());
+            this.oldList = new ArrayList<>(oldList != null ? oldList : new ArrayList<>());
+            this.newList = new ArrayList<>(newList != null ? newList : new ArrayList<>());
+            Log.d("CommentDiffCallback", "Diff callback initialized: old size " + oldList.size() + ", new size " + newList.size());
         }
 
         @Override
@@ -157,9 +156,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     class CommentViewHolder extends RecyclerView.ViewHolder {
         private final ImageView ivUserAvatar;
         private final TextView tvUserName, tvCommentContent, tvCommentTime, tvReply, tvReplyIndicator;
-        private final RatingBar rbCommentRating;
+        private final RatingBar ratingBarComment;
         private final RecyclerView rvMedia, rvReplies;
-        private final LinearLayout llRepliesContainer;
+        private final LinearLayout llRepliesContainer, llReplyControls;
         private final ImageButton ibMoreOptions;
         private final View replyLine;
         private final MediaAdapter mediaAdapter;
@@ -173,14 +172,15 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
             tvCommentTime = itemView.findViewById(R.id.tvCommentTime);
             tvReply = itemView.findViewById(R.id.tvReply);
             tvReplyIndicator = itemView.findViewById(R.id.tvReplyIndicator);
-            rbCommentRating = itemView.findViewById(R.id.ratingBarComment);
+            ratingBarComment = itemView.findViewById(R.id.ratingBarComment);
             rvMedia = itemView.findViewById(R.id.rvMedia);
             rvReplies = itemView.findViewById(R.id.rvReplies);
             llRepliesContainer = itemView.findViewById(R.id.llRepliesContainer);
+            llReplyControls = itemView.findViewById(R.id.llReplyControls);
             ibMoreOptions = itemView.findViewById(R.id.ibMoreOptions);
             replyLine = itemView.findViewById(R.id.replyLine);
 
-            rvMedia.setLayoutManager(new GridLayoutManager(context, 2));
+            rvMedia.setLayoutManager(new GridLayoutManager(context, 3)); // Max 3 thumbnails
             mediaAdapter = new MediaAdapter(context);
             rvMedia.setAdapter(mediaAdapter);
 
@@ -191,32 +191,31 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 
         void bindComment(Comment comment, int level) {
             if (comment == null) {
-                Log.w(TAG, "bindComment: Comment is null, skipping bind");
+                Log.w(TAG, "bindComment: Comment is null, skipping");
                 return;
             }
-            Log.d(TAG, "bindComment: comment=" + (comment.getContent() != null ? comment.getContent() : "null") + ", level=" + level);
+            Log.d(TAG, "Binding comment: " + (comment.getContent() != null ? comment.getContent() : "null") + " at level " + level);
 
-            // Avatar
-            if (comment.getUser() != null && comment.getUser().getAvatar() != null) {
-                Glide.with(context).load(comment.getUser().getAvatar()).into(ivUserAvatar);
+            // Load avatar
+            String avatarUrl = comment.getUser() != null ? comment.getUser().getAvatar() : null;
+            Glide.with(context).load(avatarUrl != null ? avatarUrl : R.drawable.ic_menu_user).into(ivUserAvatar);
+
+            // Set username
+            tvUserName.setText(comment.getUser() != null ? comment.getUser().getName() : "Anonymous");
+
+            // Set rating
+            if (comment.getRating() != null && comment.getRating() > 0) {
+                ratingBarComment.setRating(comment.getRating());
+                ratingBarComment.setVisibility(View.VISIBLE);
             } else {
-                ivUserAvatar.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_menu_user));
+                ratingBarComment.setVisibility(View.GONE);
             }
 
-            // User name
-            tvUserName.setText(comment.getUser() != null ? comment.getUser().getName() : "Người dùng ẩn danh");
-
-            // Content
-            tvCommentContent.setText(comment.getContent() != null ? comment.getContent() : "Nội dung rỗng");
-
-            // Rating
-            rbCommentRating.setVisibility(comment.getRating() != null && comment.getRating() > 0 ? View.VISIBLE : View.GONE);
-            if (comment.getRating() != null) rbCommentRating.setRating(comment.getRating());
-
-            // Time
+            // Set content and time
+            tvCommentContent.setText(comment.getContent() != null ? comment.getContent() : "");
             tvCommentTime.setText(getRelativeTime(comment.getCreatedAt()));
 
-            // Media
+            // Handle media
             if (comment.getImageUrls() != null && !comment.getImageUrls().isEmpty()) {
                 mediaAdapter.setMediaItems(comment.getImageUrls());
                 rvMedia.setVisibility(View.VISIBLE);
@@ -224,46 +223,43 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                 rvMedia.setVisibility(View.GONE);
             }
 
-            // Replies
+            // Handle reply controls
+            if (listener != null) {
+                llReplyControls.setVisibility(View.VISIBLE);
+                tvReply.setVisibility(View.VISIBLE);
+                tvReply.setOnClickListener(v -> listener.onReplyComment(comment));
+            } else {
+                llReplyControls.setVisibility(View.GONE);
+            }
+
+            // Handle reply indicator
+            boolean hasReplies = comment.getRight() - comment.getLeft() > 1;
+            if (hasReplies && listener != null) {
+                int replyCount = (comment.getRight() - comment.getLeft() - 1) / 2;
+                tvReplyIndicator.setText("Xem " + replyCount + " trả lời");
+                tvReplyIndicator.setVisibility(View.VISIBLE);
+                tvReplyIndicator.setOnClickListener(v -> {
+                    if (context instanceof CommentActivity) {
+                        ((CommentActivity) context).loadReplies(comment);
+                    }
+                });
+            } else {
+                tvReplyIndicator.setVisibility(View.GONE);
+            }
+
+            // Handle replies
             List<Comment> replies = comment.getReplies();
             if (replies != null && !replies.isEmpty()) {
-                replyAdapter.updateComments(replies); // Cập nhật replies với level 1
+                replyAdapter.updateComments(replies);
                 rvReplies.setVisibility(View.VISIBLE);
                 llRepliesContainer.setVisibility(View.VISIBLE);
-                tvReplyIndicator.setVisibility(View.GONE); // Ẩn khi replies đã load
+                tvReplyIndicator.setVisibility(View.GONE);
             } else {
-                boolean hasReplies = comment.getRight() - comment.getLeft() > 1;
-                if (hasReplies) {
-                    int replyCount = (comment.getRight() - comment.getLeft() - 1) / 2;
-                    tvReplyIndicator.setText("Xem " + replyCount + " trả lời");
-                    tvReplyIndicator.setVisibility(listener != null ? View.VISIBLE : View.GONE);
-                    tvReplyIndicator.setOnClickListener(v -> {
-                        if (context instanceof CommentActivity && listener != null) {
-                            ((CommentActivity) context).loadReplies(comment);
-                        }
-                    });
-                } else {
-                    tvReplyIndicator.setVisibility(View.GONE);
-                }
                 rvReplies.setVisibility(View.GONE);
                 llRepliesContainer.setVisibility(View.GONE);
             }
 
-            // Reply line
-            replyLine.setVisibility(level > 0 ? View.VISIBLE : View.GONE);
-            if (level > 0) {
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) replyLine.getLayoutParams();
-                params.setMarginStart(20 + (level - 1) * 16);
-                replyLine.setLayoutParams(params);
-            }
-
-            // Reply button
-            tvReply.setVisibility(listener != null ? View.VISIBLE : View.GONE);
-            if (listener != null) {
-                tvReply.setOnClickListener(v -> listener.onReplyComment(comment));
-            }
-
-            // More options
+            // Handle more options
             ibMoreOptions.setVisibility(listener != null ? View.VISIBLE : View.GONE);
             if (listener != null) {
                 ibMoreOptions.setOnClickListener(v -> {
@@ -272,16 +268,25 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                     if (comment.isDeletable()) popup.getMenu().add(Menu.NONE, 2, 2, "Xóa");
                     if (!comment.isEditable() && !comment.isDeletable()) popup.getMenu().add(Menu.NONE, 3, 3, "Report");
                     popup.setOnMenuItemClickListener(item -> {
-                        if (item.getItemId() == 1) listener.onEditComment(comment);
-                        else if (item.getItemId() == 2) listener.onDeleteComment(comment);
-                        else if (item.getItemId() == 3) listener.onReportComment(comment);
+                        int id = item.getItemId();
+                        if (id == 1) listener.onEditComment(comment);
+                        else if (id == 2) listener.onDeleteComment(comment);
+                        else if (id == 3) listener.onReportComment(comment);
                         return true;
                     });
                     popup.show();
                 });
             }
 
-            // Margin for nested comments
+            // Set reply line for nested comments
+            replyLine.setVisibility(level > 0 ? View.VISIBLE : View.GONE);
+            if (level > 0) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) replyLine.getLayoutParams();
+                params.setMarginStart(20 + (level - 1) * 16);
+                replyLine.setLayoutParams(params);
+            }
+
+            // Adjust margin for nested comments
             LinearLayout llMainComment = itemView.findViewById(R.id.llMainComment);
             if (llMainComment != null) {
                 ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) llMainComment.getLayoutParams();

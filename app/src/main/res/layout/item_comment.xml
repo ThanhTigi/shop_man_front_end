@@ -6,113 +6,145 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-    <!-- Main comment layout -->
-    <LinearLayout
-        android:id="@+id/llMainComment"
+    <!-- Ảnh đại diện người dùng (ra ngoài CardView, căn chỉnh với cardMainContent) -->
+    <ImageView
+        android:id="@+id/ivUserAvatar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_menu_user"
+        app:layout_constraintTop_toTopOf="@id/cardMainContent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- CardView cho phần nội dung chính (tên, rating, text content) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardMainContent"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <!-- Ảnh đại diện người dùng -->
-        <ImageView
-            android:id="@+id/ivUserAvatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_placeholder"
-            android:layout_gravity="center_vertical" />
+        app:layout_constraintStart_toEndOf="@id/ivUserAvatar"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="8dp">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:id="@+id/llMainComment"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginStart="8dp">
+            android:padding="8dp">
 
-            <!-- Tên người dùng -->
-            <TextView
-                android:id="@+id/tvUserName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <!-- Rating (nếu có) -->
-            <RatingBar
-                android:id="@+id/ratingBarComment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:numStars="5"
-                android:stepSize="0.5"
-                android:isIndicator="true"
-                android:visibility="gone"
-                android:layout_marginTop="2dp"
-                style="@style/Widget.AppCompat.RatingBar.Small"
-                android:progressTint="#FFD700" />
-
-            <!-- Nội dung comment -->
-            <TextView
-                android:id="@+id/tvCommentContent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp" />
-
-            <!-- Media container (ảnh/video) -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvMedia"
+            <!-- Phần tên, rating, và nội dung -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxHeight="120dp"
-                android:layout_marginTop="4dp"
-                android:visibility="gone"
-                android:nestedScrollingEnabled="false" />
+                android:orientation="vertical">
 
-            <!-- Thời gian -->
-            <TextView
-                android:id="@+id/tvCommentTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:textColor="@color/grey" />
+                <!-- Tên người dùng -->
+                <TextView
+                    android:id="@+id/tvUserName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-            <!-- Chỉ báo có reply -->
-            <TextView
-                android:id="@+id/tvReplyIndicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Xem trả lời"
-                android:textSize="12sp"
-                android:textColor="@color/blue"
-                android:visibility="gone"
-                android:padding="4dp"
-                android:drawableEnd="@drawable/ic_arrow_down" />
+                <!-- Rating (nếu có) -->
+                <RatingBar
+                    android:id="@+id/ratingBarComment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="5"
+                    android:stepSize="0.5"
+                    android:isIndicator="true"
+                    android:visibility="gone"
+                    android:layout_marginTop="2dp"
+                    style="@style/Widget.AppCompat.RatingBar.Small"
+                    android:progressTint="#FFD700" />
 
-            <!-- Nút trả lời -->
-            <TextView
-                android:id="@+id/tvReply"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Trả lời"
-                android:textSize="12sp"
-                android:textColor="@color/blue"
-                android:layout_marginEnd="8dp" />
+                <!-- Nội dung comment -->
+                <ImageButton
+                    android:id="@+id/ibMoreOptions"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="4dp"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/more_options"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_more_vert" />
+
+                <TextView
+                    android:id="@+id/tvCommentContent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:maxLines="3"
+                    android:ellipsize="end" />
+
+                <!-- Thời gian -->
+                <TextView
+                    android:id="@+id/tvCommentTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/grey" />
+
+            </LinearLayout>
+
+            <!-- Nút dấu ba chấm -->
 
         </LinearLayout>
 
-        <!-- Nút dấu ba chấm -->
-        <ImageButton
-            android:id="@+id/ibMoreOptions"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_more_vert"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="8dp"
-            android:padding="12dp"
-            android:background="?android:selectableItemBackgroundBorderless"
-            android:contentDescription="@string/more_options" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Container cho media (mỗi ảnh trong CardView riêng) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMedia"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/cardMainContent"
+        app:layout_constraintStart_toEndOf="@id/ivUserAvatar"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="8dp"
+        android:maxHeight="100dp"
+        android:nestedScrollingEnabled="false"
+        android:visibility="gone" />
+
+    <!-- Nút trả lời và chỉ báo có reply (bên cạnh nhau, đặt dưới rvMedia) -->
+    <LinearLayout
+        android:id="@+id/llReplyControls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/rvMedia"
+        app:layout_constraintStart_toEndOf="@id/ivUserAvatar"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp">
+
+        <TextView
+            android:id="@+id/tvReply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:text="Trả lời"
+            android:textColor="@color/blue"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvReplyIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xem trả lời"
+            android:textSize="12sp"
+            android:textColor="@color/blue"
+            android:visibility="gone"
+            android:padding="4dp"
+            android:drawableEnd="@drawable/ic_arrow_down"
+            android:layout_marginStart="8dp" />
 
     </LinearLayout>
 
@@ -123,26 +155,26 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginStart="48dp"
-        app:layout_constraintTop_toBottomOf="@id/llMainComment"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/llReplyControls"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Đường kẻ dọc cho replies -->
-    <View
-        android:id="@+id/replyLine"
-        android:layout_width="2dp"
-        android:layout_height="match_parent"
-        android:background="@color/grey"
-        android:layout_marginStart="20dp"
-        android:visibility="gone" />
+        <!-- Đường kẻ dọc cho replies -->
+        <View
+            android:id="@+id/replyLine"
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:background="@color/grey"
+            android:layout_marginStart="20dp"
+            android:visibility="gone" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvReplies"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:nestedScrollingEnabled="false"
-        android:visibility="gone" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvReplies"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:visibility="gone" />
 
-</LinearLayout>
+    </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

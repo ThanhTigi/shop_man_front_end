@@ -4,107 +4,109 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
+    android:fitsSystemWindows="false"
     android:orientation="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:paddingTop="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
 
-        <TextView
-            android:id="@+id/numberOfPageTxt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="15dp"
-            android:paddingTop="15dp"
-            android:text="1/3"
-            android:textColor="#000000"
-            android:textSize="20dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tvSkip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:padding="16dp"
-            android:text="Skip"
-            android:textSize="20dp"
-            android:textColor="#000000"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/viewPager"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/numberOfPageTxt"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:text="1/3"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/tvPrev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="Prev"
-            android:textSize="20dp"
-            android:textColor="#666666"
-            android:layout_weight="1"
-            android:gravity="start"
-            android:visibility="gone"
-            />
+    <TextView
+        android:id="@+id/tvSkip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:text="Skip"
+        android:textSize="20dp"
+        android:textColor="#000000"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:id="@+id/tvHidePrev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text=""
-            android:textColor="#666666"
-            android:layout_weight="1"
-            android:gravity="start"
-            />
-        <LinearLayout
-            android:id="@+id/llDots"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:orientation="horizontal" />
+<androidx.viewpager.widget.ViewPager
+android:id="@+id/viewPager"
+android:layout_width="match_parent"
+android:layout_height="0dp"
+android:layout_weight="1"
+android:clipToPadding="false"
+android:paddingBottom="16dp"> <!-- Padding dưới để tránh navigation bar đè -->
+</androidx.viewpager.widget.ViewPager>
 
-        <TextView
-            android:id="@+id/tvNext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="Next"
-            android:textSize="20dp"
-            android:gravity="end"
-            android:layout_weight="1"
-            android:textColor="#FF0000" />
+<LinearLayout
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:gravity="center"
+android:orientation="horizontal"
+android:padding="16dp"
+    android:paddingBottom="16dp"> <!-- Thêm padding dưới để tránh navigation bar -->
 
-        <TextView
-            android:id="@+id/tvGetStarted"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:gravity="end"
-            android:text="Get Started"
-            android:textSize="20dp"
-            android:layout_weight="1"
-            android:textColor="#FF0000"
-            android:visibility="gone" />
+<TextView
+android:id="@+id/tvPrev"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:padding="8dp"
+android:text="Prev"
+android:textSize="20dp"
+android:textColor="#666666"
+android:layout_weight="1"
+android:gravity="start"
+android:visibility="gone" />
+
+<TextView
+android:id="@+id/tvHidePrev"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:padding="8dp"
+android:text=""
+android:textColor="#666666"
+android:layout_weight="1"
+android:gravity="start" />
+
+<LinearLayout
+android:id="@+id/llDots"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginHorizontal="16dp"
+android:gravity="center"
+android:layout_weight="1"
+android:orientation="horizontal" />
+
+<TextView
+android:id="@+id/tvNext"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:padding="8dp"
+android:text="Next"
+android:textSize="20dp"
+android:gravity="end"
+android:layout_weight="1"
+android:textColor="#FF0000" />
+
+<TextView
+android:id="@+id/tvGetStarted"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:padding="8dp"
+android:gravity="end"
+android:text="Get Started"
+android:textSize="20dp"
+android:layout_weight="1"
+android:textColor="#FF0000"
+android:visibility="gone" />
 
     </LinearLayout>
 
-
-</LinearLayout>
+    </LinearLayout>

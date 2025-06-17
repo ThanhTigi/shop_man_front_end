@@ -57,7 +57,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 
     public void setMaxComments(int max) {
         this.maxComments = max;
-        notifyDataSetChanged();
+        updateComments(comments); // Cập nhật lại với DiffUtil khi thay đổi maxComments
     }
 
     @NonNull
@@ -83,21 +83,31 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 
     public void addComment(Comment comment) {
         if (comment != null) {
+            List<Comment> oldList = new ArrayList<>(comments);
             comments.add(0, comment);
-            notifyItemInserted(0);
+            CommentDiffCallback diffCallback = new CommentDiffCallback(oldList, comments);
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+            diffResult.dispatchUpdatesTo(this);
             Log.d(TAG, "Added comment with id: " + comment.getId());
         }
     }
 
     public void updateComment(Comment updatedComment) {
         if (updatedComment != null) {
+            int index = -1;
             for (int i = 0; i < comments.size(); i++) {
                 if (comments.get(i).getId() == updatedComment.getId()) {
-                    comments.set(i, updatedComment);
-                    notifyItemChanged(i);
-                    Log.d(TAG, "Updated comment with id: " + updatedComment.getId() + " at position " + i);
+                    index = i;
                     break;
                 }
+            }
+            if (index != -1) {
+                List<Comment> oldList = new ArrayList<>(comments);
+                comments.set(index, updatedComment);
+                CommentDiffCallback diffCallback = new CommentDiffCallback(oldList, comments);
+                DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+                diffResult.dispatchUpdatesTo(this);
+                Log.d(TAG, "Updated comment with id: " + updatedComment.getId() + " at position " + index);
             }
         }
     }
@@ -120,6 +130,20 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         comments.addAll(filteredComments);
         diffResult.dispatchUpdatesTo(this);
         Log.d(TAG, "Updated comments list size: " + comments.size());
+    }
+
+    public void removeComment(Comment comment) {
+        if (comment != null) {
+            int index = comments.indexOf(comment);
+            if (index != -1) {
+                List<Comment> oldList = new ArrayList<>(comments);
+                comments.remove(index);
+                CommentDiffCallback diffCallback = new CommentDiffCallback(oldList, comments);
+                DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+                diffResult.dispatchUpdatesTo(this);
+                Log.d(TAG, "Removed comment with id: " + comment.getId() + " at position " + index);
+            }
+        }
     }
 
     private static class CommentDiffCallback extends DiffUtil.Callback {

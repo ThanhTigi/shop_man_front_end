@@ -1,35 +1,23 @@
 package com.example.shopman.activities;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.InputType;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.shopman.MainActivity;
 import com.example.shopman.R;
-import com.example.shopman.adapters.CheckoutAdapter;
-import com.example.shopman.models.Coupon;
-import com.example.shopman.adapters.CouponAdapter;
-import com.example.shopman.models.cart.CartItemResponse;
 import com.example.shopman.models.login.LoginResponse;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
@@ -42,9 +30,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.gson.Gson;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -60,7 +45,16 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.log_in);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false); // Tràn viền
+        setContentView(R.layout.activity_log_in);
+
+        // Thêm padding động cho LinearLayout root
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+            v.setPadding(0, statusBarHeight, 0, navigationBarHeight);
+            return insets;
+        });
 
         // Khởi tạo RetrofitClient
         RetrofitClient.init(this);
@@ -135,6 +129,9 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(LoginResponse response) {
                     if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata().getTokens() != null) {
+                        // Lưu token
+                        MyPreferences.setString(LoginActivity.this, "access_token", response.getMetadata().getMetadata().getTokens().getAccessToken());
+                        MyPreferences.setString(LoginActivity.this, "refresh_token", response.getMetadata().getMetadata().getTokens().getRefreshToken());
                         Log.d(TAG, "Login successful: " + new Gson().toJson(response));
                         Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -209,6 +206,9 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResponse response) {
                 if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata().getTokens() != null) {
+                    // Lưu token
+                    MyPreferences.setString(LoginActivity.this, "access_token", response.getMetadata().getMetadata().getTokens().getAccessToken());
+                    MyPreferences.setString(LoginActivity.this, "refresh_token", response.getMetadata().getMetadata().getTokens().getRefreshToken());
                     Log.d(TAG, "Google login successful: " + new Gson().toJson(response));
                     Toast.makeText(LoginActivity.this, "Google login successful", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -240,5 +240,4 @@ public class LoginActivity extends AppCompatActivity {
         }
         return true;
     }
-
 }

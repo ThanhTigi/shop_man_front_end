@@ -13,8 +13,11 @@
         <item name="toolbar_background">@color/toolbar_background</item>
         <item name="toolbar_text_color">@color/toolbar_text_color</item>
         <item name="colorPrimary">@color/white</item>
-        <item name="colorAccent">@color/yellow</item> <!-- Đặt accent color làm màu sao vàng -->
+        <item name="colorAccent">@color/yellow</item>
         <item name="android:statusBarColor">@color/status_bar_background</item>
+        <!-- Khôi phục hỗ trợ edge-to-edge với translucent -->
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
     </style>
 
     <style name="Theme.MaterialComponents.Light.Dialog" parent="Theme.MaterialComponents.Light.Dialog.Alert">
@@ -22,14 +25,12 @@
         <item name="colorAccent">@color/blue</item>
     </style>
 
-    <!-- Giữ style cho RatingBar -->
     <style name="CustomRatingBar" parent="Widget.AppCompat.RatingBar.Small">
         <item name="android:progressTint">@color/yellow</item>
         <item name="android:progressBackgroundTint">@color/grey</item>
         <item name="android:isIndicator">false</item>
     </style>
 
-    <!-- Định nghĩa DiscountBorder trong styles.xml -->
     <style name="DiscountBorder">
         <item name="android:background">@drawable/border</item>
     </style>

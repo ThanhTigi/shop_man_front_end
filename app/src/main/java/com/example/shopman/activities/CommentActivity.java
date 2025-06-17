@@ -25,6 +25,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,6 +37,7 @@ import com.example.shopman.R;
 import com.example.shopman.adapters.CommentAdapter;
 import com.example.shopman.models.Comments.Comment;
 import com.example.shopman.models.Comments.CommentResponse;
+import com.example.shopman.models.Comments.DeleteCommentResponse;
 import com.example.shopman.models.Comments.RepliesResponse;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
@@ -77,15 +81,21 @@ public class CommentActivity extends AppCompatActivity {
     private Comment replyingTo;
     private BottomSheetDialog currentDialog;
     private int currentRequestCode = -1;
-
+    private List<String> existingImageUrlsDialog = new ArrayList<>();
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private ActivityResultLauncher<String> requestPermissionLauncher;
-
+    private boolean isLoadingMore = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_comment);
-
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+            v.setPadding(0, statusBarHeight, 0, navigationBarHeight); // Padding trên và dưới
+            return insets;
+        });
         initViews();
         productId = getIntent().getStringExtra("productId");
         if (TextUtils.isEmpty(productId)) {
@@ -169,14 +179,13 @@ public class CommentActivity extends AppCompatActivity {
         });
 
         imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-            Log.d(TAG, "Image picker result received: resultCode=" + result.getResultCode() + ", data=" + result.getData());
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                 Intent data = result.getData();
                 if (currentRequestCode == REQUEST_CODE_SELECT_IMAGE) {
                     handleImageSelection(data, selectedImageUris, llImagePreviewContainer);
                 } else if (currentRequestCode == REQUEST_CODE_SELECT_IMAGE_DIALOG) {
                     handleImageSelection(data, selectedImageUrisDialog, currentDialog != null ? currentDialog.findViewById(R.id.llImagePreviewContainer) : null);
-                    Log.d(TAG, "Selected images for dialog: " + selectedImageUrisDialog.size());
+                    Log.d(TAG, "Selected images for dialog after pick: " + selectedImageUrisDialog);
                 }
             } else {
                 Log.w(TAG, "Image picker failed: resultCode=" + result.getResultCode() + ", data=" + result.getData());
@@ -185,28 +194,30 @@ public class CommentActivity extends AppCompatActivity {
     }
 
     private void handleImageSelection(Intent data, List<Uri> targetList, LinearLayout targetPreview) {
-        Log.d(TAG, "Handling image selection: data=" + data + ", targetList size=" + targetList.size());
+        Log.d(TAG, "Handling image selection: data=" + data + ", targetList size before=" + targetList.size());
         if (data.getClipData() != null) {
             int count = Math.min(data.getClipData().getItemCount(), MAX_IMAGES - targetList.size());
-            Log.d(TAG, "ClipData found, item count=" + data.getClipData().getItemCount() + ", adding " + count + " items");
             for (int i = 0; i < count; i++) {
                 Uri imageUri = data.getClipData().getItemAt(i).getUri();
-                targetList.add(imageUri);
+                if (targetList.size() < MAX_IMAGES) {
+                    targetList.add(imageUri);
+                }
                 Log.d(TAG, "Added Uri: " + imageUri);
             }
         } else if (data.getData() != null && targetList.size() < MAX_IMAGES) {
             Uri imageUri = data.getData();
+            if (targetList.size() == MAX_IMAGES) {
+                targetList.clear(); // Xóa tất cả để thay thế bằng ảnh mới
+            }
             targetList.add(imageUri);
             Log.d(TAG, "Added single Uri: " + imageUri);
-        } else {
-            Log.w(TAG, "No valid data or max images reached: data=" + data.getData() + ", current size=" + targetList.size());
         }
         if (targetList.size() >= MAX_IMAGES) {
             Toast.makeText(this, "Tối đa " + MAX_IMAGES + " ảnh", Toast.LENGTH_SHORT).show();
         }
-        if (targetPreview != null && targetList.size() > 0) {
-            updateImagePreview(targetPreview, targetList, null, false);
-            Log.d(TAG, "Previewing " + targetList.size() + " images with Uri: " + targetList);
+        if (targetPreview != null) {
+            updateImagePreview(targetPreview, targetList, null, currentRequestCode == REQUEST_CODE_SELECT_IMAGE_DIALOG);
+            Log.d(TAG, "Previewing " + targetList.size() + " images, URIs: " + targetList);
         }
     }
 
@@ -248,17 +259,11 @@ public class CommentActivity extends AppCompatActivity {
             List<String> existingImageUrls = new ArrayList<>();
 
             if (!selectedImageUris.isEmpty()) {
-                uploadImagesToCloudinary(content, finalRating, parentId, null, existingImageUrls, llImagePreviewContainer, selectedImageUris, null);
+                commentsProgressBar.setVisibility(View.VISIBLE);
+                uploadImagesToCloudinary(content, finalRating, parentId, null, existingImageUrls, llImagePreviewContainer, new ArrayList<>(selectedImageUris), null);
             } else {
                 postComment(content, finalRating, parentId, existingImageUrls);
             }
-            etComment.setText("");
-            rbRating.setRating(0);
-            selectedImageUris.clear();
-            llImagePreviewContainer.removeAllViews();
-            tvReplyHint.setVisibility(View.GONE);
-            replyingTo = null;
-            rbRating.setVisibility(View.VISIBLE);
         });
 
         commentsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -311,34 +316,39 @@ public class CommentActivity extends AppCompatActivity {
     }
 
     private void loadMoreComments() {
-        if (!isLoadingComments && !isLastCommentPage && !TextUtils.isEmpty(nextCommentCursor)) {
-            isLoadingComments = true;
+        if (!isLoadingComments && !isLoadingMore && !isLastCommentPage && !TextUtils.isEmpty(nextCommentCursor)) {
+            isLoadingMore = true;
             commentsProgressBar.setVisibility(View.VISIBLE);
             apiManager.getProductComments(Integer.parseInt(productId), COMMENT_PAGE_SIZE, nextCommentCursor, new ApiResponseListener<CommentResponse>() {
                 @Override
                 public void onSuccess(CommentResponse response) {
-                    isLoadingComments = false;
-                    commentsProgressBar.setVisibility(View.GONE);
-                    if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
-                        CommentResponse.CommentMetadata metadata = response.getMetadata().getMetadata();
-                        List<Comment> newComments = metadata.getComments();
-                        nextCommentCursor = metadata.getNextCursor();
-                        isLastCommentPage = TextUtils.isEmpty(nextCommentCursor);
-                        if (newComments != null) {
-                            int startPosition = comments.size();
-                            comments.addAll(newComments);
-                            commentAdapter.notifyItemRangeInserted(startPosition, newComments.size());
-                            Log.d(TAG, "Loaded " + newComments.size() + " more comments");
+                    runOnUiThread(() -> {
+                        isLoadingComments = false;
+                        isLoadingMore = false;
+                        commentsProgressBar.setVisibility(View.GONE);
+                        if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
+                            CommentResponse.CommentMetadata metadata = response.getMetadata().getMetadata();
+                            List<Comment> newComments = metadata.getComments();
+                            nextCommentCursor = metadata.getNextCursor();
+                            isLastCommentPage = TextUtils.isEmpty(nextCommentCursor);
+                            if (newComments != null && !newComments.isEmpty()) {
+                                comments.addAll(newComments); // Thêm vào danh sách hiện tại
+                                commentAdapter.updateComments(comments); // Cập nhật với DiffUtil
+                                Log.d(TAG, "Loaded " + newComments.size() + " more comments");
+                            }
                         }
-                    }
+                    });
                 }
 
                 @Override
                 public void onError(String errorMessage) {
-                    isLoadingComments = false;
-                    commentsProgressBar.setVisibility(View.GONE);
-                    Log.e(TAG, "Load more comments error: " + errorMessage);
-                    Toast.makeText(CommentActivity.this, "Lỗi tải thêm bình luận: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    runOnUiThread(() -> {
+                        isLoadingComments = false;
+                        isLoadingMore = false;
+                        commentsProgressBar.setVisibility(View.GONE);
+                        Log.e(TAG, "Load more comments error: " + errorMessage);
+                        Toast.makeText(CommentActivity.this, "Lỗi tải thêm bình luận: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    });
                 }
             });
         }
@@ -374,7 +384,7 @@ public class CommentActivity extends AppCompatActivity {
 
     private void showCommentDialog(Comment comment, boolean isReply, boolean isEdit) {
         currentDialog = new BottomSheetDialog(this);
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_comment, null);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_comment, null);
         currentDialog.setContentView(dialogView);
 
         EditText etCommentDialog = dialogView.findViewById(R.id.etComment);
@@ -385,6 +395,8 @@ public class CommentActivity extends AppCompatActivity {
         Button btnSendDialog = dialogView.findViewById(R.id.btnSend);
 
         selectedImageUrisDialog.clear();
+        existingImageUrlsDialog.clear();
+        llImagePreview.removeAllViews();
         llImagePreview.setVisibility(View.GONE);
 
         if (isEdit && comment != null) {
@@ -400,7 +412,10 @@ public class CommentActivity extends AppCompatActivity {
                 rbRatingDialog.setVisibility(View.GONE);
             }
             if (comment.getImageUrls() != null && !comment.getImageUrls().isEmpty()) {
-                updateImagePreview(llImagePreview, null, new ArrayList<>(comment.getImageUrls()), true);
+                existingImageUrlsDialog.addAll(comment.getImageUrls());
+                selectedImageUrisDialog.addAll(parseUrisFromUrls(comment.getImageUrls()));
+                Log.d(TAG, "Initial preview state (edit): selectedImageUrisDialog=" + selectedImageUrisDialog + ", existingImageUrlsDialog=" + existingImageUrlsDialog);
+                updateImagePreview(llImagePreview, selectedImageUrisDialog, null, true);
                 llImagePreview.setVisibility(View.VISIBLE);
             }
         } else {
@@ -408,22 +423,19 @@ public class CommentActivity extends AppCompatActivity {
             rbRatingDialog.setVisibility(isReply ? View.GONE : View.VISIBLE);
             etCommentDialog.setText("");
             llImagePreview.setVisibility(View.GONE);
-            if (isReply && comment != null) {
-                etCommentDialog.setHint("Trả lời: " + (comment.getUser() != null ? comment.getUser().getName() : "Người dùng"));
-            } else {
-                etCommentDialog.setHint("Nhập bình luận...");
-            }
+            etCommentDialog.setHint(isReply && comment != null ? "Trả lời: " + (comment.getUser() != null ? comment.getUser().getName() : "Người dùng") : "Nhập bình luận...");
         }
 
         btnAddImageDialog.setOnClickListener(v -> checkStoragePermission(REQUEST_CODE_SELECT_IMAGE_DIALOG, llImagePreview));
 
         btnCancel.setOnClickListener(v -> {
             selectedImageUrisDialog.clear();
+            existingImageUrlsDialog.clear();
+            llImagePreview.removeAllViews();
             currentDialog.dismiss();
         });
 
         btnSendDialog.setOnClickListener(v -> {
-            Log.d(TAG, "btnSendDialog clicked, selectedImageUrisDialog size: " + selectedImageUrisDialog.size());
             String content = etCommentDialog.getText().toString().trim();
             if (TextUtils.isEmpty(content)) {
                 Toast.makeText(this, "Vui lòng nhập nội dung", Toast.LENGTH_SHORT).show();
@@ -437,13 +449,22 @@ public class CommentActivity extends AppCompatActivity {
             } else if (isEdit && comment.getRating() != null) {
                 finalRating = comment.getRating();
             }
-            Integer parentId = isReply && comment != null ? comment.getId() : null; // Đảm bảo parentId chỉ khi reply
-            List<String> existingImageUrls = isEdit && comment != null ? comment.getImageUrls() : new ArrayList<>();
+            Integer parentId = isReply && comment != null ? comment.getId() : null;
+            List<String> existingImageUrls = new ArrayList<>(existingImageUrlsDialog); // Sử dụng danh sách đã đồng bộ
 
-            if (!selectedImageUrisDialog.isEmpty()) {
-                Log.d(TAG, "Uploading images, uris: " + selectedImageUrisDialog);
+            // Chỉ upload ảnh mới từ selectedImageUrisDialog
+            List<Uri> newImagesToUpload = new ArrayList<>();
+            for (Uri uri : selectedImageUrisDialog) {
+                String uriString = uri.toString();
+                if (!existingImageUrls.contains(uriString)) {
+                    newImagesToUpload.add(uri);
+                }
+            }
+            Log.d(TAG, "Before upload: selectedImageUrisDialog=" + selectedImageUrisDialog + ", existingImageUrlsDialog=" + existingImageUrlsDialog + ", newImagesToUpload=" + newImagesToUpload);
+
+            if (!newImagesToUpload.isEmpty()) {
                 currentDialog.setCancelable(false);
-                uploadImagesToCloudinary(content, finalRating, parentId, isEdit ? comment : null, existingImageUrls, llImagePreview, new ArrayList<>(selectedImageUrisDialog), currentDialog);
+                uploadImagesToCloudinary(content, finalRating, parentId, isEdit ? comment : null, existingImageUrls, llImagePreview, newImagesToUpload, currentDialog);
             } else {
                 if (isEdit) {
                     updateComment(comment, content, finalRating, existingImageUrls);
@@ -456,6 +477,8 @@ public class CommentActivity extends AppCompatActivity {
 
         currentDialog.setOnDismissListener(d -> {
             selectedImageUrisDialog.clear();
+            existingImageUrlsDialog.clear();
+            llImagePreview.removeAllViews();
             tvReplyHint.setVisibility(View.GONE);
             replyingTo = null;
             rbRating.setVisibility(View.VISIBLE);
@@ -463,36 +486,73 @@ public class CommentActivity extends AppCompatActivity {
         currentDialog.show();
     }
 
-    private void updateImagePreview(LinearLayout llImagePreview, List<Uri> uris, List<String> urls, boolean isEdit) {
+    private void updateImagePreview(LinearLayout llImagePreview, List<Uri> uris, View viewToRemove, boolean isEdit) {
         if (llImagePreview == null) return;
         llImagePreview.removeAllViews();
-        llImagePreview.setVisibility(uris != null && !uris.isEmpty() || (urls != null && !urls.isEmpty()) ? View.VISIBLE : View.GONE);
+        List<Uri> currentUris = uris != null ? new ArrayList<>(uris) : (isEdit ? selectedImageUrisDialog : selectedImageUris);
+        Log.d(TAG, "Updating preview: currentUris=" + currentUris + ", isEdit=" + isEdit);
+        if (currentUris.isEmpty()) {
+            llImagePreview.setVisibility(View.GONE);
+            if (isEdit) {
+                existingImageUrlsDialog.clear();
+                selectedImageUrisDialog.clear(); // Đồng bộ với currentUris
+            } else {
+                selectedImageUris.clear(); // Đồng bộ khi không edit
+            }
+            Log.d(TAG, "Preview cleared, existingImageUrlsDialog=" + existingImageUrlsDialog + ", selectedImageUrisDialog=" + selectedImageUrisDialog + ", selectedImageUris=" + selectedImageUris);
+            return;
+        }
+        llImagePreview.setVisibility(View.VISIBLE);
 
-        List<Object> imagesToShow = new ArrayList<>();
-        if (uris != null) imagesToShow.addAll(uris);
-        if (urls != null) imagesToShow.addAll(urls);
-
-        for (int i = 0; i < imagesToShow.size(); i++) {
+        for (Uri uri : new ArrayList<>(currentUris)) {
             View mediaView = LayoutInflater.from(this).inflate(R.layout.item_media, llImagePreview, false);
             ImageView ivMedia = mediaView.findViewById(R.id.ivMedia);
             ImageButton btnRemove = mediaView.findViewById(R.id.btnRemove);
-            Object image = imagesToShow.get(i);
-            Glide.with(this).load(image instanceof Uri ? (Uri) image : (String) image).into(ivMedia);
-            int finalI = i;
+
+            Glide.with(this).load(uri).into(ivMedia);
             btnRemove.setOnClickListener(v -> {
-                if (finalI >= 0 && finalI < imagesToShow.size()) {
-                    imagesToShow.remove(finalI);
-                    if (image instanceof Uri) {
-                        List<Uri> currentUris = llImagePreview == llImagePreviewContainer ? selectedImageUris : selectedImageUrisDialog;
-                        if (finalI < currentUris.size()) currentUris.remove(finalI);
-                    } else if (image instanceof String && urls != null) {
-                        if (finalI < urls.size()) urls.remove(finalI);
-                    }
-                    updateImagePreview(llImagePreview, uris, urls, isEdit);
+                currentUris.remove(uri);
+                llImagePreview.removeView(mediaView);
+                if (isEdit && existingImageUrlsDialog != null) {
+                    String uriString = uri.toString();
+                    existingImageUrlsDialog.removeIf(url -> url.equals(uriString));
+                    selectedImageUrisDialog.removeIf(u -> u.toString().equals(uriString)); // Đồng bộ xóa
+                } else {
+                    selectedImageUris.remove(uri); // Đồng bộ xóa cho post comment
                 }
+                if (currentUris.isEmpty()) {
+                    llImagePreview.setVisibility(View.GONE);
+                    if (isEdit) {
+                        existingImageUrlsDialog.clear();
+                        selectedImageUrisDialog.clear(); // Đồng bộ khi rỗng
+                    } else {
+                        selectedImageUris.clear(); // Đồng bộ khi rỗng cho post comment
+                    }
+                }
+                Log.d(TAG, "After remove: currentUris=" + currentUris + ", existingImageUrlsDialog=" + existingImageUrlsDialog + ", selectedImageUrisDialog=" + selectedImageUrisDialog + ", selectedImageUris=" + selectedImageUris);
+                updateImagePreview(llImagePreview, currentUris, null, isEdit);
             });
             llImagePreview.addView(mediaView);
         }
+        if (isEdit) {
+            selectedImageUrisDialog.clear();
+            selectedImageUrisDialog.addAll(currentUris); // Đồng bộ sau khi render
+            Log.d(TAG, "After render: selectedImageUrisDialog synced with currentUris=" + selectedImageUrisDialog);
+        } else {
+            selectedImageUris.clear();
+            selectedImageUris.addAll(currentUris); // Đồng bộ cho post comment
+            Log.d(TAG, "After render: selectedImageUris synced with currentUris=" + selectedImageUris);
+        }
+    }
+
+    private List<Uri> parseUrisFromUrls(List<String> urls) {
+        List<Uri> uris = new ArrayList<>();
+        if (urls != null) {
+            for (String url : urls) {
+                uris.add(Uri.parse(url));
+            }
+        }
+        return uris;
     }
 
     private void uploadImagesToCloudinary(String content, Integer rating, Integer parentId, Comment comment, List<String> existingImageUrls, LinearLayout llImagePreview, List<Uri> uploadUris, BottomSheetDialog dialog) {
@@ -500,21 +560,32 @@ public class CommentActivity extends AppCompatActivity {
         List<String> uploadedImageUrls = new ArrayList<>();
         final int totalImages = uploadUris.size();
 
-        Log.d(TAG, "Starting upload for " + totalImages + " images: " + uploadUris);
+        Log.d(TAG, "Starting upload for " + totalImages + " new images, uploadUris=" + uploadUris);
 
         if (totalImages == 0) {
-            commentsProgressBar.setVisibility(View.GONE);
-            if (comment != null) {
-                updateComment(comment, content, rating != null ? rating : 0, existingImageUrls);
-            } else {
-                postComment(content, rating, parentId, existingImageUrls);
-            }
-            if (dialog != null) dialog.dismiss();
+            handleUploadCompletion(content, rating, parentId, comment, existingImageUrls, uploadedImageUrls, llImagePreview, dialog);
             return;
         }
 
-        // Xử lý upload từng ảnh
-        for (Uri uri : new ArrayList<>(uploadUris)) {
+        // Lọc các URI hợp lệ
+        List<Uri> validUris = new ArrayList<>();
+        for (Uri uri : uploadUris) {
+            if (uri != null && "content".equals(uri.getScheme())) {
+                validUris.add(uri);
+            } else {
+                Log.w(TAG, "Invalid URI skipped: " + uri);
+            }
+        }
+
+        if (validUris.isEmpty()) {
+            handleUploadCompletion(content, rating, parentId, comment, existingImageUrls, uploadedImageUrls, llImagePreview, dialog);
+            return;
+        }
+
+        updateImagePreview(llImagePreview, validUris, null, dialog != null);
+        Log.d(TAG, "Uploading validUris=" + validUris);
+
+        for (Uri uri : new ArrayList<>(validUris)) {
             try {
                 MediaManager.get().upload(uri)
                         .unsigned("android_unsigned")
@@ -523,13 +594,12 @@ public class CommentActivity extends AppCompatActivity {
                         .callback(new com.cloudinary.android.callback.UploadCallback() {
                             @Override
                             public void onStart(String requestId) {
-                                Log.d(TAG, "Upload started for Uri: " + uri + ", Request ID: " + requestId);
+                                Log.d(TAG, "Upload started for Uri: " + uri);
                             }
 
                             @Override
                             public void onProgress(String requestId, long bytes, long totalBytes) {
-                                float progress = (bytes * 100f) / totalBytes;
-                                Log.d(TAG, "Upload progress for " + requestId + ": " + progress + "%");
+                                Log.d(TAG, "Upload progress for " + requestId + ": " + (bytes * 100f / totalBytes) + "%");
                             }
 
                             @Override
@@ -537,8 +607,8 @@ public class CommentActivity extends AppCompatActivity {
                                 String secureUrl = (String) resultData.get("secure_url");
                                 if (secureUrl != null) {
                                     uploadedImageUrls.add(secureUrl);
-                                    Log.d(TAG, "Upload success for " + requestId + ", URL: " + secureUrl + ", Total uploaded: " + uploadedImageUrls.size());
-                                    if (uploadedImageUrls.size() == totalImages) {
+                                    Log.d(TAG, "Upload success, URL: " + secureUrl + ", Total: " + uploadedImageUrls.size());
+                                    if (uploadedImageUrls.size() == validUris.size()) {
                                         handleUploadCompletion(content, rating, parentId, comment, existingImageUrls, uploadedImageUrls, llImagePreview, dialog);
                                     }
                                 }
@@ -546,23 +616,23 @@ public class CommentActivity extends AppCompatActivity {
 
                             @Override
                             public void onError(String requestId, com.cloudinary.android.callback.ErrorInfo error) {
-                                Log.e(TAG, "Upload error for " + requestId + ": " + error.getDescription());
-                                uploadedImageUrls.add(null); // Đánh dấu lỗi
-                                if (uploadedImageUrls.size() == totalImages) {
+                                Log.e(TAG, "Upload error: " + error.getDescription());
+                                uploadedImageUrls.add(null);
+                                if (uploadedImageUrls.size() == validUris.size()) {
                                     handleUploadCompletion(content, rating, parentId, comment, existingImageUrls, uploadedImageUrls, llImagePreview, dialog);
                                 }
                             }
 
                             @Override
                             public void onReschedule(String requestId, com.cloudinary.android.callback.ErrorInfo error) {
-                                Log.w(TAG, "Upload rescheduled for " + requestId + ": " + error.getDescription());
+                                Log.w(TAG, "Upload rescheduled: " + error.getDescription());
                             }
                         })
                         .dispatch();
             } catch (Exception e) {
-                Log.e(TAG, "Error during upload dispatch for Uri: " + uri + ": " + e.getMessage(), e);
-                uploadedImageUrls.add(null); // Đánh dấu lỗi
-                if (uploadedImageUrls.size() == totalImages) {
+                Log.e(TAG, "Upload dispatch error: " + e.getMessage(), e);
+                uploadedImageUrls.add(null);
+                if (uploadedImageUrls.size() == validUris.size()) {
                     handleUploadCompletion(content, rating, parentId, comment, existingImageUrls, uploadedImageUrls, llImagePreview, dialog);
                 }
             }
@@ -573,10 +643,10 @@ public class CommentActivity extends AppCompatActivity {
         runOnUiThread(() -> {
             List<String> finalUrls = new ArrayList<>(existingImageUrls);
             for (String url : uploadedImageUrls) {
-                if (url != null) finalUrls.add(url); // Chỉ thêm URL thành công
+                if (url != null) finalUrls.add(url); // Chỉ thêm URL hợp lệ
             }
+            Log.d(TAG, "Upload completed: finalUrls=" + finalUrls);
 
-            commentsProgressBar.setVisibility(View.GONE);
             if (comment != null) {
                 updateComment(comment, content, rating != null ? rating : 0, finalUrls);
             } else {
@@ -585,23 +655,34 @@ public class CommentActivity extends AppCompatActivity {
 
             if (llImagePreview != null) {
                 llImagePreview.removeAllViews();
-                updateImagePreview(llImagePreview, null, finalUrls, false);
-                Log.d(TAG, "Preview updated with " + finalUrls.size() + " URLs");
+                if (dialog == null) {
+                    selectedImageUris.clear();
+                    etComment.setText("");
+                    rbRating.setRating(0);
+                    tvReplyHint.setVisibility(View.GONE);
+                    replyingTo = null;
+                    rbRating.setVisibility(View.VISIBLE);
+                } else {
+                    selectedImageUrisDialog.clear();
+                }
             }
 
+            commentsProgressBar.setVisibility(View.GONE);
             if (dialog != null) {
                 dialog.dismiss();
             }
 
             if (uploadedImageUrls.contains(null)) {
-                Toast.makeText(CommentActivity.this, "Một số ảnh không thể upload", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Một số ảnh không thể upload", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Upload thành công", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void postComment(String content, Integer rating, Integer parentId, List<String> imageUrls) {
         commentsProgressBar.setVisibility(View.VISIBLE);
-        Log.d(TAG, "Calling postComment with content: " + content + ", rating: " + rating + ", parentId: " + parentId + ", imageUrls: " + imageUrls);
+        Log.d(TAG, "Posting comment: content=" + content + ", rating=" + rating + ", parentId=" + parentId + ", imageUrls=" + imageUrls);
         try {
             int productIdInt = Integer.parseInt(productId);
             apiManager.postComment(productIdInt, content, rating, parentId, imageUrls, new ApiResponseListener<Comment>() {
@@ -620,7 +701,7 @@ public class CommentActivity extends AppCompatActivity {
                                         c.setReplies(replies);
                                     }
                                     replies.add(comment);
-                                    commentAdapter.notifyItemChanged(i); // Cập nhật parent để hiển thị reply
+                                    commentAdapter.notifyItemChanged(i);
                                     scrollPosition = i;
                                     break;
                                 }
@@ -662,44 +743,12 @@ public class CommentActivity extends AppCompatActivity {
             public void onSuccess(Comment updatedComment) {
                 runOnUiThread(() -> {
                     commentsProgressBar.setVisibility(View.GONE);
-                    // Kiểm tra xem comment có phải là reply không
-                    Integer parentId = updatedComment.getParentId(); // Giả sử Comment model có getParentId()
-                    if (parentId != null) {
-                        // Đây là reply, tìm comment gốc
-                        for (int i = 0; i < comments.size(); i++) {
-                            Comment parentComment = comments.get(i);
-                            if (parentComment.getId() == parentId) {
-                                // Cập nhật reply trong danh sách replies của comment gốc
-                                List<Comment> replies = parentComment.getReplies();
-                                if (replies != null) {
-                                    for (int j = 0; j < replies.size(); j++) {
-                                        if (replies.get(j).getId() == updatedComment.getId()) {
-                                            replies.set(j, updatedComment);
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    replies = new ArrayList<>();
-                                    replies.add(updatedComment);
-                                    parentComment.setReplies(replies);
-                                }
-                                commentAdapter.notifyItemChanged(i); // Render lại comment gốc
-                                commentsRecyclerView.smoothScrollToPosition(i); // Scroll đến comment gốc
-                                break;
-                            }
-                        }
-                    } else {
-                        // Đây là comment gốc
-                        int index = comments.indexOf(comment);
-                        if (index != -1) {
-                            comments.set(index, updatedComment);
-                            commentAdapter.updateComment(updatedComment);
-                            commentsRecyclerView.smoothScrollToPosition(index);
-                        } else {
-                            comments.add(updatedComment);
-                            commentAdapter.addComment(updatedComment);
-                            commentsRecyclerView.smoothScrollToPosition(comments.size() - 1);
-                        }
+                    int index = comments.indexOf(comment);
+                    if (index != -1) {
+                        comments.set(index, updatedComment);
+                        commentAdapter.updateComment(updatedComment);
+                        commentAdapter.notifyItemChanged(index);
+                        commentsRecyclerView.smoothScrollToPosition(index);
                     }
                     Toast.makeText(CommentActivity.this, "Cập nhật bình luận thành công", Toast.LENGTH_SHORT).show();
                 });
@@ -715,25 +764,30 @@ public class CommentActivity extends AppCompatActivity {
             }
         });
     }
+
     private void deleteComment(Comment comment) {
         commentsProgressBar.setVisibility(View.VISIBLE);
-        apiManager.deleteComment(comment.getId(), new ApiResponseListener<Integer>() {
+        apiManager.deleteComment(comment.getId(), new ApiResponseListener<DeleteCommentResponse>() {
             @Override
-            public void onSuccess(Integer result) {
-                commentsProgressBar.setVisibility(View.GONE);
-                int index = comments.indexOf(comment);
-                if (index != -1) {
-                    comments.remove(index);
-                    commentAdapter.notifyItemRemoved(index);
-                    Toast.makeText(CommentActivity.this, "Xóa bình luận thành công", Toast.LENGTH_SHORT).show();
-                }
+            public void onSuccess(DeleteCommentResponse response) {
+                runOnUiThread(() -> {
+                    commentsProgressBar.setVisibility(View.GONE);
+                    int index = comments.indexOf(comment);
+                    if (index != -1) {
+                        commentAdapter.removeComment(comment); // Sử dụng removeComment với DiffUtil
+                        Toast.makeText(CommentActivity.this, "Xóa bình luận thành công", Toast.LENGTH_SHORT).show();
+                    }
+                    Log.d(TAG, "Delete success, status: " + response.getStatus() + ", metadata: " + response.getMetadata().getMetadata());
+                });
             }
 
             @Override
             public void onError(String errorMessage) {
-                commentsProgressBar.setVisibility(View.GONE);
-                Log.e(TAG, "Delete comment error: " + errorMessage);
-                Toast.makeText(CommentActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                runOnUiThread(() -> {
+                    commentsProgressBar.setVisibility(View.GONE);
+                    Log.e(TAG, "Delete comment error: " + errorMessage);
+                    Toast.makeText(CommentActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+                });
             }
         });
     }

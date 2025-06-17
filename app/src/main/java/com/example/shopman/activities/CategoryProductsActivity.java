@@ -4,11 +4,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.example.shopman.fragments.home.CategoryProductsFragment;
 import com.example.shopman.R;
@@ -22,6 +28,13 @@ public class CategoryProductsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Cấu hình Window để tràn viền và hỗ trợ translucent
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        WindowInsetsControllerCompat insetsController = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+        insetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent)); // Nền trong suốt
+
         Log.d(TAG, "onCreate started");
         try {
             setContentView(R.layout.activity_category_products);
@@ -31,6 +44,30 @@ public class CategoryProductsActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        // Áp dụng padding động cho header sau khi layout được vẽ
+        findViewById(android.R.id.content).post(() -> {
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+                int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+                int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+
+                // Padding cho header để tránh chồng lấn với status bar
+                ConstraintLayout header = findViewById(R.id.header);
+                if (header != null) {
+                    header.setPadding(0, statusBarHeight, 0, 0); // Di chuyển header xuống bằng chiều cao status bar
+                    Log.d(TAG, "Applied status bar height padding: " + statusBarHeight); // Log để kiểm tra
+                }
+
+                // Padding cho fragment_container
+                FrameLayout fragmentContainer = findViewById(R.id.fragment_container);
+                if (fragmentContainer != null) {
+                    fragmentContainer.setPadding(0, 0, 0, navigationBarHeight); // Padding dưới để tránh navigation bar
+                }
+
+                return insets;
+            });
+            ViewCompat.requestApplyInsets(findViewById(android.R.id.content)); // Yêu cầu áp dụng insets ngay
+        });
 
         ImageView ivBack = findViewById(R.id.ivBack);
         TextView tvCategoryTitle = findViewById(R.id.tvCategoryTitle);

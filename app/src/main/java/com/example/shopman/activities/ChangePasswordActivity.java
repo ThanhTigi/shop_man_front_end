@@ -9,6 +9,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.shopman.MainActivity;
 import com.example.shopman.R;
@@ -31,7 +34,15 @@ public class ChangePasswordActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_change_password);
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+            v.setPadding(0, statusBarHeight, 0, navigationBarHeight); // Padding trên và dưới
+            return insets;
+        });
 
         ivBack = findViewById(R.id.ivBack);
         etSignUpPassword = findViewById(R.id.etPassword);
@@ -42,7 +53,13 @@ public class ChangePasswordActivity extends AppCompatActivity {
         apiManager = new ApiManager(this);
         resetToken = getIntent().getStringExtra("resetToken");
 
-        ivBack.setOnClickListener(v -> finish());
+        // Set up back button
+        if (ivBack != null) {
+            ivBack.setOnClickListener(v -> finish());
+        } else {
+            // Log nếu ivBack không tồn tại, phòng trường hợp layout thay đổi
+            android.util.Log.e("ChangePasswordActivity", "ivBack not found in layout");
+        }
 
         ivShowSignUpPassword.setOnClickListener(v -> {
             isSignUpPasswordVisible = !isSignUpPasswordVisible;

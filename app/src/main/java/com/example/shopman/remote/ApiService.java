@@ -6,6 +6,7 @@ import com.example.shopman.models.Campaign.CampaignResponse;
 import com.example.shopman.models.Comments.Comment;
 import com.example.shopman.models.Comments.CommentCreateResponse;
 import com.example.shopman.models.Comments.CommentResponse;
+import com.example.shopman.models.Comments.DeleteCommentResponse;
 import com.example.shopman.models.Comments.PostCommentRequest;
 import com.example.shopman.models.Comments.RepliesResponse;
 import com.example.shopman.models.Comments.UpdateCommentRequest;
@@ -216,7 +217,7 @@ public interface ApiService {
     );
 
     @DELETE("/api/v1/comment/{id}")
-    Call<Integer> deleteComment(
+    Call<DeleteCommentResponse> deleteComment(
             @Header("Authorization") String authorization,
             @Path("id") int commentId
     );

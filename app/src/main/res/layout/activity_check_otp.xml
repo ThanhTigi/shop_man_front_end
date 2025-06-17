@@ -5,17 +5,8 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
+    android:fitsSystemWindows="false"
     android:background="#FFFFFF">
-
-    <!-- Back Arrow -->
-    <ImageView
-        android:id="@+id/ivBack"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_gravity="start"
-        android:layout_marginTop="-100dp"
-        android:contentDescription="Back"
-        android:src="@drawable/ic_arrow_back" />
 
     <!-- Title -->
     <TextView

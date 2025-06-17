@@ -8,6 +8,9 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.shopman.R;
 import com.example.shopman.models.changepassword.request.ForgotPasswordRequest;
@@ -25,7 +28,16 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.forgot_password);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        setContentView(R.layout.activity_forgot_password);
+
+        // Thêm padding động cho LinearLayout root
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+            v.setPadding(0, statusBarHeight, 0, navigationBarHeight); // Padding trên và dưới
+            return insets;
+        });
 
         ivBack = findViewById(R.id.ivBack);
         etEmail = findViewById(R.id.etEmail);
@@ -33,11 +45,16 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         apiManager = new ApiManager(this);
 
         // Back Button Click
-        ivBack.setOnClickListener(v -> {
-            Intent intent = new Intent(ForgotPasswordActivity.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        });
+        if (ivBack != null) {
+            ivBack.setOnClickListener(v -> {
+                Intent intent = new Intent(ForgotPasswordActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            });
+        } else {
+            // Log nếu ivBack không tồn tại, phòng trường hợp layout thay đổi
+            android.util.Log.e("ForgotPasswordActivity", "ivBack not found in layout");
+        }
 
         // Submit Button Click
         btnSubmit.setOnClickListener(v -> {

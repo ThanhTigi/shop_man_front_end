@@ -10,6 +10,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.shopman.R;
 import com.example.shopman.models.CampaignResponse;
@@ -34,7 +37,16 @@ public class CheckOTPActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_check_otp);
+
+        // Thêm padding động cho LinearLayout root
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+            v.setPadding(0, statusBarHeight, 0, navigationBarHeight); // Padding trên và dưới
+            return insets;
+        });
 
         // Lấy email từ Intent
         email = getIntent().getStringExtra("email");
@@ -52,7 +64,12 @@ public class CheckOTPActivity extends AppCompatActivity {
         apiManager = new ApiManager(this);
 
         // Set up back button
-        ivBack.setOnClickListener(v -> finish());
+        if (ivBack != null) {
+            ivBack.setOnClickListener(v -> finish());
+        } else {
+            // Log nếu ivBack không tồn tại, phòng trường hợp layout thay đổi
+            android.util.Log.e("CheckOTPActivity", "ivBack not found in layout");
+        }
 
         // Set up countdown timer for Resend button
         startCountdownTimer();

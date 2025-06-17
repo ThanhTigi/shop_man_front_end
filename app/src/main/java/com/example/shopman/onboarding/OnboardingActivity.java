@@ -7,6 +7,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.shopman.utilitis.MyPreferences;
@@ -25,14 +28,25 @@ public class OnboardingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (MyPreferences.getBoolean(this,"new_user", false))
-        {
+        // Kiểm tra nếu không phải người dùng mới
+        if (MyPreferences.getBoolean(this, "new_user", false)) {
             Intent intent = new Intent(OnboardingActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
+            return;
         }
 
+        // Cấu hình tràn viền và padding động
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_onboarding);
+
+        // Áp dụng padding động cho toàn bộ root layout
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+            v.setPadding(0, statusBarHeight, 0, navigationBarHeight); // Padding trên và dưới
+            return insets;
+        });
 
         viewPager = findViewById(R.id.viewPager);
         numberOfPageTxt = findViewById(R.id.numberOfPageTxt);
@@ -79,13 +93,13 @@ public class OnboardingActivity extends AppCompatActivity {
         tvPrev.setOnClickListener(v -> viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true));
         tvNext.setOnClickListener(v -> viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true));
         tvGetStarted.setOnClickListener(v -> {
-            MyPreferences.setBoolean(this,"new_user",true);
+            MyPreferences.setBoolean(this, "new_user", true);
             Intent intent = new Intent(OnboardingActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
         });
         tvSkip.setOnClickListener(v -> {
-            MyPreferences.setBoolean(this,"new_user",true);
+            MyPreferences.setBoolean(this, "new_user", true);
             Intent intent = new Intent(OnboardingActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();

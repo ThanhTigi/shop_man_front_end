@@ -10,9 +10,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -51,17 +53,39 @@ public class MainActivity extends AppCompatActivity {
 
         // Kiểm tra token trước khi khởi tạo UI
         if (!checkTokens()) {
+            Log.d(TAG, "Tokens invalid, redirecting to Login");
             redirectToLogin("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
             return;
         }
 
-        // Cấu hình System UI
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+        // Cấu hình System UI (tràn viền và xử lý padding)
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false); // Tràn viền
         WindowInsetsControllerCompat insetsController = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
-        insetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
-        getWindow().setStatusBarColor(getResources().getColor(android.R.color.white));
+        insetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE); // Ẩn thanh khi vuốt
+        getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent)); // Nền trong suốt
 
         setContentView(R.layout.activity_main);
+
+        // Áp dụng padding động cho toàn bộ layout
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+
+            // Áp padding cho toolbar
+            LinearLayout toolbar = findViewById(R.id.toolbar);
+            if (toolbar != null) {
+                toolbar.setPadding(0, statusBarHeight, 0, 0); // Padding trên cho status bar
+            }
+
+            // Áp padding cho bottom navigation
+            BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
+            if (bottomNav != null) {
+                bottomNav.setPadding(0, 0, 0, navigationBarHeight); // Padding dưới cho navigation bar
+            }
+
+            // Trả về insets để tiếp tục xử lý
+            return insets;
+        });
 
         // Khởi tạo RetrofitClient
         RetrofitClient.init(this);
@@ -70,6 +94,11 @@ public class MainActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         bottomNavigationView = findViewById(R.id.bottomNavigation);
         profileImageView = findViewById(R.id.ivProfile);
+
+        if (viewPager == null || bottomNavigationView == null || profileImageView == null) {
+            Log.e(TAG, "One or more views (viewPager, bottomNavigation, profileImageView) not found in layout");
+            return;
+        }
 
         // Đăng ký BroadcastReceiver để xử lý đăng xuất
         registerLogoutReceiver();

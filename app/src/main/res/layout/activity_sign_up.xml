@@ -5,7 +5,8 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
-    android:background="#FFFFFF">
+    android:background="#FFFFFF"
+    android:fitsSystemWindows="false"> <!-- Thêm để hỗ trợ tràn viền -->
 
     <!-- Create an Account Text -->
     <TextView

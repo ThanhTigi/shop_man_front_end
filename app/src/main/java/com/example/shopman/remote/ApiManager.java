@@ -11,6 +11,7 @@ import com.example.shopman.models.Campaign.CampaignResponse;
 import com.example.shopman.models.Comments.Comment;
 import com.example.shopman.models.Comments.CommentCreateResponse;
 import com.example.shopman.models.Comments.CommentResponse;
+import com.example.shopman.models.Comments.DeleteCommentResponse;
 import com.example.shopman.models.Comments.PostCommentRequest;
 import com.example.shopman.models.Comments.RepliesResponse;
 import com.example.shopman.models.Comments.UpdateCommentRequest;
@@ -1088,23 +1089,22 @@ public class ApiManager {
             }
         });
     }
-
-   public void deleteComment(int commentId, ApiResponseListener<Integer> listener) {
-        Call<Integer> call = apiService.deleteComment("", commentId); // Interceptor sẽ xử lý token
-        call.enqueue(new retrofit2.Callback<Integer>() {
+    public void deleteComment(int commentId, ApiResponseListener<DeleteCommentResponse> listener) {
+        Call<DeleteCommentResponse> call = apiService.deleteComment("", commentId); // Interceptor sẽ xử lý token
+        call.enqueue(new retrofit2.Callback<DeleteCommentResponse>() {
             @Override
-            public void onResponse(Call<Integer> call, Response<Integer> response) {
+            public void onResponse(Call<DeleteCommentResponse> call, Response<DeleteCommentResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     listener.onSuccess(response.body());
                 } else {
-                    String errorMsg = "Lỗi server: " + response.code();
+                    String errorMsg = "Lỗi server: " + response.code() + " - " + (response.errorBody() != null ? response.errorBody().toString() : "Không có chi tiết");
                     Log.e(TAG, errorMsg);
                     listener.onError(errorMsg);
                 }
             }
 
             @Override
-            public void onFailure(Call<Integer> call, Throwable t) {
+            public void onFailure(Call<DeleteCommentResponse> call, Throwable t) {
                 String errorMsg = "Lỗi kết nối: " + t.getMessage();
                 Log.e(TAG, errorMsg, t);
                 listener.onError(errorMsg);

@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.shopman.MainActivity;
 import com.example.shopman.R;
@@ -45,10 +46,9 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false); // Tràn viền
-        setContentView(R.layout.activity_log_in);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        setContentView(R.layout.activity_login);
 
-        // Thêm padding động cho LinearLayout root
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
             int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
@@ -56,14 +56,12 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Khởi tạo RetrofitClient
         RetrofitClient.init(this);
-
         apiManager = new ApiManager(this);
 
-        // Kiểm tra nếu đã đăng nhập
         String accessToken = MyPreferences.getString(this, "access_token", null);
-        if (accessToken != null && !accessToken.isEmpty()) {
+        String refreshToken = MyPreferences.getString(this, "refresh_token", null);
+        if (accessToken != null && !accessToken.isEmpty() && refreshToken != null && !refreshToken.isEmpty()) {
             Log.d(TAG, "Access token found: " + accessToken);
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -72,14 +70,12 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // Kiểm tra Google Play Services
         if (!isGooglePlayServicesAvailable()) {
             Log.e(TAG, "Google Play Services unavailable");
             Toast.makeText(this, "Google Play Services is required for Google Sign-In", Toast.LENGTH_LONG).show();
             return;
         }
 
-        // Khởi tạo Google Sign-In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken("629917845564-d6b1672h9s4uhi43dmfhpsjtg91hsmih.apps.googleusercontent.com")
                 .requestEmail()
@@ -94,11 +90,10 @@ public class LoginActivity extends AppCompatActivity {
         TextView btnCreateAccount = findViewById(R.id.btnCreateAccount);
         googleButton = findViewById(R.id.googleButton);
 
-        // Toggle Password Visibility
         ivShowPassword.setOnClickListener(v -> {
             isPasswordVisible = !isPasswordVisible;
             if (isPasswordVisible) {
-                etPassword.setInputType(InputType.TYPE_CLASS_TEXT);
+                etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
                 ivShowPassword.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
             } else {
                 etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -108,9 +103,8 @@ public class LoginActivity extends AppCompatActivity {
             Log.d(TAG, "Password visibility toggled: " + isPasswordVisible);
         });
 
-        // Login Button Click
         btnLogin.setOnClickListener(v -> {
-            String email = etUsername.getText().toString().trim();
+            String email = etUsername.getText().toString().trim().toLowerCase();
             String password = etPassword.getText().toString().trim();
 
             if (email.isEmpty() || password.isEmpty()) {
@@ -123,19 +117,33 @@ public class LoginActivity extends AppCompatActivity {
                 Log.w(TAG, "Invalid email format: " + email);
                 return;
             }
+            if (!email.endsWith(".vn")) {
+                Toast.makeText(LoginActivity.this, "Please enter an email ending with .vn", Toast.LENGTH_SHORT).show();
+                Log.w(TAG, "Email does not end with .vn: " + email);
+                return;
+            }
 
             Log.d(TAG, "Attempting login with email: " + email);
             apiManager.login(email, password, new ApiResponseListener<LoginResponse>() {
                 @Override
                 public void onSuccess(LoginResponse response) {
-                    if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata().getTokens() != null) {
-                        // Lưu token
-                        MyPreferences.setString(LoginActivity.this, "access_token", response.getMetadata().getMetadata().getTokens().getAccessToken());
-                        MyPreferences.setString(LoginActivity.this, "refresh_token", response.getMetadata().getMetadata().getTokens().getRefreshToken());
+                    if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null
+                            && response.getMetadata().getMetadata().getTokens() != null) {
+                        String accessToken = response.getMetadata().getMetadata().getTokens().getAccessToken();
+                        String refreshToken = response.getMetadata().getMetadata().getTokens().getRefreshToken();
+                        String avatar = response.getMetadata().getMetadata().getUser() != null
+                                ? response.getMetadata().getMetadata().getUser().getAvatar() : null;
+                        MyPreferences.setString(LoginActivity.this, "access_token", accessToken);
+                        MyPreferences.setString(LoginActivity.this, "refresh_token", refreshToken);
                         Log.d(TAG, "Login successful: " + new Gson().toJson(response));
                         Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        intent.putExtra("user_avatar", avatar);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        // Gửi broadcast để thông báo cập nhật thông tin người dùng
+                        LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(
+                                new Intent("com.example.shopman.ACTION_UPDATE_USER")
+                        );
                         startActivity(intent);
                         finish();
                     } else {
@@ -152,21 +160,18 @@ public class LoginActivity extends AppCompatActivity {
             });
         });
 
-        // Google Sign-In Button Click
         googleButton.setOnClickListener(v -> {
             Log.d(TAG, "Google Sign-In button clicked");
             Intent signInIntent = googleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, RC_SIGN_IN);
         });
 
-        // Forgot Password Click
         btnForgotPassWord.setOnClickListener(v -> {
             Log.d(TAG, "Forgot Password clicked");
             Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
             startActivity(intent);
         });
 
-        // Create Account Click
         btnCreateAccount.setOnClickListener(v -> {
             Log.d(TAG, "Create Account clicked");
             Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
@@ -205,14 +210,23 @@ public class LoginActivity extends AppCompatActivity {
         apiManager.loginWithGoogle(idToken, new ApiResponseListener<LoginResponse>() {
             @Override
             public void onSuccess(LoginResponse response) {
-                if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata().getTokens() != null) {
-                    // Lưu token
-                    MyPreferences.setString(LoginActivity.this, "access_token", response.getMetadata().getMetadata().getTokens().getAccessToken());
-                    MyPreferences.setString(LoginActivity.this, "refresh_token", response.getMetadata().getMetadata().getTokens().getRefreshToken());
+                if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null
+                        && response.getMetadata().getMetadata().getTokens() != null) {
+                    String accessToken = response.getMetadata().getMetadata().getTokens().getAccessToken();
+                    String refreshToken = response.getMetadata().getMetadata().getTokens().getRefreshToken();
+                    String avatar = response.getMetadata().getMetadata().getUser() != null
+                            ? response.getMetadata().getMetadata().getUser().getAvatar() : null;
+                    MyPreferences.setString(LoginActivity.this, "access_token", accessToken);
+                    MyPreferences.setString(LoginActivity.this, "refresh_token", refreshToken);
                     Log.d(TAG, "Google login successful: " + new Gson().toJson(response));
                     Toast.makeText(LoginActivity.this, "Google login successful", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    intent.putExtra("user_avatar", avatar);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    // Gửi broadcast để thông báo cập nhật thông tin người dùng
+                    LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(
+                            new Intent("com.example.shopman.ACTION_UPDATE_USER")
+                    );
                     startActivity(intent);
                     finish();
                 } else {

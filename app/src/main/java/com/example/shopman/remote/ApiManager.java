@@ -103,8 +103,9 @@ public class ApiManager {
     }
 
     public void login(String email, String password, final ApiResponseListener<LoginResponse> listener) {
-        Log.d(TAG, "Login Request: email=" + email);
+        Log.d(TAG, "Login Request: email=" + email + " password="+ password);
         LoginRequest request = new LoginRequest(email, password);
+        Log.d(TAG, "Login Request Body: " + new Gson().toJson(request));
         Call<LoginResponse> call = apiService.login(request);
 
         call.enqueue(new Callback<LoginResponse>() {

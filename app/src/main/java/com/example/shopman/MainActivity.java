@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -21,14 +20,17 @@ import androidx.viewpager2.widget.ViewPager2;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.bumptech.glide.Glide;
 import com.example.shopman.activities.LoginActivity;
+import com.example.shopman.activities.ProfileActivity;
 import com.example.shopman.fragments.cart.CartFragment;
 import com.example.shopman.fragments.home.HomeFragment;
 import com.example.shopman.fragments.search.SearchFragment;
-import com.example.shopman.activities.ProfileActivity;
 import com.example.shopman.fragments.setting.SettingFragment;
 import com.example.shopman.fragments.wishlist.WishlistFragment;
+import com.example.shopman.models.login.User;
 import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
 import com.example.shopman.remote.RetrofitClient;
@@ -36,6 +38,7 @@ import com.example.shopman.utilitis.AppConfig;
 import com.example.shopman.utilitis.MyPreferences;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -45,15 +48,16 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private ApiManager apiManager;
     private BroadcastReceiver logoutReceiver;
+    private BroadcastReceiver userUpdateReceiver;
     private boolean isChangingActivity = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Kiểm tra token trước khi khởi tạo UI
-        if (!checkTokens()) {
-            Log.d(TAG, "Tokens invalid, redirecting to Login");
+        // Kiểm tra và khôi phục token trước khi khởi tạo UI
+        if (!restoreSession()) {
+            Log.d(TAG, "Failed to restore session, redirecting to Login");
             redirectToLogin("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
             return;
         }
@@ -100,8 +104,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Đăng ký BroadcastReceiver để xử lý đăng xuất
-        registerLogoutReceiver();
+        // Đăng ký BroadcastReceiver
+        registerBroadcastReceivers();
 
         // Lấy FCM token và gửi lên server
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
@@ -200,14 +204,73 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // Cập nhật ảnh đại diện khi khởi động
+        updateProfileImage();
     }
 
-    private boolean checkTokens() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Cập nhật ảnh đại diện khi quay lại
+        updateProfileImage();
+    }
+
+    private void updateProfileImage() {
+        if (isFinishing() || isChangingActivity) return;
+
+        // Lấy avatar từ Intent (fallback)
+        String avatarUrl = getIntent().getStringExtra("user_avatar");
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            Log.d(TAG, "Updating profile image from Intent: " + avatarUrl);
+            loadImage(avatarUrl);
+            return;
+        }
+
+        // Lấy avatar từ SharedPreferences
+        String userJson = MyPreferences.getString(this, "current_user_meta_data", null);
+        if (userJson != null && !userJson.isEmpty()) {
+            try {
+                User user = new Gson().fromJson(userJson, User.class);
+                String avatar = user.getAvatar();
+                if (avatar != null && !avatar.isEmpty()) {
+                    Log.d(TAG, "Updating profile image from SharedPreferences: " + avatar);
+                    loadImage(avatar);
+                } else {
+                    Log.w(TAG, "No avatar found in SharedPreferences");
+                    loadImage(null);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to parse user JSON: " + e.getMessage());
+                loadImage(null);
+            }
+        } else {
+            Log.w(TAG, "No user data found in SharedPreferences");
+            loadImage(null);
+        }
+    }
+
+    private void loadImage(String avatarUrl) {
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            Glide.with(this).load(avatarUrl).circleCrop()
+                    .placeholder(R.drawable.ic_menu_user)
+                    .error(R.drawable.ic_menu_user)
+                    .into(profileImageView);
+        } else {
+            Glide.with(this).load(R.drawable.ic_menu_user).circleCrop().into(profileImageView);
+        }
+    }
+
+    private boolean restoreSession() {
         String accessToken = MyPreferences.getString(this, "access_token", null);
         String refreshToken = MyPreferences.getString(this, "refresh_token", null);
-        boolean isValid = !TextUtils.isEmpty(accessToken) && !TextUtils.isEmpty(refreshToken);
-        Log.d(TAG, "Token check: access_token=" + accessToken + ", refresh_token=" + refreshToken + ", valid=" + isValid);
-        return isValid;
+        Log.d(TAG, "Restoring session - access_token: " + accessToken + ", refresh_token: " + refreshToken);
+
+        if (TextUtils.isEmpty(accessToken) || TextUtils.isEmpty(refreshToken)) {
+            Log.w(TAG, "No valid tokens found in preferences");
+            return false;
+        }
+        return true;
     }
 
     private void redirectToLogin(String message) {
@@ -222,25 +285,36 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void registerLogoutReceiver() {
+    private void registerBroadcastReceivers() {
+        // Đăng ký logout receiver
         logoutReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Log.d(TAG, "Received logout broadcast");
+                loadImage(null); // Xóa avatar
                 redirectToLogin("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
             }
         };
-        IntentFilter filter = new IntentFilter("com.example.shopman.ACTION_LOGOUT");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(logoutReceiver, filter, RECEIVER_NOT_EXPORTED);
-        } else {
-            registerReceiver(logoutReceiver, filter);
-        }
-        Log.d(TAG, "Registered logout receiver with RECEIVER_NOT_EXPORTED");
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                logoutReceiver, new IntentFilter("com.example.shopman.ACTION_LOGOUT")
+        );
+
+        // Đăng ký user update receiver
+        userUpdateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "Received user update broadcast");
+                updateProfileImage();
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                userUpdateReceiver, new IntentFilter("com.example.shopman.ACTION_UPDATE_USER")
+        );
+        Log.d(TAG, "Registered broadcast receivers with LocalBroadcastManager");
     }
 
     private void sendFcmTokenToServer(String fcmToken) {
-        if (!checkTokens()) {
+        if (!restoreSession()) {
             Log.w(TAG, "Invalid tokens, skipping FCM token update");
             redirectToLogin("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
             return;
@@ -276,10 +350,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (logoutReceiver != null) {
-            unregisterReceiver(logoutReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(logoutReceiver);
             logoutReceiver = null;
-            Log.d(TAG, "Unregistered logout receiver");
         }
+        if (userUpdateReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(userUpdateReceiver);
+            userUpdateReceiver = null;
+        }
+        Log.d(TAG, "Unregistered broadcast receivers");
         isChangingActivity = true; // Ngăn tương tác sau khi hủy
     }
 }

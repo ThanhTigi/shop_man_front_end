@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -16,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -51,7 +51,6 @@ import com.google.android.material.chip.ChipGroup;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -62,7 +61,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private static final int RELATED_PRODUCTS_PAGE_SIZE = 6;
 
     // Views
-    private Toolbar toolbar;
+    private ImageView ivBack; // Thay toolbar bằng ivBack
     private NestedScrollView nestedScrollView;
     private ImageView ivProduct, ivShopLogo;
     private TextView tvName, tvSubtitle, tvRating, tvPrice, tvOriginalPrice, tvDiscount, tvDescription, tvShopName;
@@ -70,7 +69,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private LinearLayout llAttributesContainer, llRelatedProductsContainer;
     private ChipGroup chipGroupOptions;
     private Button btnFollow, btnViewAllComments;
-    private ImageButton btnBack, btnGoToCart, btnBuyNow, btnWishlist;
+    private ImageButton btnGoToCart, btnBuyNow, btnWishlist;
     private RecyclerView commentsRecyclerView, relatedProductsRecyclerView;
     private ProgressBar relatedProductsProgressBar;
 
@@ -94,10 +93,15 @@ public class ProductDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_product_details);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.nestedScrollView), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
             int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
-            v.setPadding(0, statusBarHeight, 0, navigationBarHeight); // Padding trên và dưới
+            // Áp dụng padding cho nestedScrollView
+            nestedScrollView.setPadding(0, statusBarHeight, 0, 0);
+            // Đẩy bottomBar lên bằng cách điều chỉnh margin hoặc padding
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) findViewById(R.id.bottomBar).getLayoutParams();
+            params.bottomMargin = navigationBarHeight > 0 ? navigationBarHeight : 8; // Đảm bảo không âm
+            findViewById(R.id.bottomBar).setLayoutParams(params);
             return insets;
         });
         // Initialize views
@@ -123,7 +127,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        toolbar = findViewById(R.id.toolbar);
+        ivBack = findViewById(R.id.ivBack); // Thay toolbar bằng ivBack
         nestedScrollView = findViewById(R.id.nestedScrollView);
         ivProduct = findViewById(R.id.ivProduct);
         ivShopLogo = findViewById(R.id.ivShopLogo);
@@ -144,7 +148,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
         relatedProductsRecyclerView = findViewById(R.id.relatedProductsRecyclerView);
         relatedProductsProgressBar = findViewById(R.id.relatedProductsProgressBar);
         llRelatedProductsContainer = findViewById(R.id.llRelatedProductsContainer);
-        btnBack = findViewById(R.id.btnBack);
         btnGoToCart = findViewById(R.id.btnGoToCart);
         btnBuyNow = findViewById(R.id.btnBuyNow);
         btnWishlist = findViewById(R.id.btnWishlist);
@@ -172,7 +175,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        btnBack.setOnClickListener(v -> finish());
+        ivBack.setOnClickListener(v -> finish()); // Thay btnBack bằng ivBack
         btnViewAllComments.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(productId)) {
                 openCommentActivity();

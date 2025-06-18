@@ -28,13 +28,11 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.bumptech.glide.Glide;
-import com.cloudinary.android.MediaManager;
-import com.cloudinary.android.callback.ErrorInfo;
-import com.cloudinary.android.callback.UploadCallback;
+import com.example.shopman.MainActivity;
 import com.example.shopman.R;
-import com.example.shopman.models.Comments.Comment;
 import com.example.shopman.models.profile.getuserprofile.Address;
 import com.example.shopman.models.profile.getuserprofile.GetUserProfileResponse;
 import com.example.shopman.models.profile.getuserprofile.UserProfileMetadata;
@@ -45,35 +43,42 @@ import com.example.shopman.remote.ApiManager;
 import com.example.shopman.remote.ApiResponseListener;
 import com.example.shopman.utilitis.MyPreferences;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class ProfileActivity extends AppCompatActivity {
     private static final String TAG = "ProfileActivity";
     private static final String KEY_ACCESS_TOKEN = "access_token";
+    private static final int MAX_IMAGES = 1; // Giới hạn 1 ảnh cho avatar
 
     private ImageView ivBack, ivProfileImage;
     private EditText etEmail, etName, etPhoneNumber, etAddress, etPincode, etCity, etCountry;
     private Button btnSave;
     private ProgressBar progressBar;
+    private ScrollView scrollView;
     private ApiManager apiManager;
     private String accessToken;
     private String avatar;
     private BroadcastReceiver logoutReceiver;
-    private ActivityResultLauncher<Intent> pickImageLauncher;
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
     private ActivityResultLauncher<String> requestPermissionLauncher;
+    private List<Uri> selectedImageUris = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_profile);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.toolbar), (v, insets) -> {
-            ScrollView scrollView = findViewById(R.id.scrollView); // Sử dụng id đã thêm
-            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+
+        // Áp dụng padding động cho navigation bar
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
             int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
-            scrollView.setPadding(0, statusBarHeight, 0, navigationBarHeight); // Padding trên và dưới
+            scrollView = findViewById(R.id.scrollView);
+            scrollView.setPadding(0, 0, 0, navigationBarHeight);
             return insets;
         });
+
         // Khởi tạo views
         ivBack = findViewById(R.id.ivBack);
         ivProfileImage = findViewById(R.id.ivProfileImage);
@@ -86,6 +91,7 @@ public class ProfileActivity extends AppCompatActivity {
         etCountry = findViewById(R.id.etCountry);
         btnSave = findViewById(R.id.btnSave);
         progressBar = findViewById(R.id.progressBar);
+        scrollView = findViewById(R.id.scrollView);
 
         // Khởi tạo ApiManager
         apiManager = new ApiManager(this);
@@ -94,7 +100,7 @@ public class ProfileActivity extends AppCompatActivity {
         registerLogoutReceiver();
 
         // Khởi tạo ActivityResultLauncher để chọn ảnh
-        initPickImageLauncher();
+        initImagePickerLauncher();
 
         // Khởi tạo ActivityResultLauncher để yêu cầu quyền
         initRequestPermissionLauncher();
@@ -119,18 +125,14 @@ public class ProfileActivity extends AppCompatActivity {
         ivProfileImage.setOnClickListener(v -> checkStoragePermission());
     }
 
-    private void initPickImageLauncher() {
-        pickImageLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+    private void initImagePickerLauncher() {
+        imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                Uri imageUri = result.getData().getData();
-                if (imageUri != null) {
-                    Glide.with(this).load(imageUri).circleCrop().into(ivProfileImage);
-                    uploadImageToCloudinary(imageUri);
-                } else {
-                    Toast.makeText(this, "Failed to select image", Toast.LENGTH_SHORT).show();
-                }
+                Intent data = result.getData();
+                handleImageSelection(data);
             } else {
                 Toast.makeText(this, "Image selection cancelled", Toast.LENGTH_SHORT).show();
+                Log.w(TAG, "Image picker failed: resultCode=" + result.getResultCode() + ", data=" + result.getData());
             }
         });
     }
@@ -139,16 +141,17 @@ public class ProfileActivity extends AppCompatActivity {
         requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
                 openImagePicker();
+                Log.d(TAG, "Permission granted, opening image picker");
             } else {
                 Toast.makeText(this, "Permission denied. Cannot access gallery.", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Permission denied");
             }
         });
     }
 
     private void checkStoragePermission() {
         String permission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ?
-                Manifest.permission.READ_MEDIA_IMAGES :
-                Manifest.permission.READ_EXTERNAL_STORAGE;
+                Manifest.permission.READ_MEDIA_IMAGES : Manifest.permission.READ_EXTERNAL_STORAGE;
 
         if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
             openImagePicker();
@@ -159,7 +162,37 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void openImagePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        pickImageLauncher.launch(intent);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false); // Chỉ cho phép chọn 1 ảnh
+        intent.setType("image/*");
+        imagePickerLauncher.launch(intent);
+    }
+
+    private void handleImageSelection(Intent data) {
+        Log.d(TAG, "Handling image selection: data=" + data + ", selectedImageUris size before=" + selectedImageUris.size());
+        selectedImageUris.clear(); // Xóa danh sách cũ vì chỉ cần 1 ảnh
+        if (data.getClipData() != null) {
+            int count = Math.min(data.getClipData().getItemCount(), MAX_IMAGES - selectedImageUris.size());
+            for (int i = 0; i < count; i++) {
+                Uri imageUri = data.getClipData().getItemAt(i).getUri();
+                if (selectedImageUris.size() < MAX_IMAGES) {
+                    selectedImageUris.add(imageUri);
+                }
+                Log.d(TAG, "Added Uri: " + imageUri);
+            }
+        } else if (data.getData() != null && selectedImageUris.size() < MAX_IMAGES) {
+            Uri imageUri = data.getData();
+            selectedImageUris.add(imageUri);
+            Log.d(TAG, "Added single Uri: " + imageUri);
+        }
+        if (selectedImageUris.size() >= MAX_IMAGES) {
+            Toast.makeText(this, "Tối đa " + MAX_IMAGES + " ảnh", Toast.LENGTH_SHORT).show();
+        }
+        if (!selectedImageUris.isEmpty()) {
+            Glide.with(this).load(selectedImageUris.get(0)).circleCrop().into(ivProfileImage);
+            uploadImageToCloudinary(selectedImageUris.get(0));
+        } else {
+            Toast.makeText(this, "Failed to select image", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void uploadImageToCloudinary(Uri imageUri) {
@@ -169,69 +202,54 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
-        // Kiểm tra phiên bản Android và bỏ qua upload nếu >= 31 mà không hỗ trợ cờ PendingIntent
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Log.w(TAG, "Upload ảnh bị vô hiệu hóa trên Android 12+ do yêu cầu FLAG_IMMUTABLE/FLAG_MUTABLE không được hỗ trợ bởi SDK hiện tại.");
-            Toast.makeText(this, "Upload ảnh không khả dụng trên thiết bị này. Vui lòng thử lại sau.", Toast.LENGTH_SHORT).show();
-            showLoading(false);
-            return;
-        }
-
-        try {
-            MediaManager.get();
-        } catch (IllegalStateException e) {
-            showLoading(false);
-            Toast.makeText(this, "Image upload service not available", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "MediaManager not initialized: " + e.getMessage());
-            return;
-        }
-
         showLoading(true);
-        String requestId = MediaManager.get().upload(imageUri)
+        Log.d(TAG, "Starting upload for Uri: " + imageUri);
+        String requestId = com.cloudinary.android.MediaManager.get().upload(imageUri)
                 .unsigned("android_unsigned")
                 .option("folder", "shopman/avatars")
-                .option("public_id", "user_" + System.currentTimeMillis())
-                .callback(new UploadCallback() {
+                .option("public_id", "user_" + System.currentTimeMillis() + "_" + imageUri.getLastPathSegment())
+                .callback(new com.cloudinary.android.callback.UploadCallback() {
                     @Override
                     public void onStart(String requestId) {
-                        Log.d(TAG, "Upload started: " + requestId);
+                        Log.d(TAG, "Upload started for Uri: " + imageUri);
                     }
 
                     @Override
                     public void onProgress(String requestId, long bytes, long totalBytes) {
-                        int progress = (int) (100 * bytes / totalBytes);
-                        Log.d(TAG, "Upload progress: " + progress + "%");
+                        Log.d(TAG, "Upload progress for " + requestId + ": " + (bytes * 100f / totalBytes) + "%");
                     }
 
                     @Override
                     public void onSuccess(String requestId, Map resultData) {
                         showLoading(false);
                         String secureUrl = (String) resultData.get("secure_url");
-                        if (!TextUtils.isEmpty(secureUrl)) {
+                        Log.d(TAG, "Upload success, URL: " + secureUrl);
+                        if (secureUrl != null) {
                             avatar = secureUrl;
                             Glide.with(ProfileActivity.this).load(secureUrl).circleCrop().into(ivProfileImage);
-                            MyPreferences.setString(ProfileActivity.this, "user_avatar", secureUrl);
                             Toast.makeText(ProfileActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "Uploaded image: " + secureUrl);
                         } else {
+                            Log.w(TAG, "No secure URL returned in resultData: " + resultData);
                             Toast.makeText(ProfileActivity.this, "Failed to get image URL", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
-                    public void onError(String requestId, ErrorInfo error) {
+                    public void onError(String requestId, com.cloudinary.android.callback.ErrorInfo error) {
                         showLoading(false);
-                        Log.e(TAG, "Upload error: " + error.getDescription());
+                        Log.e(TAG, "Upload error: " + error.getDescription() + ", code: " + error.getCode());
                         Toast.makeText(ProfileActivity.this, "Failed to upload image: " + error.getDescription(), Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
-                    public void onReschedule(String requestId, ErrorInfo error) {
-                        Log.d(TAG, "Upload rescheduled: " + error.getDescription());
+                    public void onReschedule(String requestId, com.cloudinary.android.callback.ErrorInfo error) {
+                        Log.w(TAG, "Upload rescheduled: " + error.getDescription());
                     }
                 })
                 .dispatch();
+        Log.d(TAG, "Upload dispatched with requestId: " + requestId);
     }
+
     private boolean isNetworkAvailable() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -247,8 +265,7 @@ public class ProfileActivity extends AppCompatActivity {
             }
         };
         IntentFilter filter = new IntentFilter("com.example.shopman.ACTION_LOGOUT");
-        registerReceiver(logoutReceiver, filter);
-
+        LocalBroadcastManager.getInstance(this).registerReceiver(logoutReceiver, filter);
     }
 
     private void fetchUserProfile() {
@@ -263,7 +280,7 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onSuccess(GetUserProfileResponse response) {
                 showLoading(false);
-                Log.d(TAG, "Raw response: " + response); // Log response gốc
+                Log.d(TAG, "Raw response: " + response);
                 if (response == null || response.getMetadata() == null || response.getMetadata().getMetadata() == null) {
                     Log.e(TAG, "Invalid profile response: response=" + response +
                             ", metadata=" + (response != null ? response.getMetadata() : null));
@@ -342,6 +359,17 @@ public class ProfileActivity extends AppCompatActivity {
                 displayUserProfile(user);
                 Toast.makeText(ProfileActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "Successfully updated user profile: " + user.getEmail());
+
+                // Gửi broadcast để thông báo MainActivity cập nhật avatar
+                LocalBroadcastManager.getInstance(ProfileActivity.this).sendBroadcast(
+                        new Intent("com.example.shopman.ACTION_UPDATE_USER")
+                );
+
+                // Quay lại MainActivity (không cần truyền avatar qua Intent vì đã lưu trong SharedPreferences)
+                Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                finish();
             }
 
             @Override
@@ -368,7 +396,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(avatar)) {
             Glide.with(this).load(avatar).circleCrop().into(ivProfileImage);
         } else {
-            Glide.with(this).load(R.drawable.user).circleCrop().into(ivProfileImage);
+            Glide.with(this).load(R.drawable.ic_menu_user).circleCrop().into(ivProfileImage); // Ảnh mặc định
         }
 
         if (user.getAddress() != null && !user.getAddress().isEmpty()) {
@@ -410,7 +438,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (logoutReceiver != null) {
-            unregisterReceiver(logoutReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(logoutReceiver);
             logoutReceiver = null;
         }
     }

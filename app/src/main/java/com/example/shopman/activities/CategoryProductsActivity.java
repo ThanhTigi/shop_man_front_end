@@ -54,14 +54,17 @@ public class CategoryProductsActivity extends AppCompatActivity {
                 // Padding cho header để tránh chồng lấn với status bar
                 ConstraintLayout header = findViewById(R.id.header);
                 if (header != null) {
-                    header.setPadding(0, statusBarHeight, 0, 0); // Di chuyển header xuống bằng chiều cao status bar
-                    Log.d(TAG, "Applied status bar height padding: " + statusBarHeight); // Log để kiểm tra
+                    header.setPadding(0, statusBarHeight, 0, 0); // PaddingTop động dựa trên statusBarHeight
+                    Log.d(TAG, "Applied statusBarHeight: " + statusBarHeight); // Log chiều cao status bar
+                    Log.d(TAG, "Header paddingTop: " + header.getPaddingTop()); // Log paddingTop thực tế
+                    Log.d(TAG, "Header height: " + header.getHeight()); // Log chiều cao header sau khi vẽ
                 }
 
                 // Padding cho fragment_container
                 FrameLayout fragmentContainer = findViewById(R.id.fragment_container);
                 if (fragmentContainer != null) {
                     fragmentContainer.setPadding(0, 0, 0, navigationBarHeight); // Padding dưới để tránh navigation bar
+                    Log.d(TAG, "Applied navigationBarHeight: " + navigationBarHeight); // Log chiều cao navigation bar
                 }
 
                 return insets;
@@ -92,6 +95,7 @@ public class CategoryProductsActivity extends AppCompatActivity {
         }
 
         tvCategoryTitle.setText((categoryName != null ? categoryName : "Category") + " Products");
+        Log.d(TAG, "tvCategoryTitle text set to: " + tvCategoryTitle.getText()); // Log text của TextView
 
         CategoryProductsFragment fragment = CategoryProductsFragment.newInstance(slug, categoryName, categoryImageUrl);
         getSupportFragmentManager()

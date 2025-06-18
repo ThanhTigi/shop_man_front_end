@@ -1,6 +1,7 @@
 package com.example.shopman.activities;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -11,8 +12,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,6 +31,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -68,13 +73,14 @@ public class CommentActivity extends AppCompatActivity {
     private ImageButton btnSend;
     private TextView tvReplyHint;
     private LinearLayout llImagePreviewContainer;
+    private LinearLayout llCommentInput;
 
     // Data
     private ApiManager apiManager;
     private CommentAdapter commentAdapter;
     private List<Comment> comments = new ArrayList<>();
-    private List<Uri> selectedImageUris = new ArrayList<>(); // Cho activity
-    private List<Uri> selectedImageUrisDialog = new ArrayList<>(); // Cho dialog
+    private List<Uri> selectedImageUris = new ArrayList<>();
+    private List<Uri> selectedImageUrisDialog = new ArrayList<>();
     private String productId;
     private String nextCommentCursor;
     private boolean isLoadingComments, isLastCommentPage;
@@ -85,17 +91,41 @@ public class CommentActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private boolean isLoadingMore = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Cấu hình Window để tràn viền
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
         setContentView(R.layout.activity_comment);
+
+        // Áp dụng padding động cho layout
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
-            int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
             int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
-            v.setPadding(0, statusBarHeight, 0, navigationBarHeight); // Padding trên và dưới
+            int imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+
+            // Không áp paddingTop cho header để nằm ngay dưới status bar
+            ConstraintLayout header = findViewById(R.id.header);
+            if (header != null) {
+                header.setPadding(0, 0, 0, 0); // Xóa padding trên
+            }
+
+            // Áp padding cho llCommentInput khi bàn phím hiện
+            if (llCommentInput != null) {
+                llCommentInput.setPadding(0, 0, 0, imeHeight + navigationBarHeight);
+            }
+
+            // Cuộn RecyclerView đến vị trí cuối khi bàn phím hiện
+            if (imeHeight > 0 && commentsRecyclerView != null && !comments.isEmpty()) {
+                commentsRecyclerView.post(() -> {
+                    commentsRecyclerView.smoothScrollToPosition(comments.size() - 1);
+                });
+            }
+
             return insets;
         });
+
         initViews();
         productId = getIntent().getStringExtra("productId");
         if (TextUtils.isEmpty(productId)) {
@@ -123,11 +153,21 @@ public class CommentActivity extends AppCompatActivity {
         btnSend = findViewById(R.id.btnSend);
         tvReplyHint = findViewById(R.id.tvReplyHint);
         llImagePreviewContainer = findViewById(R.id.llImagePreviewContainer);
+        llCommentInput = findViewById(R.id.llCommentInput);
 
         tvTitle.setText("Bình luận");
         rbRating.setVisibility(View.VISIBLE);
         rbRating.setEnabled(true);
         rbRating.setIsIndicator(false);
+
+        // Thêm focus listener cho etComment
+        etComment.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus && !comments.isEmpty()) {
+                commentsRecyclerView.post(() -> {
+                    commentsRecyclerView.smoothScrollToPosition(comments.size() - 1);
+                });
+            }
+        });
     }
 
     private void initAdapters() {
@@ -207,7 +247,7 @@ public class CommentActivity extends AppCompatActivity {
         } else if (data.getData() != null && targetList.size() < MAX_IMAGES) {
             Uri imageUri = data.getData();
             if (targetList.size() == MAX_IMAGES) {
-                targetList.clear(); // Xóa tất cả để thay thế bằng ảnh mới
+                targetList.clear();
             }
             targetList.add(imageUri);
             Log.d(TAG, "Added single Uri: " + imageUri);
@@ -332,8 +372,8 @@ public class CommentActivity extends AppCompatActivity {
                             nextCommentCursor = metadata.getNextCursor();
                             isLastCommentPage = TextUtils.isEmpty(nextCommentCursor);
                             if (newComments != null && !newComments.isEmpty()) {
-                                comments.addAll(newComments); // Thêm vào danh sách hiện tại
-                                commentAdapter.updateComments(comments); // Cập nhật với DiffUtil
+                                comments.addAll(newComments);
+                                commentAdapter.updateComments(comments);
                                 Log.d(TAG, "Loaded " + newComments.size() + " more comments");
                             }
                         }
@@ -383,22 +423,27 @@ public class CommentActivity extends AppCompatActivity {
     }
 
     private void showCommentDialog(Comment comment, boolean isReply, boolean isEdit) {
+        // Khởi tạo BottomSheetDialog
         currentDialog = new BottomSheetDialog(this);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_comment, null);
         currentDialog.setContentView(dialogView);
 
+        // Khởi tạo các thành phần giao diện
         EditText etCommentDialog = dialogView.findViewById(R.id.etComment);
         Button btnAddImageDialog = dialogView.findViewById(R.id.btnAddImage);
         LinearLayout llImagePreview = dialogView.findViewById(R.id.llImagePreviewContainer);
         RatingBar rbRatingDialog = dialogView.findViewById(R.id.rbRating);
         Button btnCancel = dialogView.findViewById(R.id.btnCancel);
         Button btnSendDialog = dialogView.findViewById(R.id.btnSend);
+        TextView tvReplyHint = dialogView.findViewById(R.id.tvReplyHint); // Giả sử có ID này
 
+        // Xóa dữ liệu cũ
         selectedImageUrisDialog.clear();
         existingImageUrlsDialog.clear();
         llImagePreview.removeAllViews();
         llImagePreview.setVisibility(View.GONE);
 
+        // Cấu hình nội dung dựa trên chế độ
         if (isEdit && comment != null) {
             etCommentDialog.setText(comment.getContent() != null ? comment.getContent() : "");
             long createdTime = parseDateTime(comment.getCreatedAt());
@@ -426,8 +471,94 @@ public class CommentActivity extends AppCompatActivity {
             etCommentDialog.setHint(isReply && comment != null ? "Trả lời: " + (comment.getUser() != null ? comment.getUser().getName() : "Người dùng") : "Nhập bình luận...");
         }
 
+        // Lấy FrameLayout của bottom sheet để điều chỉnh
+        FrameLayout bottomSheet = currentDialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        if (bottomSheet != null) {
+            // Log vị trí ban đầu khi mở dialog
+            bottomSheet.post(() -> {
+                int[] location = new int[2];
+                bottomSheet.getLocationOnScreen(location);
+                int top = location[1];
+                int bottom = top + bottomSheet.getHeight();
+                Log.d(TAG, "Dialog opened - Position: Top=" + top + ", Bottom=" + bottom + ", Height=" + bottomSheet.getHeight());
+            });
+
+            // Xử lý WindowInsets để điều chỉnh vị trí khi bàn phím hiện
+            ViewCompat.setOnApplyWindowInsetsListener(bottomSheet, (v, insets) -> {
+                int imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+                Log.d(TAG, "Keyboard height (imeHeight): " + imeHeight + ", Is IME visible: " + insets.isVisible(WindowInsetsCompat.Type.ime()));
+
+                if (imeHeight > 0) {
+                    int screenHeight = getResources().getDisplayMetrics().heightPixels;
+                    int statusBarHeight = getStatusBarHeight();
+                    int targetTop = screenHeight - imeHeight - bottomSheet.getHeight(); // Đặt đáy dialog ngay trên đỉnh bàn phím
+
+                    if (targetTop < statusBarHeight) targetTop = statusBarHeight; // Tránh che status bar
+                    bottomSheet.setY(targetTop);
+                    Log.d(TAG, "Adjusted dialog position - Target Top=" + targetTop + ", Bottom=" + (targetTop + bottomSheet.getHeight()) + ", imeHeight=" + imeHeight);
+
+                    // Đảm bảo EditText cuộn vào tầm nhìn
+                    NestedScrollView nestedScrollView = dialogView.findViewById(R.id.nested_scroll_view);
+                    if (nestedScrollView != null) {
+                        nestedScrollView.post(() -> nestedScrollView.smoothScrollTo(0, etCommentDialog.getTop()));
+                    }
+                }
+                return insets;
+            });
+
+            // Yêu cầu áp dụng insets sau khi layout hoàn tất
+            bottomSheet.post(() -> bottomSheet.requestApplyInsets());
+        }
+
+        // Xử lý khi dialog hiển thị
+        currentDialog.setOnShowListener(dialog -> {
+            bottomSheet.setBackgroundResource(android.R.color.transparent);
+            etCommentDialog.requestFocus();
+            bottomSheet.postDelayed(() -> {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (!etCommentDialog.hasFocus()) etCommentDialog.requestFocus(); // Đảm bảo focus
+                imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0); // Ép hiện bàn phím
+                Log.d(TAG, "Dialog shown, requested focus with delay: " + etCommentDialog.hasFocus());
+            }, 300); // Delay 300ms
+        });
+
+        // Xử lý khi dialog đóng
+        currentDialog.setOnDismissListener(dialog -> {
+            if (bottomSheet != null) {
+                int[] location = new int[2];
+                bottomSheet.getLocationOnScreen(location);
+                int top = location[1];
+                int bottom = top + bottomSheet.getHeight();
+                Log.d(TAG, "Dialog dismissed - Position: Top=" + top + ", Bottom=" + bottom + ", Height=" + bottomSheet.getHeight());
+            }
+            selectedImageUrisDialog.clear();
+            existingImageUrlsDialog.clear();
+            llImagePreview.removeAllViews();
+            tvReplyHint.setVisibility(View.GONE);
+            replyingTo = null;
+            rbRatingDialog.setVisibility(View.VISIBLE);
+        });
+
+        // Theo dõi focus và ép hiện bàn phím
+        etCommentDialog.setOnFocusChangeListener((v, hasFocus) -> {
+            Log.d(TAG, "etCommentDialog focus changed: hasFocus=" + hasFocus);
+            if (hasFocus) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+                Log.d(TAG, "Focus gained, toggling keyboard");
+            }
+        });
+
+        etCommentDialog.setOnClickListener(v -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+            Log.d(TAG, "EditText clicked, toggling keyboard");
+        });
+
+        // Xử lý nút thêm ảnh
         btnAddImageDialog.setOnClickListener(v -> checkStoragePermission(REQUEST_CODE_SELECT_IMAGE_DIALOG, llImagePreview));
 
+        // Xử lý nút hủy
         btnCancel.setOnClickListener(v -> {
             selectedImageUrisDialog.clear();
             existingImageUrlsDialog.clear();
@@ -435,6 +566,7 @@ public class CommentActivity extends AppCompatActivity {
             currentDialog.dismiss();
         });
 
+        // Xử lý nút gửi
         btnSendDialog.setOnClickListener(v -> {
             String content = etCommentDialog.getText().toString().trim();
             if (TextUtils.isEmpty(content)) {
@@ -450,9 +582,8 @@ public class CommentActivity extends AppCompatActivity {
                 finalRating = comment.getRating();
             }
             Integer parentId = isReply && comment != null ? comment.getId() : null;
-            List<String> existingImageUrls = new ArrayList<>(existingImageUrlsDialog); // Sử dụng danh sách đã đồng bộ
+            List<String> existingImageUrls = new ArrayList<>(existingImageUrlsDialog);
 
-            // Chỉ upload ảnh mới từ selectedImageUrisDialog
             List<Uri> newImagesToUpload = new ArrayList<>();
             for (Uri uri : selectedImageUrisDialog) {
                 String uriString = uri.toString();
@@ -475,16 +606,15 @@ public class CommentActivity extends AppCompatActivity {
             }
         });
 
-        currentDialog.setOnDismissListener(d -> {
-            selectedImageUrisDialog.clear();
-            existingImageUrlsDialog.clear();
-            llImagePreview.removeAllViews();
-            tvReplyHint.setVisibility(View.GONE);
-            replyingTo = null;
-            rbRating.setVisibility(View.VISIBLE);
-        });
         currentDialog.show();
     }
+
+    // Hàm lấy chiều cao status bar
+    private int getStatusBarHeight() {
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        return resourceId > 0 ? getResources().getDimensionPixelSize(resourceId) : 0;
+    }
+
 
     private void updateImagePreview(LinearLayout llImagePreview, List<Uri> uris, View viewToRemove, boolean isEdit) {
         if (llImagePreview == null) return;
@@ -495,9 +625,9 @@ public class CommentActivity extends AppCompatActivity {
             llImagePreview.setVisibility(View.GONE);
             if (isEdit) {
                 existingImageUrlsDialog.clear();
-                selectedImageUrisDialog.clear(); // Đồng bộ với currentUris
+                selectedImageUrisDialog.clear();
             } else {
-                selectedImageUris.clear(); // Đồng bộ khi không edit
+                selectedImageUris.clear();
             }
             Log.d(TAG, "Preview cleared, existingImageUrlsDialog=" + existingImageUrlsDialog + ", selectedImageUrisDialog=" + selectedImageUrisDialog + ", selectedImageUris=" + selectedImageUris);
             return;
@@ -516,17 +646,17 @@ public class CommentActivity extends AppCompatActivity {
                 if (isEdit && existingImageUrlsDialog != null) {
                     String uriString = uri.toString();
                     existingImageUrlsDialog.removeIf(url -> url.equals(uriString));
-                    selectedImageUrisDialog.removeIf(u -> u.toString().equals(uriString)); // Đồng bộ xóa
+                    selectedImageUrisDialog.removeIf(u -> u.toString().equals(uriString));
                 } else {
-                    selectedImageUris.remove(uri); // Đồng bộ xóa cho post comment
+                    selectedImageUris.remove(uri);
                 }
                 if (currentUris.isEmpty()) {
                     llImagePreview.setVisibility(View.GONE);
                     if (isEdit) {
                         existingImageUrlsDialog.clear();
-                        selectedImageUrisDialog.clear(); // Đồng bộ khi rỗng
+                        selectedImageUrisDialog.clear();
                     } else {
-                        selectedImageUris.clear(); // Đồng bộ khi rỗng cho post comment
+                        selectedImageUris.clear();
                     }
                 }
                 Log.d(TAG, "After remove: currentUris=" + currentUris + ", existingImageUrlsDialog=" + existingImageUrlsDialog + ", selectedImageUrisDialog=" + selectedImageUrisDialog + ", selectedImageUris=" + selectedImageUris);
@@ -536,11 +666,11 @@ public class CommentActivity extends AppCompatActivity {
         }
         if (isEdit) {
             selectedImageUrisDialog.clear();
-            selectedImageUrisDialog.addAll(currentUris); // Đồng bộ sau khi render
+            selectedImageUrisDialog.addAll(currentUris);
             Log.d(TAG, "After render: selectedImageUrisDialog synced with currentUris=" + selectedImageUrisDialog);
         } else {
             selectedImageUris.clear();
-            selectedImageUris.addAll(currentUris); // Đồng bộ cho post comment
+            selectedImageUris.addAll(currentUris);
             Log.d(TAG, "After render: selectedImageUris synced with currentUris=" + selectedImageUris);
         }
     }
@@ -567,7 +697,6 @@ public class CommentActivity extends AppCompatActivity {
             return;
         }
 
-        // Lọc các URI hợp lệ
         List<Uri> validUris = new ArrayList<>();
         for (Uri uri : uploadUris) {
             if (uri != null && "content".equals(uri.getScheme())) {
@@ -643,7 +772,7 @@ public class CommentActivity extends AppCompatActivity {
         runOnUiThread(() -> {
             List<String> finalUrls = new ArrayList<>(existingImageUrls);
             for (String url : uploadedImageUrls) {
-                if (url != null) finalUrls.add(url); // Chỉ thêm URL hợp lệ
+                if (url != null) finalUrls.add(url);
             }
             Log.d(TAG, "Upload completed: finalUrls=" + finalUrls);
 
@@ -774,7 +903,7 @@ public class CommentActivity extends AppCompatActivity {
                     commentsProgressBar.setVisibility(View.GONE);
                     int index = comments.indexOf(comment);
                     if (index != -1) {
-                        commentAdapter.removeComment(comment); // Sử dụng removeComment với DiffUtil
+                        commentAdapter.removeComment(comment);
                         Toast.makeText(CommentActivity.this, "Xóa bình luận thành công", Toast.LENGTH_SHORT).show();
                     }
                     Log.d(TAG, "Delete success, status: " + response.getStatus() + ", metadata: " + response.getMetadata().getMetadata());

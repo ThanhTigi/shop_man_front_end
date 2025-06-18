@@ -1,6 +1,6 @@
 package com.example.shopman.models.signup;
 
-import com.example.shopman.models.login.InnerMetadata;
+import com.example.shopman.models.signup.InnerMetadata;
 import com.google.gson.annotations.SerializedName;
 
 public class SignUpMetadata {

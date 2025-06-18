@@ -94,6 +94,7 @@
         android:theme="@style/Theme.AppCompat.NoActionBar" />
     <activity
         android:name=".activities.CommentActivity"
+        android:windowSoftInputMode="adjustResize|stateAlwaysHidden"
         android:exported="false" />
     <!--        <activity-->
     <!--            android:name=".activities.DealActivity"-->

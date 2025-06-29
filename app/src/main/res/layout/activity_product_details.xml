@@ -11,8 +11,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header"
         android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:background="@color/red"
+        android:layout_height="wrap_content"
+        android:background="@color/pink"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -288,6 +288,7 @@
                         android:textSize="14sp"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
+                        android:textColor="@color/white"
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -314,6 +315,16 @@
                         android:textColor="@color/black"
                         android:textSize="18sp"
                         android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvNoComments"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Chưa có bình luận, hãy là người đầu tiên"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/darker_gray"
+                        android:gravity="center"
+                        android:visibility="gone" />
 
                     <!-- Comments RecyclerView -->
                     <androidx.recyclerview.widget.RecyclerView
@@ -387,7 +398,7 @@
         android:background="@color/green"
         android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="8dp"> <!-- Thêm margin bottom để tránh bị che lấp -->
+        android:layout_marginBottom="8dp">
 
         <ImageButton
             android:id="@+id/btnGoToCart"

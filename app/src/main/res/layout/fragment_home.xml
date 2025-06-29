@@ -150,40 +150,59 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <!-- Block màu xanh chứa tiêu đề, nút View all và bộ đếm giờ -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/deal_background"
-                        android:gravity="center_vertical"
+                        android:orientation="vertical"
                         android:padding="8dp">
 
-                        <TextView
-                            android:layout_width="0dp"
+                        <!-- Tiêu đề và nút View all trên cùng hàng -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Deal of the Day"
-                            android:textColor="@android:color/white"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:gravity="center_vertical">
 
+                            <!-- Tiêu đề -->
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Deal of the Day"
+                                android:textColor="@android:color/white"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:paddingBottom="4dp" />
+
+                            <!-- Nút View all với background khớp block -->
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnViewAllDeal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:text="View all"
+                                android:textColor="@android:color/white"
+                                android:textSize="16sp"
+                                app:backgroundTint="@color/blue"
+                                app:strokeColor="@android:color/white"
+                                app:strokeWidth="1dp"
+                                app:cornerRadius="8dp"
+                                android:padding="4dp"
+                                android:layout_marginStart="8dp" />
+                        </LinearLayout>
+
+                        <!-- Bộ đếm giờ -->
                         <TextView
-                            android:id="@+id/dealViewAll"
+                            android:id="@+id/dealRemainingTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="View all"
+                            android:text="00:00:00"
                             android:textColor="@android:color/white"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:paddingTop="4dp" />
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/dealRemainingTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="00:00:00"
-                        android:textColor="#666666"
-                        android:textSize="12sp" />
-
+                    <!-- RecyclerView cho sản phẩm deal -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/dealRecyclerView"
                         android:layout_width="match_parent"
@@ -192,6 +211,14 @@
                         android:nestedScrollingEnabled="true"
                         android:orientation="horizontal"
                         android:scrollbars="horizontal" />
+
+                    <!-- Progress bar khi tải thêm -->
+                    <ProgressBar
+                        android:id="@+id/dealProgressBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -264,40 +291,59 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <!-- Block màu xanh chứa tiêu đề, nút View all và bộ đếm giờ -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/trending_background"
-                        android:gravity="center_vertical"
+                        android:orientation="vertical"
                         android:padding="8dp">
 
-                        <TextView
-                            android:layout_width="0dp"
+                        <!-- Tiêu đề và nút View all trên cùng hàng -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Trending Products"
-                            android:textColor="@android:color/white"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:gravity="center_vertical">
 
+                            <!-- Tiêu đề -->
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Trending Products"
+                                android:textColor="@android:color/white"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:paddingBottom="4dp" />
+
+                            <!-- Nút View all với background khớp block -->
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnViewAllTrending"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:text="View all"
+                                android:textColor="@android:color/white"
+                                android:textSize="16sp"
+                                app:backgroundTint="@color/pink"
+                            app:strokeColor="@android:color/white"
+                            app:strokeWidth="1dp"
+                            app:cornerRadius="8dp"
+                            android:padding="4dp"
+                            android:layout_marginStart="8dp" />
+                        </LinearLayout>
+
+                        <!-- Bộ đếm giờ -->
                         <TextView
-                            android:id="@+id/trendingViewAll"
+                            android:id="@+id/trendingRemainingTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="View all"
+                            android:text="00:00:00"
                             android:textColor="@android:color/white"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:paddingTop="4dp" />
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/trendingRemainingTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="00:00:00"
-                        android:textColor="#666666"
-                        android:textSize="12sp" />
-
+                    <!-- RecyclerView cho sản phẩm trending -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/trendingRecyclerView"
                         android:layout_width="match_parent"

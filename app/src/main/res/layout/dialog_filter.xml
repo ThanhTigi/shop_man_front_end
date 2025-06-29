@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/transparent">
+
+    <!-- Price Range Slider -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Price Range (VND)"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp" />
+
+    <com.google.android.material.slider.RangeSlider
+        android:id="@+id/rangeSliderPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:values="@array/default_price_range"
+        app:trackColorActive="@color/pink"
+    app:trackColorInactive="#CCCCCC" /> <!-- Thay thế trackInactiveTint -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Min: 0 VND"
+            android:id="@+id/tvMinPrice" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Max: 10,000,000 VND"
+            android:id="@+id/tvMaxPrice"
+            android:gravity="end" />
+    </LinearLayout>
+
+    <!-- Rating Slider -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Minimum Rating"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/sliderRating"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:trackColorActive="@color/pink"
+    app:trackColorInactive="#CCCCCC" /> <!-- Thay thế trackInactiveTint -->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Min Rating: 0.0"
+        android:id="@+id/tvMinRating"
+        android:layout_marginTop="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:backgroundTint="@color/pink"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/btnApply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Apply"
+            android:backgroundTint="@color/blue"
+            android:textColor="@android:color/white"
+            android:layout_marginStart="16dp" />
+    </LinearLayout>
+</LinearLayout>

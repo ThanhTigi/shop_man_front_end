@@ -73,10 +73,10 @@
         android:theme="@style/AppTheme"
         android:exported="false" />
 
-    <activity
-        android:name=".activities.TrendingProductActivity"
-        android:theme="@style/AppTheme"
-        android:exported="false" />
+<!--    <activity-->
+<!--        android:name=".activities.TrendingProductActivity"-->
+<!--        android:theme="@style/AppTheme"-->
+<!--        android:exported="false" />-->
     <activity
         android:name=".activities.ProfileActivity"
         android:theme="@style/AppTheme"
@@ -89,6 +89,14 @@
         android:name=".activities.SignUpActivity"
         android:theme="@style/AppTheme"
         android:exported="false" />
+        <activity
+            android:name=".activities.ShopDetailActivity"
+            android:theme="@style/AppTheme"
+            android:exported="false" />
+        <activity
+            android:name=".activities.CampaignDetailsActivity"
+            android:theme="@style/AppTheme"
+            android:exported="false" />
     <activity
         android:name=".activities.FullScreenImageActivity"
         android:theme="@style/Theme.AppCompat.NoActionBar" />
@@ -96,9 +104,9 @@
         android:name=".activities.CommentActivity"
         android:windowSoftInputMode="adjustResize|stateAlwaysHidden"
         android:exported="false" />
-    <!--        <activity-->
-    <!--            android:name=".activities.DealActivity"-->
-    <!--            android:exported="false" />-->
+            <activity
+                android:name=".activities.DealActivity"
+                android:exported="false" />
     <!--        <activity-->
     <!--            android:name=".activities.SpecialOffersActivity"-->
     <!--            android:exported="false" />-->

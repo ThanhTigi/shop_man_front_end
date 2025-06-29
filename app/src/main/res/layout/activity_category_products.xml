@@ -9,8 +9,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header"
         android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:background="@color/red"
+        android:layout_height="wrap_content"
+        android:background="@color/pink"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -20,7 +20,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginStart="28dp"
-            android:layout_marginTop="60dp"
+            android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
             android:contentDescription="@string/back"
             android:src="@drawable/ic_back"

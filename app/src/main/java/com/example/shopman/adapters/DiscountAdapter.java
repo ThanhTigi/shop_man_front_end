@@ -1,57 +1,44 @@
 package com.example.shopman.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.shopman.R;
-import com.example.shopman.models.CampaignResponse;
-import com.example.shopman.models.ShopResponse;
+import com.example.shopman.models.Discount;
 
 import java.util.List;
 
 public class DiscountAdapter extends RecyclerView.Adapter<DiscountAdapter.DiscountViewHolder> {
-    private final List<Object> discounts; // Hỗ trợ cả CampaignResponse.Discount và ShopResponse.Discount
+    private final Context context;
+    private final List<Discount> discounts;
+    private OnDiscountClickListener listener;
 
-    public DiscountAdapter(List<Object> discounts) {
+    public DiscountAdapter(Context context, List<Discount> discounts) {
+        this.context = context;
         this.discounts = discounts;
+    }
+
+    public void setOnDiscountClickListener(OnDiscountClickListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
     @Override
     public DiscountViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_discount, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_discount, parent, false);
         return new DiscountViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull DiscountViewHolder holder, int position) {
-        Object discountObj = discounts.get(position);
-        String name, code, value, type;
-
-        if (discountObj instanceof CampaignResponse.Discount) {
-            CampaignResponse.Discount discount = (CampaignResponse.Discount) discountObj;
-            name = discount.getName();
-            code = discount.getCode();
-            value = discount.getValue();
-            type = discount.getType();
-        } else if (discountObj instanceof ShopResponse.Discount) {
-            ShopResponse.Discount discount = (ShopResponse.Discount) discountObj;
-            name = discount.getName();
-            code = discount.getCode();
-            value = discount.getValue();
-            type = discount.getType();
-        } else {
-            return;
-        }
-
-        holder.discountName.setText(name);
-        holder.discountCode.setText("Mã: " + code);
-        String discountText = type.equals("percent") ? value + "%" : value + "đ";
-        holder.discountValue.setText("Giảm: " + discountText);
+        Discount discount = discounts.get(position);
+        holder.bind(discount);
     }
 
     @Override
@@ -59,14 +46,28 @@ public class DiscountAdapter extends RecyclerView.Adapter<DiscountAdapter.Discou
         return discounts.size();
     }
 
-    static class DiscountViewHolder extends RecyclerView.ViewHolder {
-        TextView discountName, discountCode, discountValue;
+    class DiscountViewHolder extends RecyclerView.ViewHolder {
+        TextView tvDiscountName, tvDiscountValue;
 
-        DiscountViewHolder(View itemView) {
+        DiscountViewHolder(@NonNull View itemView) {
             super(itemView);
-            discountName = itemView.findViewById(R.id.discountName);
-            discountCode = itemView.findViewById(R.id.discountCode);
-            discountValue = itemView.findViewById(R.id.discountValue);
+            tvDiscountName = itemView.findViewById(R.id.tvDiscountName);
+            tvDiscountValue = itemView.findViewById(R.id.tvDiscountValue);
+
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onDiscountClick(discounts.get(getAdapterPosition()));
+                }
+            });
         }
+
+        void bind(Discount discount) {
+            tvDiscountName.setText(discount.getName());
+            tvDiscountValue.setText(discount.getValue() + (discount.getType().equals("percent") ? "%" : "đ"));
+        }
+    }
+
+    public interface OnDiscountClickListener {
+        void onDiscountClick(Discount discount);
     }
 }

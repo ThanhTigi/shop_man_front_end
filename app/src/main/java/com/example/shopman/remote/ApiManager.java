@@ -23,7 +23,7 @@ import com.example.shopman.models.ProductDetails.ProductDetailResponse;
 import com.example.shopman.models.Shop.FollowShopResponse;
 import com.example.shopman.models.Shop.ShopInfoResponse;
 import com.example.shopman.models.Shop.ShopProductsResponse;
-import com.example.shopman.models.ShopResponse;
+import com.example.shopman.models.Shop.ShopResponse;
 import com.example.shopman.models.TopTrendingProducts.TrendingProductResponse;
 import com.example.shopman.models.cart.CartAddRequest;
 import com.example.shopman.models.cart.CartResponse;
@@ -51,7 +51,9 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
+import okhttp3.HttpUrl;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -60,7 +62,7 @@ public class ApiManager {
     private static final String TAG = "ApiManager";
     private final ApiService apiService;
     private final Context context;
-
+    private final Gson gson = new Gson();
     public ApiManager(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("Context cannot be null");
@@ -625,110 +627,6 @@ public class ApiManager {
         });
     }
 
-    public void getCampaignDetails(String slug, ApiResponseListener<CampaignResponse> listener) {
-        Log.d(TAG, "Calling getCampaignDetails: /campaign/" + slug);
-        Call<CampaignResponse> call = apiService.getCampaignDetails(slug);
-        call.enqueue(new Callback<CampaignResponse>() {
-            @Override
-            public void onResponse(Call<CampaignResponse> call, Response<CampaignResponse> response) {
-                Log.d(TAG, "Campaign Details Response: HTTP " + response.code() + ", body=" +
-                        (response.body() != null ? new Gson().toJson(response.body()) : "null"));
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
-                } else {
-                    String errorMessage = getErrorMessage(response);
-                    if (response.code() == 401) {
-                        errorMessage = "Session expired. Please log in again.";
-                        Intent intent = new Intent("com.example.shopman.ACTION_LOGOUT");
-                        context.sendBroadcast(intent);
-                    }
-                    listener.onError(errorMessage);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<CampaignResponse> call, Throwable t) {
-                Log.e(TAG, "Campaign Details Failure: " + t.getMessage());
-                listener.onError("Lỗi kết nối: " + t.getMessage());
-            }
-        });
-    }
-
-    public void getCampaignProducts(String slug, int page, int limit, ApiResponseListener<CampaignProductsResponse> listener) {
-        Log.d(TAG, "Calling getCampaignProducts: /campaign/" + slug + "/product?page=" + page + "&limit=" + limit);
-        Call<CampaignProductsResponse> call = apiService.getCampaignProducts(slug, page, limit);
-        call.enqueue(new Callback<CampaignProductsResponse>() {
-            @Override
-            public void onResponse(Call<CampaignProductsResponse> call, Response<CampaignProductsResponse> response) {
-                Log.d(TAG, "Campaign Products Response: HTTP " + response.code() + ", body=" +
-                        (response.body() != null ? new Gson().toJson(response.body()) : "null"));
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
-                } else {
-                    String errorMessage = getErrorMessage(response);
-                    if (response.code() == 401) {
-                        errorMessage = "Session expired. Please log in again.";
-                        Intent intent = new Intent("com.example.shopman.ACTION_LOGOUT");
-                        context.sendBroadcast(intent);
-                    }
-                    listener.onError(errorMessage);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<CampaignProductsResponse> call, Throwable t) {
-                Log.e(TAG, "Campaign Products Failure: " + t.getMessage());
-                listener.onError("Lỗi kết nối: " + t.getMessage());
-            }
-        });
-    }
-
-    public void getShopDetails(String slug, ApiResponseListener<ShopResponse> listener) {
-        Log.d(TAG, "Calling getShopDetails: /shop/" + slug);
-        Call<ShopResponse> call = apiService.getShopDetails(slug);
-        call.enqueue(new Callback<ShopResponse>() {
-            @Override
-            public void onResponse(Call<ShopResponse> call, Response<ShopResponse> response) {
-                Log.d(TAG, "Shop Details Response: HTTP " + response.code() + ", body=" +
-                        (response.body() != null ? new Gson().toJson(response.body()) : "null"));
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
-                } else {
-                    listener.onError("Lỗi API: " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ShopResponse> call, Throwable t) {
-                Log.e(TAG, "Shop Details Failure: " + t.getMessage());
-                listener.onError("Lỗi kết nối: " + t.getMessage());
-            }
-        });
-    }
-
-    public void getShopProducts(String slug, List<Object> lastSortValues, ApiResponseListener<ShopProductsResponse> listener) {
-        Log.d(TAG, "Calling getShopProducts: /shop/" + slug + "/product");
-        Call<ShopProductsResponse> call = apiService.getShopProducts(slug, lastSortValues);
-        call.enqueue(new Callback<ShopProductsResponse>() {
-            @Override
-            public void onResponse(Call<ShopProductsResponse> call, Response<ShopProductsResponse> response) {
-                Log.d(TAG, "Shop Products Response: HTTP " + response.code() + ", body=" +
-                        (response.body() != null ? new Gson().toJson(response.body()) : "null"));
-                if (response.isSuccessful() && response.body() != null) {
-                    listener.onSuccess(response.body());
-                } else {
-                    listener.onError("Lỗi API: " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ShopProductsResponse> call, Throwable t) {
-                Log.e(TAG, "Shop Products Failure: " + t.getMessage());
-                listener.onError("Lỗi kết nối: " + t.getMessage());
-            }
-        });
-    }
-
     public void getWishlist(String accessToken, int page, int limit, ApiResponseListener<WishlistResponse> listener) {
         Log.d(TAG, "Get Wishlist Request: page=" + page + ", limit=" + limit);
         Call<WishlistResponse> call = apiService.getWishlist("Bearer " + accessToken, page, limit);
@@ -758,29 +656,48 @@ public class ApiManager {
         });
     }
 
-    public void getDealProducts(int page, int limit, ApiResponseListener<DealProductResponse> listener) {
-        Log.d(TAG, "Get Deal Products Request: page=" + page + ", limit=" + limit);
-        Call<DealProductResponse> call = apiService.getDealProducts(page, limit);
+    private String formatLastSortValues(Object lastSortValues) {
+        if (lastSortValues == null) return null;
+        if (lastSortValues instanceof List) {
+            return gson.toJson(lastSortValues); // Tạo JSON thô [16.10699, "products+0+901"]
+        }
+        return null;
+    }
+
+    public void getDealOfTheDay(Object lastSortValues, int pageSize, Float minPrice, Float maxPrice,
+                                Integer minRating, String sortBy,
+                                ApiResponseListener<DealProductResponse> listener) {
+        String lastSortValuesStr = formatLastSortValues(lastSortValues);
+        Log.d(TAG, "Get Deal of the Day Request: lastSortValues=" + (lastSortValuesStr != null ? lastSortValuesStr : "null") +
+                ", pageSize=" + pageSize + ", minPrice=" + minPrice +
+                ", maxPrice=" + maxPrice + ", minRating=" + minRating + ", sortBy=" + sortBy);
+        Call<DealProductResponse> call = apiService.getDealOfTheDay(lastSortValuesStr, pageSize, minPrice, maxPrice,
+                minRating, sortBy, true);
         call.enqueue(new Callback<DealProductResponse>() {
             @Override
             public void onResponse(Call<DealProductResponse> call, Response<DealProductResponse> response) {
-                Log.d(TAG, "Get Deal Products Response: HTTP " + response.code() + ", body=" +
+                Log.d(TAG, "Get Deal of the Day Response: HTTP " + response.code() + ", body=" +
                         (response.body() != null ? new Gson().toJson(response.body()) : "null"));
                 if (response.isSuccessful() && response.body() != null) {
                     listener.onSuccess(response.body());
                 } else {
-                    listener.onError("Lỗi API: " + response.code());
+                    String errorMessage = getErrorMessage(response);
+                    if (response.code() == 401) {
+                        errorMessage = "Session expired. Please log in again.";
+                        Intent intent = new Intent("com.example.shopman.ACTION_LOGOUT");
+                        context.sendBroadcast(intent);
+                    }
+                    listener.onError("Failed to fetch deal products: " + errorMessage);
                 }
             }
 
             @Override
             public void onFailure(Call<DealProductResponse> call, Throwable t) {
-                Log.e(TAG, "Get Deal Products Error: " + t.getMessage());
-                listener.onError("Lỗi kết nối: " + t.getMessage());
+                Log.e(TAG, "Get Deal of the Day Error: " + t.getMessage());
+                listener.onError("Network Error: " + t.getMessage());
             }
         });
     }
-
     public void getNewArrivals(int page, Integer pageSize, ApiResponseListener<NewArrivalsResponse> listener) {
         Log.d(TAG, "Get New Arrivals Request: page=" + page + ", pageSize=" + (pageSize != null ? pageSize : "default"));
         Call<NewArrivalsResponse> call = apiService.getNewArrivals(page, pageSize);
@@ -1109,6 +1026,124 @@ public class ApiManager {
                 String errorMsg = "Lỗi kết nối: " + t.getMessage();
                 Log.e(TAG, errorMsg, t);
                 listener.onError(errorMsg);
+            }
+        });
+    }
+    public void getShopDetails(String slug, ApiResponseListener<ShopResponse> listener) {
+        Log.d(TAG, "Calling getShopDetails: /shop/" + slug);
+        String accessToken = MyPreferences.getString(context, "access_token", null);
+        String authHeader = accessToken != null ? "Bearer " + accessToken : "";
+        Call<ShopResponse> call = apiService.getShopDetails(authHeader, slug);
+        call.enqueue(new Callback<ShopResponse>() {
+            @Override
+            public void onResponse(Call<ShopResponse> call, Response<ShopResponse> response) {
+                Log.d(TAG, "Shop Details Response: HTTP " + response.code() + ", body=" +
+                        (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMessage = getErrorMessage(response);
+                    if (response.code() == 401) {
+                        errorMessage = "Session expired. Please log in again.";
+                        Intent intent = new Intent("com.example.shopman.ACTION_LOGOUT");
+                        context.sendBroadcast(intent);
+                    }
+                    listener.onError(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ShopResponse> call, Throwable t) {
+                Log.e(TAG, "Shop Details Failure: " + t.getMessage());
+                listener.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+    // Phương thức mới cho /shop/{slug}/product
+    public void getShopProducts(String slug, List<Object> lastSortValues, ApiResponseListener<ShopProductsResponse> listener) {
+        Log.d(TAG, "Calling getShopProducts: /shop/" + slug + "/product, lastSortValues=" +
+                (lastSortValues != null ? new Gson().toJson(lastSortValues) : "null"));
+        String accessToken = MyPreferences.getString(context, "access_token", null);
+        String authHeader = accessToken != null ? "Bearer " + accessToken : "";
+        Call<ShopProductsResponse> call = apiService.getShopProducts(authHeader, slug, lastSortValues);
+        call.enqueue(new Callback<ShopProductsResponse>() {
+            @Override
+            public void onResponse(Call<ShopProductsResponse> call, Response<ShopProductsResponse> response) {
+                Log.d(TAG, "Shop Products Response: HTTP " + response.code() + ", body=" +
+                        (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMessage = getErrorMessage(response);
+                    if (response.code() == 401) {
+                        errorMessage = "Session expired. Please log in again.";
+                        Intent intent = new Intent("com.example.shopman.ACTION_LOGOUT");
+                        context.sendBroadcast(intent);
+                    }
+                    listener.onError(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ShopProductsResponse> call, Throwable t) {
+                Log.e(TAG, "Shop Products Failure: " + t.getMessage());
+                listener.onError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+    public void getCampaignDetails(String slug, ApiResponseListener<CampaignResponse> listener) {
+        Log.d(TAG, "Calling getCampaignDetails: /campaigns/" + slug);
+        Call<CampaignResponse> call = apiService.getCampaignDetails(slug);
+        call.enqueue(new Callback<CampaignResponse>() {
+            @Override
+            public void onResponse(Call<CampaignResponse> call, Response<CampaignResponse> response) {
+                Log.d(TAG, "Campaign Details Response: HTTP " + response.code() + ", body=" +
+                        (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMessage = getErrorMessage(response);
+                    if (response.code() == 401) {
+                        errorMessage = "Session expired. Please log in again.";
+                        Intent intent = new Intent("com.example.shopman.ACTION_LOGOUT");
+                        context.sendBroadcast(intent);
+                    }
+                    listener.onError("Failed to fetch campaign details: " + errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CampaignResponse> call, Throwable t) {
+                Log.e(TAG, "Campaign Details Failure: " + t.getMessage());
+                listener.onError("Network Error: " + t.getMessage());
+            }
+        });
+    }
+    public void getCampaignProducts(String slug, int limit, String lastId, ApiResponseListener<CampaignProductsResponse> listener) {
+        Log.d(TAG, "Calling getCampaignProducts: /campaigns/" + slug + "/products, limit=" + limit + ", lastId=" + (lastId != null ? lastId : "null"));
+        Call<CampaignProductsResponse> call = apiService.getCampaignProducts(slug, limit, lastId);
+        call.enqueue(new Callback<CampaignProductsResponse>() {
+            @Override
+            public void onResponse(Call<CampaignProductsResponse> call, Response<CampaignProductsResponse> response) {
+                Log.d(TAG, "Campaign Products Response: HTTP " + response.code() + ", body=" +
+                        (response.body() != null ? new Gson().toJson(response.body()) : "null"));
+                if (response.isSuccessful() && response.body() != null) {
+                    listener.onSuccess(response.body());
+                } else {
+                    String errorMessage = getErrorMessage(response);
+                    if (response.code() == 401) {
+                        errorMessage = "Session expired. Please log in again.";
+                        Intent intent = new Intent("com.example.shopman.ACTION_LOGOUT");
+                        context.sendBroadcast(intent);
+                    }
+                    listener.onError("Failed to fetch campaign products: " + errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CampaignProductsResponse> call, Throwable t) {
+                Log.e(TAG, "Campaign Products Failure: " + t.getMessage());
+                listener.onError("Network Error: " + t.getMessage());
             }
         });
     }

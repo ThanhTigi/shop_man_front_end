@@ -1,6 +1,7 @@
 package com.example.shopman.models.TopTrendingProducts;
 
 import com.example.shopman.models.Product;
+import com.example.shopman.models.searchproducts.SearchProduct;
 import com.google.gson.annotations.SerializedName;
 
 public class TrendingProduct {
@@ -22,6 +23,38 @@ public class TrendingProduct {
     @SerializedName("discount_percentage")
     private int discountPercentage;
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSaleCount(int saleCount) {
+        this.saleCount = saleCount;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
+    public void setDiscountPercentage(int discountPercentage) {
+        this.discountPercentage = discountPercentage;
+    }
+
+    public void setThumb(String thumb) {
+        this.thumb = thumb;
+    }
+
+    public void setRating(float rating) {
+        this.rating = rating;
+    }
+
     @SerializedName("thumb")
     private String thumb;
 
@@ -38,24 +71,18 @@ public class TrendingProduct {
     public String getThumb() { return thumb; }
     public float getRating() { return rating; }
 
-    // Chuyển thành Product để dùng với ProductAdapter
-    public Product toProduct() {
-        long priceValue;
-        try {
-            priceValue = Long.parseLong(price);
-        } catch (NumberFormatException e) {
-            priceValue = 0L;
-        }
-        return new Product(
-                String.valueOf(id),
-                name,
-                priceValue,
-                thumb,
-                rating,
-                discountPercentage,
-                slug,
-                saleCount,
-                null // desc không có trong API
-        );
+    // Chuyển thành Product để dùng với DealProductAdapter
+    public SearchProduct toProduct() {
+        SearchProduct product = new SearchProduct();
+        product.setId(String.valueOf(id));
+        product.setName(name);
+        product.setPrice(price); // Giữ nguyên String
+        product.setSlug(slug);
+        product.setSaleCount(saleCount);
+        product.setRating(rating);
+        product.setThumb(thumb);
+        product.setDiscountPercentage(discountPercentage);
+        product.setDesc(null); // desc không có trong API
+        return product;
     }
 }

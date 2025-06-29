@@ -1,9 +1,11 @@
 package com.example.shopman.models;
 
+import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -130,7 +132,7 @@ public class Product implements Parcelable {
     }
 
     // Parcelable implementation
-    protected Product(android.os.Parcel in) {
+    protected Product(Parcel in) {
         id = in.readString();
         name = in.readString();
         price = in.readLong();
@@ -141,18 +143,14 @@ public class Product implements Parcelable {
         saleCount = in.readInt();
         desc = in.readString();
         skuNo = in.readString();
-        if (in.readByte() == 0) {
-            quantity = null;
-        } else {
-            quantity = in.readInt();
-        }
+        quantity = (in.readByte() == 0) ? null : in.readInt();
         variant = (Map<String, Object>) in.readSerializable();
         discounts = in.createTypedArrayList(Discount.CREATOR);
         isSelected = in.readByte() != 0;
     }
 
     @Override
-    public void writeToParcel(android.os.Parcel dest, int flags) {
+    public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(id);
         dest.writeString(name);
         dest.writeLong(price);
@@ -163,12 +161,8 @@ public class Product implements Parcelable {
         dest.writeInt(saleCount);
         dest.writeString(desc);
         dest.writeString(skuNo);
-        if (quantity == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeInt(quantity);
-        }
+        dest.writeByte((byte) (quantity == null ? 0 : 1));
+        if (quantity != null) dest.writeInt(quantity);
         dest.writeSerializable((java.io.Serializable) variant);
         dest.writeTypedList(discounts);
         dest.writeByte((byte) (isSelected ? 1 : 0));
@@ -181,7 +175,7 @@ public class Product implements Parcelable {
 
     public static final Creator<Product> CREATOR = new Creator<Product>() {
         @Override
-        public Product createFromParcel(android.os.Parcel in) {
+        public Product createFromParcel(Parcel in) {
             return new Product(in);
         }
 

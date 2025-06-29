@@ -71,8 +71,18 @@ public class SearchProduct {
     @SerializedName("deletedAt")
     private String deletedAt;
 
+    public String getDiscount_status() {
+        return discount_status;
+    }
+
+    public void setDiscount_status(String discount_status) {
+        this.discount_status = discount_status;
+    }
+
     @SerializedName("discounts")
     private List<Discount> discounts;
+    @SerializedName("discount_status")
+    private String discount_status;
 
     // Ánh xạ sang Product
     public Product toProduct() {

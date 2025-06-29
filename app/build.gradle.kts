@@ -59,4 +59,8 @@ dependencies {
     implementation ("com.google.android.material:material:1.12.0")
     implementation ("androidx.core:core:1.13.1")
     implementation ("me.relex:circleindicator:2.1.6")
+    implementation ("joda-time:joda-time:2.12.5")
+    implementation ("com.squareup.picasso:picasso:2.8")
+
+
 }

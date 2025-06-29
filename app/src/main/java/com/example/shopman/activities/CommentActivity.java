@@ -435,7 +435,7 @@ public class CommentActivity extends AppCompatActivity {
         RatingBar rbRatingDialog = dialogView.findViewById(R.id.rbRating);
         Button btnCancel = dialogView.findViewById(R.id.btnCancel);
         Button btnSendDialog = dialogView.findViewById(R.id.btnSend);
-        TextView tvReplyHint = dialogView.findViewById(R.id.tvReplyHint); // Giả sử có ID này
+        TextView tvReplyHint = dialogView.findViewById(R.id.tvReplyHint);
 
         // Xóa dữ liệu cũ
         selectedImageUrisDialog.clear();
@@ -469,90 +469,44 @@ public class CommentActivity extends AppCompatActivity {
             etCommentDialog.setText("");
             llImagePreview.setVisibility(View.GONE);
             etCommentDialog.setHint(isReply && comment != null ? "Trả lời: " + (comment.getUser() != null ? comment.getUser().getName() : "Người dùng") : "Nhập bình luận...");
-        }
-
-        // Lấy FrameLayout của bottom sheet để điều chỉnh
-        FrameLayout bottomSheet = currentDialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-        if (bottomSheet != null) {
-            // Log vị trí ban đầu khi mở dialog
-            bottomSheet.post(() -> {
-                int[] location = new int[2];
-                bottomSheet.getLocationOnScreen(location);
-                int top = location[1];
-                int bottom = top + bottomSheet.getHeight();
-                Log.d(TAG, "Dialog opened - Position: Top=" + top + ", Bottom=" + bottom + ", Height=" + bottomSheet.getHeight());
-            });
-
-            // Xử lý WindowInsets để điều chỉnh vị trí khi bàn phím hiện
-            ViewCompat.setOnApplyWindowInsetsListener(bottomSheet, (v, insets) -> {
-                int imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
-                Log.d(TAG, "Keyboard height (imeHeight): " + imeHeight + ", Is IME visible: " + insets.isVisible(WindowInsetsCompat.Type.ime()));
-
-                if (imeHeight > 0) {
-                    int screenHeight = getResources().getDisplayMetrics().heightPixels;
-                    int statusBarHeight = getStatusBarHeight();
-                    int targetTop = screenHeight - imeHeight - bottomSheet.getHeight(); // Đặt đáy dialog ngay trên đỉnh bàn phím
-
-                    if (targetTop < statusBarHeight) targetTop = statusBarHeight; // Tránh che status bar
-                    bottomSheet.setY(targetTop);
-                    Log.d(TAG, "Adjusted dialog position - Target Top=" + targetTop + ", Bottom=" + (targetTop + bottomSheet.getHeight()) + ", imeHeight=" + imeHeight);
-
-                    // Đảm bảo EditText cuộn vào tầm nhìn
-                    NestedScrollView nestedScrollView = dialogView.findViewById(R.id.nested_scroll_view);
-                    if (nestedScrollView != null) {
-                        nestedScrollView.post(() -> nestedScrollView.smoothScrollTo(0, etCommentDialog.getTop()));
-                    }
-                }
-                return insets;
-            });
-
-            // Yêu cầu áp dụng insets sau khi layout hoàn tất
-            bottomSheet.post(() -> bottomSheet.requestApplyInsets());
+            if (isReply && comment != null && tvReplyHint != null) {
+                tvReplyHint.setVisibility(View.VISIBLE);
+                tvReplyHint.setText("Trả lời: " + (comment.getUser() != null ? comment.getUser().getName() : "Người dùng"));
+            }
         }
 
         // Xử lý khi dialog hiển thị
         currentDialog.setOnShowListener(dialog -> {
-            bottomSheet.setBackgroundResource(android.R.color.transparent);
             etCommentDialog.requestFocus();
-            bottomSheet.postDelayed(() -> {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (!etCommentDialog.hasFocus()) etCommentDialog.requestFocus(); // Đảm bảo focus
-                imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0); // Ép hiện bàn phím
-                Log.d(TAG, "Dialog shown, requested focus with delay: " + etCommentDialog.hasFocus());
-            }, 300); // Delay 300ms
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+            Log.d(TAG, "Dialog shown, requested focus: " + etCommentDialog.hasFocus());
         });
 
         // Xử lý khi dialog đóng
         currentDialog.setOnDismissListener(dialog -> {
-            if (bottomSheet != null) {
-                int[] location = new int[2];
-                bottomSheet.getLocationOnScreen(location);
-                int top = location[1];
-                int bottom = top + bottomSheet.getHeight();
-                Log.d(TAG, "Dialog dismissed - Position: Top=" + top + ", Bottom=" + bottom + ", Height=" + bottomSheet.getHeight());
-            }
             selectedImageUrisDialog.clear();
             existingImageUrlsDialog.clear();
             llImagePreview.removeAllViews();
-            tvReplyHint.setVisibility(View.GONE);
+            if (tvReplyHint != null) {
+                tvReplyHint.setVisibility(View.GONE);
+            }
             replyingTo = null;
             rbRatingDialog.setVisibility(View.VISIBLE);
         });
 
-        // Theo dõi focus và ép hiện bàn phím
+        // Theo dõi focus
         etCommentDialog.setOnFocusChangeListener((v, hasFocus) -> {
             Log.d(TAG, "etCommentDialog focus changed: hasFocus=" + hasFocus);
             if (hasFocus) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
-                Log.d(TAG, "Focus gained, toggling keyboard");
             }
         });
 
         etCommentDialog.setOnClickListener(v -> {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
-            Log.d(TAG, "EditText clicked, toggling keyboard");
         });
 
         // Xử lý nút thêm ảnh
@@ -608,7 +562,6 @@ public class CommentActivity extends AppCompatActivity {
 
         currentDialog.show();
     }
-
     // Hàm lấy chiều cao status bar
     private int getStatusBarHeight() {
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");

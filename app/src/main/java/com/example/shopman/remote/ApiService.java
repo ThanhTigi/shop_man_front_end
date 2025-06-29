@@ -3,7 +3,6 @@ package com.example.shopman.remote;
 import com.example.shopman.models.Banner.BannerResponse;
 import com.example.shopman.models.Campaign.CampaignProductsResponse;
 import com.example.shopman.models.Campaign.CampaignResponse;
-import com.example.shopman.models.Comments.Comment;
 import com.example.shopman.models.Comments.CommentCreateResponse;
 import com.example.shopman.models.Comments.CommentResponse;
 import com.example.shopman.models.Comments.DeleteCommentResponse;
@@ -17,7 +16,7 @@ import com.example.shopman.models.ProductDetails.ProductDetailResponse;
 import com.example.shopman.models.Shop.FollowShopResponse;
 import com.example.shopman.models.Shop.ShopInfoResponse;
 import com.example.shopman.models.Shop.ShopProductsResponse;
-import com.example.shopman.models.ShopResponse;
+import com.example.shopman.models.Shop.ShopResponse;
 import com.example.shopman.models.TopTrendingProducts.TrendingProductResponse;
 import com.example.shopman.models.auth.RefreshTokenResponse;
 import com.example.shopman.models.cart.CartAddRequest;
@@ -123,24 +122,6 @@ public interface ApiService {
     @GET("/api/v1/banner")
     Call<BannerResponse> getBanners();
 
-    @GET("/api/v1/campaign/{slug}")
-    Call<CampaignResponse> getCampaignDetails(@Path("slug") String slug);
-
-    @GET("/api/v1/campaign/{slug}/product")
-    Call<CampaignProductsResponse> getCampaignProducts(
-            @Path("slug") String slug,
-            @Query("page") int page,
-            @Query("limit") int limit
-    );
-
-    @GET("/api/v1/shop/{slug}")
-    Call<ShopResponse> getShopDetails(@Path("slug") String slug);
-
-    @GET("/api/v1/shop/{slug}/product")
-    Call<ShopProductsResponse> getShopProducts(
-            @Path("slug") String slug,
-            @Query("lastSortValues") List<Object> lastSortValues
-    );
 
     @GET("/api/v1/wishlist")
     Call<WishlistResponse> getWishlist(
@@ -149,16 +130,21 @@ public interface ApiService {
             @Query("limit") int limit
     );
 
-    @GET("/api/v1/product/all-trending-products")
+    @GET("/api/v1/product/trending-products")
     Call<TrendingProductResponse> getTrendingProducts(
             @Query("cursor") float cursor,
             @Query("limit") int limit
     );
 
-    @GET("/api/v1/product/deal-of-the-day")
-    Call<DealProductResponse> getDealProducts(
-            @Query("page") int page,
-            @Query("limit") int limit
+    @GET("api/v1/product/deal-of-the-day")
+    Call<DealProductResponse> getDealOfTheDay(
+            @Query("lastSortValues") String lastSortValues,
+            @Query("pageSize") int pageSize,
+            @Query("minPrice") Float minPrice,
+            @Query("maxPrice") Float maxPrice,
+            @Query("minRating") Integer minRating,
+            @Query("sortBy") String sortBy,
+            @Query("isAndroid") boolean isAndroid
     );
 
     @GET("/api/v1/new-arrivals")
@@ -220,5 +206,26 @@ public interface ApiService {
     Call<DeleteCommentResponse> deleteComment(
             @Header("Authorization") String authorization,
             @Path("id") int commentId
+    );
+    @GET("/api/v1/shop/{slug}")
+    Call<ShopResponse> getShopDetails(
+            @Header("Authorization") String authorization,
+            @Path("slug") String slug
+    );
+
+    @GET("/api/v1/shop/{slug}/product")
+    Call<ShopProductsResponse> getShopProducts(
+            @Header("Authorization") String authorization,
+            @Path("slug") String slug,
+            @Query("lastSortValues") List<Object> lastSortValues
+    );
+    @GET("/api/v1/campaign/{slug}")
+    Call<CampaignResponse> getCampaignDetails(@Path("slug") String slug);
+
+    @GET("/api/v1/campaign/{slug}/product")
+    Call<CampaignProductsResponse> getCampaignProducts(
+            @Path("slug") String slug,
+            @Query("limit") int limit,
+            @Query("lastId") String lastId
     );
 }

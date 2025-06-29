@@ -52,8 +52,8 @@ import com.google.android.material.chip.ChipGroup;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Locale;
 
 public class ProductDetailsActivity extends AppCompatActivity {
     private static final String TAG = "ProductDetailsActivity";
@@ -61,10 +61,10 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private static final int RELATED_PRODUCTS_PAGE_SIZE = 6;
 
     // Views
-    private ImageView ivBack; // Thay toolbar bằng ivBack
+    private ImageView ivBack, ivShopLogo;
     private NestedScrollView nestedScrollView;
-    private ImageView ivProduct, ivShopLogo;
-    private TextView tvName, tvSubtitle, tvRating, tvPrice, tvOriginalPrice, tvDiscount, tvDescription, tvShopName;
+    private ImageView ivProduct;
+    private TextView tvName, tvSubtitle, tvRating, tvPrice, tvOriginalPrice, tvDiscount, tvDescription, tvShopName, tvNoComments;
     private RatingBar ratingBar;
     private LinearLayout llAttributesContainer, llRelatedProductsContainer;
     private ChipGroup chipGroupOptions;
@@ -96,18 +96,14 @@ public class ProductDetailsActivity extends AppCompatActivity {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
             int statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
             int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
-            // Áp dụng padding cho nestedScrollView
             nestedScrollView.setPadding(0, statusBarHeight, 0, 0);
-            // Đẩy bottomBar lên bằng cách điều chỉnh margin hoặc padding
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) findViewById(R.id.bottomBar).getLayoutParams();
-            params.bottomMargin = navigationBarHeight > 0 ? navigationBarHeight : 8; // Đảm bảo không âm
+            params.bottomMargin = navigationBarHeight > 0 ? navigationBarHeight : 8;
             findViewById(R.id.bottomBar).setLayoutParams(params);
             return insets;
         });
-        // Initialize views
         initViews();
 
-        // Get slug from Intent
         productSlug = getIntent().getStringExtra("product_slug");
         Log.d(TAG, "onCreate: productSlug=" + productSlug);
         if (TextUtils.isEmpty(productSlug)) {
@@ -117,17 +113,15 @@ public class ProductDetailsActivity extends AppCompatActivity {
             return;
         }
 
-        // Initialize managers and adapters
         apiManager = new ApiManager(this);
         initAdapters();
         setupListeners();
 
-        // Load product details
         loadProductDetailsBySlug();
     }
 
     private void initViews() {
-        ivBack = findViewById(R.id.ivBack); // Thay toolbar bằng ivBack
+        ivBack = findViewById(R.id.ivBack);
         nestedScrollView = findViewById(R.id.nestedScrollView);
         ivProduct = findViewById(R.id.ivProduct);
         ivShopLogo = findViewById(R.id.ivShopLogo);
@@ -151,19 +145,18 @@ public class ProductDetailsActivity extends AppCompatActivity {
         btnGoToCart = findViewById(R.id.btnGoToCart);
         btnBuyNow = findViewById(R.id.btnBuyNow);
         btnWishlist = findViewById(R.id.btnWishlist);
+        tvNoComments = findViewById(R.id.tvNoComments); // Thêm view cho "Chưa có bình luận"
 
         tvOriginalPrice.setPaintFlags(tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
     }
 
     private void initAdapters() {
-        // Comment Adapter
         commentAdapter = new CommentAdapter(this, comments, null);
         commentAdapter.setMaxComments(COMMENT_PAGE_SIZE);
         commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         commentsRecyclerView.setAdapter(commentAdapter);
         commentsRecyclerView.setNestedScrollingEnabled(false);
 
-        // Related Products Adapter
         relatedProductsRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         relatedProductAdapter = new ProductAdapter(this, relatedProducts, "related");
         relatedProductsRecyclerView.setAdapter(relatedProductAdapter);
@@ -175,7 +168,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        ivBack.setOnClickListener(v -> finish()); // Thay btnBack bằng ivBack
+        ivBack.setOnClickListener(v -> finish());
         btnViewAllComments.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(productId)) {
                 openCommentActivity();
@@ -188,13 +181,34 @@ public class ProductDetailsActivity extends AppCompatActivity {
         btnGoToCart.setOnClickListener(v -> showSkuSelectionBottomSheet(false));
         btnBuyNow.setOnClickListener(v -> showSkuSelectionBottomSheet(true));
         btnWishlist.setOnClickListener(v -> toggleWishlist());
+        ivShopLogo.setOnClickListener(v -> {
+            if (!TextUtils.isEmpty(shopId)) {
+                apiManager.getShopInfo(shopId, new ApiResponseListener<ShopInfoResponse>() {
+                    @Override
+                    public void onSuccess(ShopInfoResponse response) {
+                        if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
+                            String shopSlug = response.getMetadata().getMetadata().getShop().getSlug();
+                            Intent intent = new Intent(ProductDetailsActivity.this, ShopDetailActivity.class);
+                            intent.putExtra(ShopDetailActivity.EXTRA_SHOP_SLUG, shopSlug);
+                            startActivity(intent);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        Log.e(TAG, "Error getting shop slug: " + errorMessage);
+                        Toast.makeText(ProductDetailsActivity.this, "Lỗi tải thông tin shop", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
 
         nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
             @Override
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
                 if (scrollY > oldScrollY) {
-                    View contentView = nestedScrollView.getChildAt(0);
-                    if (contentView != null && nestedScrollView.getHeight() + scrollY >= contentView.getHeight() - 100) {
+                    View contentView = v.getChildAt(0);
+                    if (contentView != null && v.getHeight() + scrollY >= contentView.getHeight() - 100) {
                         if (!isLoadingRelatedProducts && !isLastRelatedPage) {
                             loadMoreRelatedProducts();
                         }
@@ -271,7 +285,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
     private void updateFollowButton() {
         btnFollow.setText(isShopFollowed ? "Unfollow" : "Follow");
         btnFollow.setSelected(isShopFollowed);
-        btnFollow.setTextColor(isShopFollowed ? getResources().getColor(android.R.color.black, null) : getResources().getColor(android.R.color.white, null));
+        btnFollow.setTextColor(isShopFollowed ? getResources().getColor(android.R.color.white, null) : getResources().getColor(android.R.color.white, null));
     }
 
     private void toggleFollowShop() {
@@ -502,13 +516,18 @@ public class ProductDetailsActivity extends AppCompatActivity {
                     if (response != null && response.getMetadata() != null && response.getMetadata().getMetadata() != null) {
                         List<Comment> newComments = response.getMetadata().getMetadata().getComments();
                         nextCommentCursor = response.getMetadata().getMetadata().getNextCursor();
-                        if (newComments != null) {
+                        if (newComments != null && !newComments.isEmpty()) {
                             comments.clear();
                             comments.addAll(newComments);
                             commentAdapter.updateComments(comments);
+                            tvNoComments.setVisibility(View.GONE); // Ẩn nếu có comment
+                        } else {
+                            tvNoComments.setVisibility(View.VISIBLE); // Hiển thị nếu không có comment
                         }
+                        commentAdapter.updateComments(comments);
                     } else {
                         Log.e(TAG, "Invalid comment response: response=" + response);
+                        tvNoComments.setVisibility(View.VISIBLE); // Hiển thị nếu response không hợp lệ
                     }
                 }
 
@@ -516,11 +535,13 @@ public class ProductDetailsActivity extends AppCompatActivity {
                 public void onError(String errorMessage) {
                     isLoadingComments = false;
                     Log.e(TAG, "Load comments error: productId=" + productId + ", error=" + errorMessage);
+                    tvNoComments.setVisibility(View.VISIBLE); // Hiển thị nếu có lỗi
                 }
             });
         } catch (NumberFormatException e) {
             isLoadingComments = false;
             Log.e(TAG, "loadComments: Invalid productId format: " + productId, e);
+            tvNoComments.setVisibility(View.VISIBLE); // Hiển thị nếu lỗi định dạng
         }
     }
 
@@ -590,7 +611,6 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
         Glide.with(this).load(productThumb).placeholder(R.drawable.ic_placeholder).into(ivProduct);
 
-        // Attributes
         llAttributesContainer.removeAllViews();
         Map<String, Object> attrs = productDetail.getAttrs();
         if (attrs != null && !attrs.isEmpty()) {
